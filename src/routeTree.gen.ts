@@ -11,6 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkflowsIndexRouteImport } from './routes/workflows/index'
+import { Route as WorkflowIdRouteImport } from './routes/workflow/$id'
+import { Route as ApiWorkflowsIndexRouteImport } from './routes/api/workflows/index'
+import { Route as ApiWorkflowsIdRouteImport } from './routes/api/workflows/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +26,21 @@ const WorkflowsIndexRoute = WorkflowsIndexRouteImport.update({
   path: '/workflows/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WorkflowIdRoute = WorkflowIdRouteImport.update({
+  id: '/workflow/$id',
+  path: '/workflow/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWorkflowsIndexRoute = ApiWorkflowsIndexRouteImport.update({
+  id: '/api/workflows/',
+  path: '/api/workflows/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiWorkflowsIdRoute = ApiWorkflowsIdRouteImport.update({
+  id: '/api/workflows/$id',
+  path: '/api/workflows/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -31,32 +49,63 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/workflow/$id': typeof WorkflowIdRoute
   '/workflows/': typeof WorkflowsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/workflows/$id': typeof ApiWorkflowsIdRoute
+  '/api/workflows/': typeof ApiWorkflowsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/workflow/$id': typeof WorkflowIdRoute
   '/workflows': typeof WorkflowsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/workflows/$id': typeof ApiWorkflowsIdRoute
+  '/api/workflows': typeof ApiWorkflowsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/workflow/$id': typeof WorkflowIdRoute
   '/workflows/': typeof WorkflowsIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/workflows/$id': typeof ApiWorkflowsIdRoute
+  '/api/workflows/': typeof ApiWorkflowsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/workflows/' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/workflow/$id'
+    | '/workflows/'
+    | '/api/auth/$'
+    | '/api/workflows/$id'
+    | '/api/workflows/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/workflows' | '/api/auth/$'
-  id: '__root__' | '/' | '/workflows/' | '/api/auth/$'
+  to:
+    | '/'
+    | '/workflow/$id'
+    | '/workflows'
+    | '/api/auth/$'
+    | '/api/workflows/$id'
+    | '/api/workflows'
+  id:
+    | '__root__'
+    | '/'
+    | '/workflow/$id'
+    | '/workflows/'
+    | '/api/auth/$'
+    | '/api/workflows/$id'
+    | '/api/workflows/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  WorkflowIdRoute: typeof WorkflowIdRoute
   WorkflowsIndexRoute: typeof WorkflowsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiWorkflowsIdRoute: typeof ApiWorkflowsIdRoute
+  ApiWorkflowsIndexRoute: typeof ApiWorkflowsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -75,6 +124,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkflowsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/workflow/$id': {
+      id: '/workflow/$id'
+      path: '/workflow/$id'
+      fullPath: '/workflow/$id'
+      preLoaderRoute: typeof WorkflowIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/workflows/': {
+      id: '/api/workflows/'
+      path: '/api/workflows'
+      fullPath: '/api/workflows/'
+      preLoaderRoute: typeof ApiWorkflowsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/workflows/$id': {
+      id: '/api/workflows/$id'
+      path: '/api/workflows/$id'
+      fullPath: '/api/workflows/$id'
+      preLoaderRoute: typeof ApiWorkflowsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -87,8 +157,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  WorkflowIdRoute: WorkflowIdRoute,
   WorkflowsIndexRoute: WorkflowsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiWorkflowsIdRoute: ApiWorkflowsIdRoute,
+  ApiWorkflowsIndexRoute: ApiWorkflowsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
