@@ -3,6 +3,7 @@ import { getNodeDefinition } from "@/lib/workflow/node-definitions";
 import { NodeIcon } from "./icons";
 import { X, Save, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { TriggerConfig, SlackConfig, DiscordConfig } from "./config";
 
 export function NodeConfigPanel() {
   const { workflow, selectedNodeId, selectNode, updateNodeConfig, removeNode } =
@@ -175,25 +176,50 @@ export function NodeConfigPanel() {
 
       {/* Config Fields */}
       <div className="flex-1 overflow-y-auto p-3 space-y-3">
-        {Object.entries(localConfig).map(([key, value]) => {
-          // Skip complex objects for now
-          if (typeof value === "object" && value !== null) return null;
-
-          return (
-            <div key={key}>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                {formatFieldLabel(key)}
-              </label>
-              {renderConfigField(key, value)}
-            </div>
-          );
-        })}
-
-        {Object.keys(localConfig).length === 0 && (
-          <p className="text-xs text-gray-400 text-center py-6">
-            No configuration options
-          </p>
+        {/* Specialized configs for specific node types */}
+        {selectedNode.type === "trigger" && (
+          <TriggerConfig
+            workflowId={workflow.id}
+            subType={selectedNode.subType}
+            config={localConfig}
+            onChange={handleChange}
+          />
         )}
+
+        {selectedNode.subType === "send-slack" && (
+          <SlackConfig config={localConfig} onChange={handleChange} />
+        )}
+
+        {selectedNode.subType === "send-discord" && (
+          <DiscordConfig config={localConfig} onChange={handleChange} />
+        )}
+
+        {/* Generic config for other node types */}
+        {selectedNode.type !== "trigger" &&
+          selectedNode.subType !== "send-slack" &&
+          selectedNode.subType !== "send-discord" &&
+          Object.entries(localConfig).map(([key, value]) => {
+            // Skip complex objects for now
+            if (typeof value === "object" && value !== null) return null;
+
+            return (
+              <div key={key}>
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  {formatFieldLabel(key)}
+                </label>
+                {renderConfigField(key, value)}
+              </div>
+            );
+          })}
+
+        {selectedNode.type !== "trigger" &&
+          selectedNode.subType !== "send-slack" &&
+          selectedNode.subType !== "send-discord" &&
+          Object.keys(localConfig).length === 0 && (
+            <p className="text-xs text-gray-400 text-center py-6">
+              No configuration options
+            </p>
+          )}
       </div>
 
       {/* Actions */}
