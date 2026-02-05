@@ -214,11 +214,12 @@ export function TriggerConfig({
     );
   }
 
-  // Manual trigger - no config needed
+  // Manual trigger - no config needed, use Execute workflow button
   return (
     <div className="bg-gray-50 rounded-lg p-4 text-center">
       <p className="text-xs text-gray-500">
-        This workflow will be triggered manually
+        Click <strong>"Execute workflow"</strong> at the bottom to run this
+        workflow manually.
       </p>
     </div>
   );
