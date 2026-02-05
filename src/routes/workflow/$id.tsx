@@ -22,18 +22,30 @@ function WorkflowEditorPage() {
 
   // Load workflow on mount
   useEffect(() => {
+    console.log("[Workflow] Load effect:", {
+      userId: session?.user?.id,
+      isLoading: isLoadingRef.current,
+      hasLoaded: hasLoadedRef.current,
+      isAuthPending,
+    });
+
     if (!session?.user?.id || isLoadingRef.current || hasLoadedRef.current)
       return;
 
     async function loadWorkflow() {
       isLoadingRef.current = true;
+      console.log("[Workflow] Fetching workflow:", id);
       try {
         const res = await fetch(`/api/workflows/${id}`);
+        console.log("[Workflow] Response:", res.status, res.ok);
         if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          console.error("[Workflow] Load failed:", errorData);
           navigate({ to: "/workflows" });
           return;
         }
         const data = await res.json();
+        console.log("[Workflow] Loaded:", data.name);
         setWorkflow({
           id: data.id,
           name: data.name,
@@ -59,7 +71,7 @@ function WorkflowEditorPage() {
     }
 
     loadWorkflow();
-  }, [id, session?.user?.id, setWorkflow, navigate]);
+  }, [id, session?.user?.id, setWorkflow, navigate, isAuthPending]);
 
   // Auto-save on changes
   const saveWorkflow = useCallback(async () => {
@@ -126,10 +138,17 @@ function WorkflowEditorPage() {
     };
   }, []);
 
-  // Auth redirect
+  // Auth redirect - only redirect if we're sure auth is complete and no user
   useEffect(() => {
+    // Give the session a moment to settle after OAuth redirect
     if (!isAuthPending && !session?.user) {
-      navigate({ to: "/" });
+      const timeout = setTimeout(() => {
+        // Double-check after a short delay
+        if (!session?.user) {
+          navigate({ to: "/" });
+        }
+      }, 500);
+      return () => clearTimeout(timeout);
     }
   }, [isAuthPending, session, navigate]);
 
