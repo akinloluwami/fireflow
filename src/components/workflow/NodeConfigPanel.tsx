@@ -57,7 +57,7 @@ export function NodeConfigPanel() {
           value={stringValue}
           onChange={(e) => handleChange(key, e.target.value)}
           className="w-full px-2.5 py-1.5 text-xs bg-white border border-gray-200 rounded-md
-                     focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]/30 focus:border-[var(--color-accent)]"
+                     focus:outline-none focus:ring-1 focus:ring-accent/30 focus:border-accent"
         >
           <option value="GET">GET</option>
           <option value="POST">POST</option>
@@ -74,7 +74,7 @@ export function NodeConfigPanel() {
           value={stringValue}
           onChange={(e) => handleChange(key, e.target.value)}
           className="w-full px-2.5 py-1.5 text-xs bg-white border border-gray-200 rounded-md
-                     focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]/30 focus:border-[var(--color-accent)]"
+                     focus:outline-none focus:ring-1 focus:ring-accent/30 focus:border-accent"
         >
           <option value="equals">Equals</option>
           <option value="not-equals">Not Equals</option>
@@ -92,7 +92,7 @@ export function NodeConfigPanel() {
           onChange={(e) => handleChange(key, e.target.value)}
           rows={5}
           className="w-full px-2.5 py-1.5 text-xs font-mono bg-gray-900 text-gray-100 border border-gray-700 rounded-md
-                     focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]/30 focus:border-[var(--color-accent)]
+                     focus:outline-none focus:ring-1 focus:ring-accent/30 focus:border-accent
                      placeholder:text-gray-500"
           placeholder={`Enter ${key}...`}
         />
@@ -107,7 +107,7 @@ export function NodeConfigPanel() {
             value={stringValue}
             onChange={(e) => handleChange(key, e.target.value)}
             className="w-full px-2.5 py-1.5 text-xs font-mono bg-white border border-gray-200 rounded-md
-                       focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]/30 focus:border-[var(--color-accent)]"
+                       focus:outline-none focus:ring-1 focus:ring-accent/30 focus:border-accent"
             placeholder="0 9 * * *"
           />
           <p className="text-[10px] text-gray-400">
@@ -129,7 +129,7 @@ export function NodeConfigPanel() {
           )
         }
         className="w-full px-2.5 py-1.5 text-xs bg-white border border-gray-200 rounded-md
-                   focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]/30 focus:border-[var(--color-accent)]
+                   focus:outline-none focus:ring-1 focus:ring-accent/30 focus:border-accent
                    placeholder:text-gray-400"
         placeholder={`Enter ${key}...`}
       />
@@ -201,8 +201,8 @@ export function NodeConfigPanel() {
         <button
           onClick={handleSave}
           className="w-full flex items-center justify-center gap-1.5 px-3 py-2 
-                     bg-[var(--color-accent)] text-white text-xs font-medium rounded-md
-                     hover:bg-[var(--color-accent-hover)] transition-colors"
+                     bg-accent text-white text-xs font-medium rounded-md
+                     hover:bg-accent-hover transition-colors"
         >
           <Save size={14} />
           Save Changes

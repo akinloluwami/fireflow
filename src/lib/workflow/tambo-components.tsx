@@ -9,9 +9,10 @@ import type {
   NodeSubType,
 } from "./types";
 import { getNodeDefinition } from "./node-definitions";
+import type { JSONSchema7 } from "json-schema";
 
 // JSON Schema definition for Tambo (avoiding Zod v4 compatibility issues)
-const GeneratedWorkflowJSONSchema = {
+const GeneratedWorkflowJSONSchema: JSONSchema7 = {
   type: "object",
   description:
     "Complete workflow definition. Always include at least one trigger node as the starting point.",
@@ -101,7 +102,7 @@ const GeneratedWorkflowJSONSchema = {
       },
     },
   },
-} as const;
+};
 
 // =============================================================================
 // WorkflowGenerator Component
@@ -188,9 +189,9 @@ function WorkflowGenerator({
 
   // This component renders a confirmation message
   return (
-    <div className="p-3 bg-[var(--color-accent-light)] rounded-lg border border-orange-100">
+    <div className="p-3 bg-accent-light rounded-lg border border-orange-100">
       <div className="flex items-start gap-2.5">
-        <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-[var(--color-accent)] flex items-center justify-center">
+        <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
           <svg
             className="w-4 h-4 text-white"
             fill="none"
@@ -214,7 +215,7 @@ function WorkflowGenerator({
           )}
           <div className="flex items-center gap-3 mt-1.5 text-[10px] text-gray-400">
             <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)]"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-accent"></span>
               {nodes?.length || 0} nodes
             </span>
             <span className="flex items-center gap-1">

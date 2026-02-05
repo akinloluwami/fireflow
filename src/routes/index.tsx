@@ -63,7 +63,7 @@ function LandingPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-100">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[var(--color-accent)] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
               <Zap className="w-4 h-4 text-white" />
             </div>
             <span className="text-lg font-semibold text-gray-900">
@@ -77,7 +77,7 @@ function LandingPage() {
             <div className="flex items-center gap-3">
               <Link
                 to="/workflows"
-                className="px-4 py-2 bg-[var(--color-accent)] text-white text-sm font-medium rounded-lg hover:bg-[var(--color-accent-hover)] transition-colors"
+                className="px-4 py-2 bg-accent text-white text-sm font-medium rounded-lg hover:bg-accent-hover transition-colors"
               >
                 Open App
               </Link>
@@ -91,7 +91,7 @@ function LandingPage() {
             <button
               onClick={handleGitHubSignIn}
               disabled={isSigningIn}
-              className="flex items-center gap-2 px-4 py-2 bg-[var(--color-accent)] text-white text-sm font-medium rounded-lg hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 bg-accent text-white text-sm font-medium rounded-lg hover:bg-accent-hover transition-colors disabled:opacity-50"
             >
               {isSigningIn ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -107,7 +107,7 @@ function LandingPage() {
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[var(--color-accent-light)] border border-orange-100 rounded-full text-[var(--color-accent)] text-sm font-medium mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-accent-light border border-orange-100 rounded-full text-accent text-sm font-medium mb-6">
             <Sparkles className="w-3.5 h-3.5" />
             AI-Powered Automation
           </div>
@@ -115,7 +115,7 @@ function LandingPage() {
           <h1 className="text-4xl md:text-6xl font-semibold text-gray-900 mb-5 leading-tight tracking-tight">
             Turn ideas into
             <br />
-            <span className="text-[var(--color-accent)]">
+            <span className="text-accent">
               automated workflows
             </span>
           </h1>
@@ -129,7 +129,7 @@ function LandingPage() {
             {session?.user ? (
               <Link
                 to="/workflows"
-                className="flex items-center gap-2 px-6 py-3 bg-[var(--color-accent)] text-white font-medium rounded-lg hover:bg-[var(--color-accent-hover)] transition-colors"
+                className="flex items-center gap-2 px-6 py-3 bg-accent text-white font-medium rounded-lg hover:bg-accent-hover transition-colors"
               >
                 Go to Workflows
                 <ArrowRight className="w-4 h-4" />
@@ -138,7 +138,7 @@ function LandingPage() {
               <button
                 onClick={handleGitHubSignIn}
                 disabled={isSigningIn}
-                className="flex items-center gap-2 px-6 py-3 bg-[var(--color-accent)] text-white font-medium rounded-lg hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-6 py-3 bg-accent text-white font-medium rounded-lg hover:bg-accent-hover transition-colors disabled:opacity-50"
               >
                 {isSigningIn ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -231,7 +231,7 @@ function LandingPage() {
       <footer className="py-6 px-6 border-t border-gray-100">
         <div className="max-w-5xl mx-auto flex items-center justify-between text-gray-400 text-sm">
           <div className="flex items-center gap-2">
-            <Zap className="w-4 h-4 text-[var(--color-accent)]" />
+            <Zap className="w-4 h-4 text-accent" />
             <span className="text-gray-600">FireFlow</span>
           </div>
           <p>Built with TanStack Start</p>

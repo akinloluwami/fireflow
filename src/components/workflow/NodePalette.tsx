@@ -87,7 +87,7 @@ export function NodePalette({ onDragStart }: NodePaletteProps) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-8 pr-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-md
-                       focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]/30 focus:border-[var(--color-accent)]
+                       focus:outline-none focus:ring-1 focus:ring-accent/30 focus:border-accent
                        placeholder:text-gray-400 transition-colors"
           />
         </div>

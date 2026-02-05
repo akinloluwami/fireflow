@@ -59,8 +59,8 @@ export function WorkflowChat() {
     return (
       <button
         onClick={() => setIsChatOpen(true)}
-        className="fixed bottom-6 right-6 p-3.5 bg-[var(--color-accent)] text-white rounded-full 
-                   shadow-lg hover:bg-[var(--color-accent-hover)] transition-colors z-50"
+        className="fixed bottom-6 right-6 p-3.5 bg-accent text-white rounded-full 
+                   shadow-lg hover:bg-accent-hover transition-colors z-50"
       >
         <Sparkles size={20} />
       </button>
@@ -72,7 +72,7 @@ export function WorkflowChat() {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-[var(--color-accent)] flex items-center justify-center">
+          <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
             <Sparkles size={14} className="text-white" />
           </div>
           <div>
@@ -97,7 +97,7 @@ export function WorkflowChat() {
               <div className="flex items-center gap-2 mb-1.5">
                 <MessageSquare
                   size={14}
-                  className="text-[var(--color-accent)]"
+                  className="text-accent"
                 />
                 <span className="font-medium text-gray-800 text-sm">
                   Welcome to FireFlow!
@@ -118,13 +118,13 @@ export function WorkflowChat() {
                     key={i}
                     onClick={() => handleSuggestedPrompt(prompt)}
                     className="w-full text-left p-2.5 bg-white border border-gray-100 rounded-lg
-                               hover:border-[var(--color-accent)]/30 hover:bg-[var(--color-accent-light)] transition-colors
+                               hover:border-accent/30 hover:bg-accent-light transition-colors
                                text-xs text-gray-600 group flex items-center justify-between"
                   >
                     <span className="line-clamp-2">{prompt}</span>
                     <ArrowRight
                       size={12}
-                      className="text-gray-300 group-hover:text-[var(--color-accent)] transition-colors flex-shrink-0 ml-2"
+                      className="text-gray-300 group-hover:text-accent transition-colors flex-shrink-0 ml-2"
                     />
                   </button>
                 ))}
@@ -144,7 +144,7 @@ export function WorkflowChat() {
             <div
               className={`max-w-[85%] rounded-xl px-3 py-2 ${
                 message.role === "user"
-                  ? "bg-[var(--color-accent)] text-white"
+                  ? "bg-accent text-white"
                   : "bg-gray-100 text-gray-700"
               }`}
             >
@@ -181,7 +181,7 @@ export function WorkflowChat() {
               <div className="flex items-center gap-2">
                 <Loader2
                   size={14}
-                  className="animate-spin text-[var(--color-accent)]"
+                  className="animate-spin text-accent"
                 />
                 <span className="text-xs text-gray-500">
                   Creating your workflow...
@@ -217,15 +217,15 @@ export function WorkflowChat() {
             rows={2}
             disabled={isPending}
             className="w-full px-3 py-2.5 pr-10 bg-gray-50 border border-gray-200 rounded-lg
-                       resize-none focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]/30 
-                       focus:border-[var(--color-accent)] placeholder:text-gray-400 text-xs
+                       resize-none focus:outline-none focus:ring-1 focus:ring-accent/30 
+                       focus:border-accent placeholder:text-gray-400 text-xs
                        disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           />
           <button
             type="submit"
             disabled={!value.trim() || isPending}
-            className="absolute right-2 bottom-2 p-1.5 bg-[var(--color-accent)] text-white rounded-md
-                       hover:bg-[var(--color-accent-hover)] disabled:opacity-50 disabled:cursor-not-allowed
+            className="absolute right-2 bottom-2 p-1.5 bg-accent text-white rounded-md
+                       hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed
                        transition-colors"
           >
             {isPending ? (

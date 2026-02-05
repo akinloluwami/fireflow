@@ -89,7 +89,7 @@ export function WorkflowBuilder({ tamboApiKey }: WorkflowBuilderProps) {
             {/* Left section */}
             <div className="flex items-center gap-4">
               <Link to="/" className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-[var(--color-accent)] flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
                   <Zap size={16} className="text-white" />
                 </div>
                 <span className="font-semibold text-gray-900">FireFlow</span>
@@ -107,7 +107,7 @@ export function WorkflowBuilder({ tamboApiKey }: WorkflowBuilderProps) {
                     .updateWorkflowMeta(e.target.value, workflow.description)
                 }
                 className="px-2 py-1 text-sm font-medium text-gray-700 bg-transparent border border-transparent 
-                           rounded hover:border-gray-200 focus:border-[var(--color-accent)] focus:outline-none 
+                           rounded hover:border-gray-200 focus:border-accent focus:outline-none 
                            transition-colors min-w-[180px]"
                 placeholder="Workflow name"
               />
@@ -148,7 +148,7 @@ export function WorkflowBuilder({ tamboApiKey }: WorkflowBuilderProps) {
                 onClick={handleRun}
                 disabled={workflow.nodes.length === 0}
                 className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white 
-                           bg-[var(--color-accent)] rounded-lg hover:bg-[var(--color-accent-hover)] disabled:opacity-50 
+                           bg-accent rounded-lg hover:bg-accent-hover disabled:opacity-50 
                            disabled:cursor-not-allowed transition-colors"
               >
                 <Play size={14} />
@@ -189,7 +189,7 @@ export function WorkflowBuilder({ tamboApiKey }: WorkflowBuilderProps) {
               {/* Floating stats */}
               <div className="absolute bottom-4 left-4 flex items-center gap-3 px-3 py-2 bg-white rounded-lg border border-gray-200 text-xs text-gray-500">
                 <span className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)]"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent"></span>
                   {workflow.nodes.filter((n) => n.type === "trigger").length}{" "}
                   triggers
                 </span>
@@ -214,8 +214,8 @@ export function WorkflowBuilder({ tamboApiKey }: WorkflowBuilderProps) {
             {!isChatOpen && (
               <button
                 onClick={toggleChat}
-                className="fixed bottom-6 right-6 p-3.5 bg-[var(--color-accent)] text-white rounded-full 
-                           shadow-lg hover:bg-[var(--color-accent-hover)] transition-colors z-50"
+                className="fixed bottom-6 right-6 p-3.5 bg-accent text-white rounded-full 
+                           shadow-lg hover:bg-accent-hover transition-colors z-50"
                 title="AI Assistant"
               >
                 <Sparkles size={20} />

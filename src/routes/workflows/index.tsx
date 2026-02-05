@@ -1,12 +1,35 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { WorkflowBuilder } from "@/components/workflow/WorkflowBuilder";
+import { authClient } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/workflows/")({
   component: WorkflowsPage,
 });
 
 function WorkflowsPage() {
-  // TODO: Get API key from environment or auth
+  const navigate = useNavigate();
+  const { data: session, isPending } = authClient.useSession();
+
+  useEffect(() => {
+    if (!isPending && !session?.user) {
+      navigate({ to: "/" });
+    }
+  }, [isPending, session, navigate]);
+
+  // Show loading while checking auth
+  if (isPending) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <div className="animate-spin w-8 h-8 border-2 border-gray-300 border-t-accent rounded-full" />
+      </div>
+    );
+  }
+
+  if (!session?.user) {
+    return null;
+  }
+
   const tamboApiKey = import.meta.env.VITE_TAMBO_API_KEY || "";
 
   if (!tamboApiKey) {

@@ -231,7 +231,7 @@ export function WorkflowCanvas() {
         {nodes.length === 0 && (
           <Panel position="top-center" className="!top-1/2 !-translate-y-1/2">
             <div className="text-center p-6 bg-white rounded-xl border border-gray-200">
-              <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-[var(--color-accent)] flex items-center justify-center">
+              <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-accent flex items-center justify-center">
                 <svg
                   className="w-6 h-6 text-white"
                   fill="none"
