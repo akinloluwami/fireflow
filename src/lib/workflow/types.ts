@@ -17,6 +17,7 @@ export type ActionSubType =
   | "http-request"
   | "send-email"
   | "send-slack"
+  | "send-discord"
   | "database-query"
   | "code";
 
