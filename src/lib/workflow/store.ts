@@ -24,6 +24,9 @@ interface WorkflowState {
   isPanelOpen: boolean;
   isChatOpen: boolean;
 
+  // Validation errors per node
+  nodeErrors: Record<string, string[]>;
+
   // History for undo/redo
   history: Workflow[];
   historyIndex: number;
@@ -80,6 +83,12 @@ interface WorkflowActions {
   setNodes: (nodes: WorkflowNode[]) => void;
   setEdges: (edges: WorkflowEdge[]) => void;
   applyWorkflowChanges: (nodes: WorkflowNode[], edges: WorkflowEdge[]) => void;
+
+  // Validation
+  validateNodes: () => boolean;
+  clearNodeErrors: () => void;
+  getNodeErrors: (nodeId: string) => string[];
+  hasValidationErrors: () => boolean;
 }
 
 type WorkflowStore = WorkflowState & WorkflowActions;
@@ -105,6 +114,7 @@ const initialState: WorkflowState = {
   selectedEdgeId: null,
   isPanelOpen: true,
   isChatOpen: true,
+  nodeErrors: {},
   history: [],
   historyIndex: -1,
 };
@@ -434,5 +444,85 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
         updatedAt: new Date(),
       },
     }));
+  },
+
+  // ---------------------------------------------------------------------------
+  // Validation
+  // ---------------------------------------------------------------------------
+
+  validateNodes: () => {
+    const { workflow } = get();
+    const nodeErrors: Record<string, string[]> = {};
+
+    for (const node of workflow.nodes) {
+      const config = (node.data.config || {}) as Record<string, unknown>;
+      const errors: string[] = [];
+
+      // Skip trigger nodes for now
+      if (node.type === "trigger") continue;
+
+      // Check Discord action
+      if (node.subType === "send-discord") {
+        if (!config.channelId) {
+          errors.push("Channel is required");
+        }
+        if (!config.message) {
+          errors.push("Message is required");
+        }
+      }
+
+      // Check Slack action
+      if (node.subType === "send-slack") {
+        if (!config.channel) {
+          errors.push("Channel is required");
+        }
+        if (!config.message) {
+          errors.push("Message is required");
+        }
+      }
+
+      // Check Email action
+      if (node.subType === "send-email") {
+        if (!config.to) {
+          errors.push("Recipient email is required");
+        }
+        if (!config.subject) {
+          errors.push("Subject is required");
+        }
+      }
+
+      // Check HTTP Request
+      if (node.subType === "http-request") {
+        if (!config.url) {
+          errors.push("URL is required");
+        }
+      }
+
+      // Check If-Else condition
+      if (node.subType === "if-else") {
+        if (!config.field && !config.condition) {
+          errors.push("Condition is required");
+        }
+      }
+
+      if (errors.length > 0) {
+        nodeErrors[node.id] = errors;
+      }
+    }
+
+    set({ nodeErrors });
+    return Object.keys(nodeErrors).length === 0;
+  },
+
+  clearNodeErrors: () => {
+    set({ nodeErrors: {} });
+  },
+
+  getNodeErrors: (nodeId: string) => {
+    return get().nodeErrors[nodeId] || [];
+  },
+
+  hasValidationErrors: () => {
+    return Object.keys(get().nodeErrors).length > 0;
   },
 }));
