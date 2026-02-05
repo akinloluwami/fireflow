@@ -148,7 +148,7 @@ export function WorkflowCanvas() {
     (event: React.DragEvent) => {
       event.preventDefault();
 
-      const data = event.dataTransfer.getData("application/vibeflow-node");
+      const data = event.dataTransfer.getData("application/fireflow-node");
       if (!data) return;
 
       const { nodeType, subType } = JSON.parse(data) as {
