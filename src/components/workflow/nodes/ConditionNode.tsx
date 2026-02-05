@@ -27,90 +27,74 @@ function ConditionNodeComponent({ id, data, selected }: ConditionNodeProps) {
   return (
     <div
       className={`
-        group relative min-w-[200px] rounded-2xl bg-gradient-to-br from-amber-50 to-white
-        shadow-lg border border-amber-100
-        transition-all duration-200 ease-out
-        ${selected ? "ring-2 ring-amber-500 ring-offset-2 shadow-amber-100" : "hover:shadow-xl hover:shadow-amber-50"}
+        group relative min-w-[160px] rounded-lg bg-white border border-gray-200
+        transition-all duration-150
+        ${selected ? "ring-2 ring-amber-500 ring-offset-1 shadow-md" : "hover:shadow-md"}
       `}
+      style={{ borderTopWidth: "2px", borderTopColor: "#f59e0b" }}
       onClick={() => selectNode(id)}
     >
-      {/* Glow effect */}
-      <div
-        className={`
-          absolute -inset-0.5 bg-gradient-to-r from-amber-400 to-orange-400 rounded-2xl opacity-0
-          blur transition-opacity duration-300
-          ${selected ? "opacity-20" : "group-hover:opacity-10"}
-        `}
-      />
+      {/* Badge */}
+      <div className="absolute -top-2 left-2.5 px-1.5 py-0.5 bg-amber-500 rounded flex items-center gap-0.5">
+        <GitBranch size={8} className="text-white" />
+        <span className="text-[9px] font-medium text-white uppercase tracking-wide">
+          Logic
+        </span>
+      </div>
 
-      {/* Content */}
-      <div className="relative">
-        {/* Badge */}
-        <div className="absolute -top-2.5 left-3 px-2 py-0.5 bg-amber-500 rounded-full flex items-center gap-1">
-          <GitBranch size={10} className="text-white" />
-          <span className="text-[10px] font-semibold text-white uppercase tracking-wide">
-            Logic
-          </span>
+      {/* Header */}
+      <div className="flex items-center gap-2 px-2.5 pt-4 pb-2">
+        <div className="flex items-center justify-center w-6 h-6 rounded bg-amber-50">
+          <NodeIcon
+            name={data.icon || "git-branch"}
+            size={14}
+            className="text-amber-600"
+          />
         </div>
-
-        {/* Header */}
-        <div className="flex items-center gap-3 px-4 pt-5 pb-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 shadow-md">
-            <NodeIcon
-              name={data.icon || "git-branch"}
-              size={20}
-              className="text-white"
-            />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-gray-800 truncate">
-              {data.label}
-            </h3>
-            {data.description && (
-              <p className="text-xs text-gray-500 truncate">
-                {data.description}
-              </p>
-            )}
-          </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-xs font-medium text-gray-700 truncate">
+            {data.label}
+          </h3>
+          {data.description && (
+            <p className="text-[10px] text-gray-400 truncate">
+              {data.description}
+            </p>
+          )}
         </div>
+      </div>
 
-        {/* Branch indicators */}
-        <div className="mx-3 mb-3 space-y-1">
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-lg border border-emerald-100">
-            <Check size={12} className="text-emerald-600" />
-            <span className="text-[11px] text-emerald-700 font-medium">
-              True path
-            </span>
-          </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-red-50 rounded-lg border border-red-100">
-            <X size={12} className="text-red-600" />
-            <span className="text-[11px] text-red-700 font-medium">
-              False path
-            </span>
-          </div>
+      {/* Branch indicators */}
+      <div className="mx-2 mb-2 space-y-1">
+        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 rounded border border-emerald-100">
+          <Check size={10} className="text-emerald-600" />
+          <span className="text-[9px] text-emerald-600 font-medium">True</span>
+        </div>
+        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-red-50 rounded border border-red-100">
+          <X size={10} className="text-red-500" />
+          <span className="text-[9px] text-red-500 font-medium">False</span>
         </div>
       </div>
 
       {/* Actions */}
       <div
         className={`
-          absolute -top-3 -right-3 flex gap-1 transition-all duration-150
-          ${selected ? "opacity-100 scale-100" : "opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100"}
+          absolute -top-6 right-0 flex gap-0.5 transition-opacity duration-150
+          ${selected ? "opacity-100" : "opacity-0"}
         `}
       >
         <button
           onClick={handleDuplicate}
-          className="p-1.5 bg-white rounded-lg shadow-md hover:bg-gray-50 transition-colors border border-gray-100"
+          className="p-1 bg-white rounded border border-gray-200 hover:bg-gray-50 transition-colors"
           title="Duplicate"
         >
-          <Copy size={12} className="text-gray-600" />
+          <Copy size={10} className="text-gray-500" />
         </button>
         <button
           onClick={handleDelete}
-          className="p-1.5 bg-white rounded-lg shadow-md hover:bg-red-50 transition-colors border border-gray-100"
+          className="p-1 bg-white rounded border border-gray-200 hover:bg-red-50 transition-colors"
           title="Delete"
         >
-          <Trash2 size={12} className="text-red-500" />
+          <Trash2 size={10} className="text-red-400" />
         </button>
       </div>
 
@@ -118,7 +102,7 @@ function ConditionNodeComponent({ id, data, selected }: ConditionNodeProps) {
       <Handle
         type="target"
         position={Position.Left}
-        className="!w-4 !h-4 !bg-amber-500 !border-[3px] !border-white !shadow-md transition-transform hover:!scale-110"
+        className="!w-2.5 !h-2.5 !bg-gray-300 !border-2 !border-white transition-colors hover:!bg-gray-500"
       />
 
       {/* Output Handles - True (top) and False (bottom) */}
@@ -126,14 +110,14 @@ function ConditionNodeComponent({ id, data, selected }: ConditionNodeProps) {
         type="source"
         position={Position.Right}
         id="true"
-        className="!w-4 !h-4 !bg-emerald-500 !border-[3px] !border-white !shadow-md transition-transform hover:!scale-110"
+        className="!w-2.5 !h-2.5 !bg-emerald-500 !border-2 !border-white transition-colors"
         style={{ top: "40%" }}
       />
       <Handle
         type="source"
         position={Position.Right}
         id="false"
-        className="!w-4 !h-4 !bg-red-500 !border-[3px] !border-white !shadow-md transition-transform hover:!scale-110"
+        className="!w-2.5 !h-2.5 !bg-red-500 !border-2 !border-white transition-colors"
         style={{ top: "70%" }}
       />
     </div>

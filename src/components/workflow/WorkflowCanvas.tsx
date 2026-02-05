@@ -230,10 +230,10 @@ export function WorkflowCanvas() {
         {/* Empty state */}
         {nodes.length === 0 && (
           <Panel position="top-center" className="!top-1/2 !-translate-y-1/2">
-            <div className="text-center p-8 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+            <div className="text-center p-6 bg-white rounded-xl border border-gray-200">
+              <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-[var(--color-accent)] flex items-center justify-center">
                 <svg
-                  className="w-8 h-8 text-white"
+                  className="w-6 h-6 text-white"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -246,10 +246,10 @@ export function WorkflowCanvas() {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+              <h3 className="text-sm font-medium text-gray-800 mb-1">
                 Start building your workflow
               </h3>
-              <p className="text-sm text-gray-500 max-w-xs">
+              <p className="text-xs text-gray-400 max-w-[200px]">
                 Drag nodes from the left panel or describe your workflow in
                 natural language
               </p>

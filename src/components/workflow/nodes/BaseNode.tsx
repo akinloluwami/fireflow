@@ -40,12 +40,13 @@ function BaseNodeComponent({
   return (
     <div
       className={`
-        relative min-w-[180px] rounded-xl bg-white shadow-lg
-        transition-all duration-200 ease-out
-        ${selected ? "ring-2 ring-offset-2" : "hover:shadow-xl"}
+        relative min-w-[160px] rounded-lg bg-white border border-gray-200
+        transition-all duration-150
+        ${selected ? "ring-2 ring-offset-1 shadow-md" : "hover:shadow-md"}
       `}
       style={{
-        borderTop: `3px solid ${color}`,
+        borderTopWidth: "2px",
+        borderTopColor: color,
         ["--tw-ring-color" as string]: color,
       }}
       onClick={() => selectNode(id)}
@@ -55,55 +56,55 @@ function BaseNodeComponent({
         <Handle
           type="target"
           position={Position.Left}
-          className="!w-3 !h-3 !bg-gray-400 !border-2 !border-white transition-colors hover:!bg-gray-600"
+          className="!w-2.5 !h-2.5 !bg-gray-300 !border-2 !border-white transition-colors hover:!bg-gray-500"
         />
       )}
 
       {/* Header */}
       <div
-        className="flex items-center gap-2 px-3 py-2.5 border-b border-gray-100"
+        className="flex items-center gap-2 px-2.5 py-2 border-b border-gray-100"
         style={{ color }}
       >
         <div
-          className="flex items-center justify-center w-7 h-7 rounded-lg"
-          style={{ backgroundColor: `${color}15` }}
+          className="flex items-center justify-center w-6 h-6 rounded"
+          style={{ backgroundColor: `${color}10` }}
         >
-          <NodeIcon name={data.icon || "code"} size={16} />
+          <NodeIcon name={data.icon || "code"} size={14} />
         </div>
-        <span className="font-semibold text-sm text-gray-800 truncate flex-1">
+        <span className="font-medium text-xs text-gray-700 truncate flex-1">
           {data.label}
         </span>
       </div>
 
       {/* Description */}
       {data.description && (
-        <div className="px-3 py-2">
-          <p className="text-xs text-gray-500 line-clamp-2">
+        <div className="px-2.5 py-1.5">
+          <p className="text-[10px] text-gray-400 line-clamp-2">
             {data.description}
           </p>
         </div>
       )}
 
-      {/* Actions (visible on hover/select) */}
+      {/* Actions (visible on select) */}
       <div
         className={`
-          absolute -top-8 right-0 flex gap-1 transition-opacity duration-150
-          ${selected ? "opacity-100" : "opacity-0 group-hover:opacity-100"}
+          absolute -top-7 right-0 flex gap-0.5 transition-opacity duration-150
+          ${selected ? "opacity-100" : "opacity-0"}
         `}
       >
         <button
           onClick={handleDuplicate}
-          className="p-1.5 bg-white rounded-md shadow-md hover:bg-gray-50 transition-colors"
+          className="p-1 bg-white rounded border border-gray-200 hover:bg-gray-50 transition-colors"
           title="Duplicate"
         >
-          <Copy size={14} className="text-gray-600" />
+          <Copy size={12} className="text-gray-500" />
         </button>
         <button
           onClick={handleDelete}
-          className="p-1.5 bg-white rounded-md shadow-md hover:bg-red-50 transition-colors"
+          className="p-1 bg-white rounded border border-gray-200 hover:bg-red-50 transition-colors"
           title="Delete"
         >
-          <Trash2 size={14} className="text-red-500" />
+          <Trash2 size={12} className="text-red-400" />
         </button>
       </div>
 
@@ -112,7 +113,7 @@ function BaseNodeComponent({
         <Handle
           type="source"
           position={Position.Right}
-          className="!w-3 !h-3 !bg-gray-400 !border-2 !border-white transition-colors hover:!bg-gray-600"
+          className="!w-2.5 !h-2.5 !bg-gray-300 !border-2 !border-white transition-colors hover:!bg-gray-500"
         />
       )}
 
@@ -123,7 +124,7 @@ function BaseNodeComponent({
           type="source"
           position={Position.Right}
           id={handle.id}
-          className="!w-3 !h-3 !border-2 !border-white transition-colors hover:!bg-gray-600"
+          className="!w-2.5 !h-2.5 !border-2 !border-white transition-colors"
           style={{
             top: `${30 + index * 25}%`,
             backgroundColor: handle.id === "true" ? "#10b981" : "#ef4444",

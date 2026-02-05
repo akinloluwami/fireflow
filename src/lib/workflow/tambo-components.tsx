@@ -188,11 +188,11 @@ function WorkflowGenerator({
 
   // This component renders a confirmation message
   return (
-    <div className="p-4 bg-gradient-to-r from-emerald-50 to-blue-50 rounded-xl border border-emerald-100">
-      <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-blue-500 flex items-center justify-center">
+    <div className="p-3 bg-[var(--color-accent-light)] rounded-lg border border-orange-100">
+      <div className="flex items-start gap-2.5">
+        <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-[var(--color-accent)] flex items-center justify-center">
           <svg
-            className="w-5 h-5 text-white"
+            className="w-4 h-4 text-white"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -205,19 +205,21 @@ function WorkflowGenerator({
             />
           </svg>
         </div>
-        <div className="flex-1">
-          <h4 className="font-semibold text-gray-800">{name}</h4>
+        <div className="flex-1 min-w-0">
+          <h4 className="text-sm font-medium text-gray-800 truncate">{name}</h4>
           {description && (
-            <p className="text-sm text-gray-600 mt-0.5">{description}</p>
+            <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+              {description}
+            </p>
           )}
-          <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+          <div className="flex items-center gap-3 mt-1.5 text-[10px] text-gray-400">
             <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)]"></span>
               {nodes?.length || 0} nodes
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-              {edges?.length || 0} connections
+              <span className="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+              {edges?.length || 0} edges
             </span>
           </div>
         </div>

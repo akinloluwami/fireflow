@@ -15,7 +15,7 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "FireFlow - Visual Workflow Builder",
+        title: "FireFlow - AI Workflow Automation",
       },
     ],
     links: [

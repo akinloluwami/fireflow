@@ -24,15 +24,13 @@ export function NodeConfigPanel() {
   if (!selectedNode || !definition) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-6 text-center bg-gray-50">
-        <div className="w-16 h-16 mb-4 rounded-2xl bg-gray-100 flex items-center justify-center">
-          <NodeIcon name="cpu" size={24} className="text-gray-400" />
+        <div className="w-12 h-12 mb-3 rounded-lg bg-gray-100 flex items-center justify-center">
+          <NodeIcon name="cpu" size={20} className="text-gray-400" />
         </div>
-        <h3 className="text-sm font-medium text-gray-600 mb-1">
+        <h3 className="text-xs font-medium text-gray-500 mb-0.5">
           No node selected
         </h3>
-        <p className="text-xs text-gray-400">
-          Select a node to configure its settings
-        </p>
+        <p className="text-[10px] text-gray-400">Select a node to configure</p>
       </div>
     );
   }
@@ -58,8 +56,8 @@ export function NodeConfigPanel() {
         <select
           value={stringValue}
           onChange={(e) => handleChange(key, e.target.value)}
-          className="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg
-                     focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+          className="w-full px-2.5 py-1.5 text-xs bg-white border border-gray-200 rounded-md
+                     focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]/30 focus:border-[var(--color-accent)]"
         >
           <option value="GET">GET</option>
           <option value="POST">POST</option>
@@ -75,8 +73,8 @@ export function NodeConfigPanel() {
         <select
           value={stringValue}
           onChange={(e) => handleChange(key, e.target.value)}
-          className="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg
-                     focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+          className="w-full px-2.5 py-1.5 text-xs bg-white border border-gray-200 rounded-md
+                     focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]/30 focus:border-[var(--color-accent)]"
         >
           <option value="equals">Equals</option>
           <option value="not-equals">Not Equals</option>
@@ -92,9 +90,9 @@ export function NodeConfigPanel() {
         <textarea
           value={stringValue}
           onChange={(e) => handleChange(key, e.target.value)}
-          rows={6}
-          className="w-full px-3 py-2 text-sm font-mono bg-gray-900 text-gray-100 border border-gray-700 rounded-lg
-                     focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
+          rows={5}
+          className="w-full px-2.5 py-1.5 text-xs font-mono bg-gray-900 text-gray-100 border border-gray-700 rounded-md
+                     focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]/30 focus:border-[var(--color-accent)]
                      placeholder:text-gray-500"
           placeholder={`Enter ${key}...`}
         />
@@ -103,17 +101,17 @@ export function NodeConfigPanel() {
 
     if (key === "cron") {
       return (
-        <div className="space-y-2">
+        <div className="space-y-1">
           <input
             type="text"
             value={stringValue}
             onChange={(e) => handleChange(key, e.target.value)}
-            className="w-full px-3 py-2 text-sm font-mono bg-white border border-gray-200 rounded-lg
-                       focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+            className="w-full px-2.5 py-1.5 text-xs font-mono bg-white border border-gray-200 rounded-md
+                       focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]/30 focus:border-[var(--color-accent)]"
             placeholder="0 9 * * *"
           />
-          <p className="text-xs text-gray-400">
-            Format: minute hour day month weekday
+          <p className="text-[10px] text-gray-400">
+            minute hour day month weekday
           </p>
         </div>
       );
@@ -130,8 +128,8 @@ export function NodeConfigPanel() {
             typeof value === "number" ? Number(e.target.value) : e.target.value,
           )
         }
-        className="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg
-                   focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
+        className="w-full px-2.5 py-1.5 text-xs bg-white border border-gray-200 rounded-md
+                   focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)]/30 focus:border-[var(--color-accent)]
                    placeholder:text-gray-400"
         placeholder={`Enter ${key}...`}
       />
@@ -146,42 +144,44 @@ export function NodeConfigPanel() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white border-l border-gray-200">
+    <div className="flex flex-col h-full bg-white">
       {/* Header */}
-      <div className="flex items-center gap-3 p-4 border-b border-gray-100">
+      <div className="flex items-center gap-2.5 p-3 border-b border-gray-100">
         <div
-          className="flex items-center justify-center w-10 h-10 rounded-xl"
-          style={{ backgroundColor: `${definition.color}15` }}
+          className="flex items-center justify-center w-8 h-8 rounded-lg"
+          style={{ backgroundColor: `${definition.color}10` }}
         >
           <NodeIcon
             name={definition.icon}
-            size={20}
+            size={16}
             style={{ color: definition.color }}
           />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-gray-800 truncate">
+          <h3 className="text-sm font-medium text-gray-800 truncate">
             {selectedNode.data.label}
           </h3>
-          <p className="text-xs text-gray-500">{definition.description}</p>
+          <p className="text-[10px] text-gray-400 truncate">
+            {definition.description}
+          </p>
         </div>
         <button
           onClick={() => selectNode(null)}
-          className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          className="p-1 rounded hover:bg-gray-100 transition-colors"
         >
-          <X size={18} className="text-gray-400" />
+          <X size={14} className="text-gray-400" />
         </button>
       </div>
 
       {/* Config Fields */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-3 space-y-3">
         {Object.entries(localConfig).map(([key, value]) => {
           // Skip complex objects for now
           if (typeof value === "object" && value !== null) return null;
 
           return (
             <div key={key}>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label className="block text-xs font-medium text-gray-600 mb-1">
                 {formatFieldLabel(key)}
               </label>
               {renderConfigField(key, value)}
@@ -190,30 +190,30 @@ export function NodeConfigPanel() {
         })}
 
         {Object.keys(localConfig).length === 0 && (
-          <p className="text-sm text-gray-400 text-center py-8">
-            No configuration options available
+          <p className="text-xs text-gray-400 text-center py-6">
+            No configuration options
           </p>
         )}
       </div>
 
       {/* Actions */}
-      <div className="p-4 border-t border-gray-100 space-y-2">
+      <div className="p-3 border-t border-gray-100 space-y-1.5">
         <button
           onClick={handleSave}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 
-                     bg-blue-500 text-white text-sm font-medium rounded-lg
-                     hover:bg-blue-600 transition-colors"
+          className="w-full flex items-center justify-center gap-1.5 px-3 py-2 
+                     bg-[var(--color-accent)] text-white text-xs font-medium rounded-md
+                     hover:bg-[var(--color-accent-hover)] transition-colors"
         >
-          <Save size={16} />
+          <Save size={14} />
           Save Changes
         </button>
         <button
           onClick={handleDelete}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 
-                     bg-red-50 text-red-600 text-sm font-medium rounded-lg
+          className="w-full flex items-center justify-center gap-1.5 px-3 py-2 
+                     bg-red-50 text-red-600 text-xs font-medium rounded-md
                      hover:bg-red-100 transition-colors"
         >
-          <Trash2 size={16} />
+          <Trash2 size={14} />
           Delete Node
         </button>
       </div>

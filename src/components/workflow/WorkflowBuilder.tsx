@@ -12,14 +12,14 @@ import { nodeDefinitions } from "@/lib/workflow/node-definitions";
 import {
   Save,
   Play,
-  Settings,
   ChevronLeft,
   ChevronRight,
   Undo,
   Redo,
   Sparkles,
-  Menu,
+  Zap,
 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 interface WorkflowBuilderProps {
   tamboApiKey: string;
@@ -83,38 +83,34 @@ export function WorkflowBuilder({ tamboApiKey }: WorkflowBuilderProps) {
       contextHelpers={contextHelpers}
     >
       <ReactFlowProvider>
-        <div className="flex flex-col h-screen bg-gray-100">
+        <div className="flex flex-col h-screen bg-gray-50">
           {/* Top Bar */}
-          <header className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200 shadow-sm z-10">
+          <header className="flex items-center justify-between px-4 h-14 bg-white border-b border-gray-200 z-10">
             {/* Left section */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                  <Sparkles size={18} className="text-white" />
+            <div className="flex items-center gap-4">
+              <Link to="/" className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-[var(--color-accent)] flex items-center justify-center">
+                  <Zap size={16} className="text-white" />
                 </div>
-                <span className="font-bold text-lg text-gray-800">
-                  VibeFlow
-                </span>
-              </div>
+                <span className="font-semibold text-gray-900">FireFlow</span>
+              </Link>
 
-              <div className="w-px h-6 bg-gray-200 mx-2" />
+              <div className="w-px h-5 bg-gray-200" />
 
               {/* Workflow name */}
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={workflow.name}
-                  onChange={(e) =>
-                    useWorkflowStore
-                      .getState()
-                      .updateWorkflowMeta(e.target.value, workflow.description)
-                  }
-                  className="px-2 py-1 text-sm font-medium text-gray-700 bg-transparent border border-transparent 
-                             rounded hover:border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-1 
-                             focus:ring-blue-500 transition-all min-w-[150px]"
-                  placeholder="Workflow name"
-                />
-              </div>
+              <input
+                type="text"
+                value={workflow.name}
+                onChange={(e) =>
+                  useWorkflowStore
+                    .getState()
+                    .updateWorkflowMeta(e.target.value, workflow.description)
+                }
+                className="px-2 py-1 text-sm font-medium text-gray-700 bg-transparent border border-transparent 
+                           rounded hover:border-gray-200 focus:border-[var(--color-accent)] focus:outline-none 
+                           transition-colors min-w-[180px]"
+                placeholder="Workflow name"
+              />
             </div>
 
             {/* Center section - Undo/Redo */}
@@ -122,18 +118,18 @@ export function WorkflowBuilder({ tamboApiKey }: WorkflowBuilderProps) {
               <button
                 onClick={undo}
                 disabled={historyIndex < 0}
-                className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                title="Undo (Ctrl+Z)"
+                className="p-2 rounded-md hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                title="Undo"
               >
-                <Undo size={18} className="text-gray-600" />
+                <Undo size={16} className="text-gray-500" />
               </button>
               <button
                 onClick={redo}
                 disabled={historyIndex >= history.length - 1}
-                className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                title="Redo (Ctrl+Shift+Z)"
+                className="p-2 rounded-md hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                title="Redo"
               >
-                <Redo size={18} className="text-gray-600" />
+                <Redo size={16} className="text-gray-500" />
               </button>
             </div>
 
@@ -142,24 +138,21 @@ export function WorkflowBuilder({ tamboApiKey }: WorkflowBuilderProps) {
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white 
-                           border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 
+                           border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
               >
-                <Save size={16} />
+                <Save size={14} />
                 {isSaving ? "Saving..." : "Save"}
               </button>
               <button
                 onClick={handleRun}
                 disabled={workflow.nodes.length === 0}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white 
-                           bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg hover:from-blue-600 
-                           hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white 
+                           bg-[var(--color-accent)] rounded-lg hover:bg-[var(--color-accent-hover)] disabled:opacity-50 
+                           disabled:cursor-not-allowed transition-colors"
               >
-                <Play size={16} />
+                <Play size={14} />
                 Run
-              </button>
-              <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                <Settings size={18} className="text-gray-600" />
               </button>
             </div>
           </header>
@@ -169,8 +162,8 @@ export function WorkflowBuilder({ tamboApiKey }: WorkflowBuilderProps) {
             {/* Left Sidebar - Node Palette */}
             <div
               className={`
-                flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden
-                ${isPanelOpen ? "w-64" : "w-0"}
+                flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden bg-white border-r border-gray-200
+                ${isPanelOpen ? "w-60" : "w-0"}
               `}
             >
               <NodePalette />
@@ -179,39 +172,37 @@ export function WorkflowBuilder({ tamboApiKey }: WorkflowBuilderProps) {
             {/* Toggle button for palette */}
             <button
               onClick={togglePanel}
-              className="flex-shrink-0 w-5 flex items-center justify-center bg-gray-100 
-                         hover:bg-gray-200 border-x border-gray-200 transition-colors"
+              className="flex-shrink-0 w-4 flex items-center justify-center bg-gray-50 
+                         hover:bg-gray-100 border-r border-gray-200 transition-colors"
             >
               {isPanelOpen ? (
-                <ChevronLeft size={14} className="text-gray-500" />
+                <ChevronLeft size={12} className="text-gray-400" />
               ) : (
-                <ChevronRight size={14} className="text-gray-500" />
+                <ChevronRight size={12} className="text-gray-400" />
               )}
             </button>
 
             {/* Canvas */}
-            <div className="flex-1 relative">
+            <div className="flex-1 relative bg-[#fafafa]">
               <WorkflowCanvas />
 
               {/* Floating stats */}
-              <div className="absolute bottom-4 left-4 flex items-center gap-2 px-3 py-2 bg-white/90 backdrop-blur-sm rounded-lg shadow-md border border-gray-200 text-xs text-gray-600">
+              <div className="absolute bottom-4 left-4 flex items-center gap-3 px-3 py-2 bg-white rounded-lg border border-gray-200 text-xs text-gray-500">
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                  {
-                    workflow.nodes.filter((n) => n.type === "trigger").length
-                  }{" "}
+                  <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-accent)]"></span>
+                  {workflow.nodes.filter((n) => n.type === "trigger").length}{" "}
                   triggers
                 </span>
-                <span className="text-gray-300">|</span>
+                <span className="text-gray-200">•</span>
                 <span>{workflow.nodes.length} nodes</span>
-                <span className="text-gray-300">|</span>
-                <span>{workflow.edges.length} connections</span>
+                <span className="text-gray-200">•</span>
+                <span>{workflow.edges.length} edges</span>
               </div>
             </div>
 
             {/* Right Sidebar - Config Panel */}
             {selectedNodeId && (
-              <div className="flex-shrink-0 w-80 overflow-hidden">
+              <div className="flex-shrink-0 w-72 overflow-hidden bg-white border-l border-gray-200">
                 <NodeConfigPanel />
               </div>
             )}
@@ -223,11 +214,11 @@ export function WorkflowBuilder({ tamboApiKey }: WorkflowBuilderProps) {
             {!isChatOpen && (
               <button
                 onClick={toggleChat}
-                className="fixed bottom-6 right-6 p-4 bg-gradient-to-r from-blue-500 to-purple-500 
-                           text-white rounded-full shadow-lg hover:shadow-xl transition-all
-                           hover:scale-105 active:scale-95 z-50"
+                className="fixed bottom-6 right-6 p-3.5 bg-[var(--color-accent)] text-white rounded-full 
+                           shadow-lg hover:bg-[var(--color-accent-hover)] transition-colors z-50"
+                title="AI Assistant"
               >
-                <Sparkles size={24} />
+                <Sparkles size={20} />
               </button>
             )}
           </div>
