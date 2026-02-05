@@ -1,8 +1,8 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { NodeIcon } from "../icons";
 import { useWorkflowStore } from "@/lib/workflow/store";
-import { Trash2, Copy, GitBranch, Check, X } from "lucide-react";
+import { Trash2, Copy, GitBranch, Check, X, AlertTriangle } from "lucide-react";
 import type { NodeData } from "@/lib/workflow/types";
 
 interface ConditionNodeProps {
@@ -12,7 +12,12 @@ interface ConditionNodeProps {
 }
 
 function ConditionNodeComponent({ id, data, selected }: ConditionNodeProps) {
-  const { removeNode, duplicateNode, selectNode } = useWorkflowStore();
+  const { removeNode, duplicateNode, selectNode, nodeErrors } =
+    useWorkflowStore();
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  const errors = nodeErrors[id] || [];
+  const hasErrors = errors.length > 0;
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -74,6 +79,38 @@ function ConditionNodeComponent({ id, data, selected }: ConditionNodeProps) {
           <span className="text-[9px] text-red-500 font-medium">False</span>
         </div>
       </div>
+
+      {/* Validation Error Indicator */}
+      {hasErrors && (
+        <div
+          className="absolute -bottom-3 left-1/2 -translate-x-1/2 z-10"
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+        >
+          <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md border border-red-200 cursor-pointer">
+            <AlertTriangle size={14} className="text-red-500" />
+          </div>
+
+          {/* Tooltip */}
+          {showTooltip && (
+            <div className="absolute top-7 left-1/2 -translate-x-1/2 z-50 w-52">
+              <div className="bg-white rounded-lg shadow-xl border border-gray-200 p-2.5">
+                <p className="text-xs font-semibold text-gray-700 mb-1.5">
+                  Issues:
+                </p>
+                <ul className="text-[11px] text-gray-600 space-y-1">
+                  {errors.map((error, i) => (
+                    <li key={i} className="flex items-start gap-1">
+                      <span className="text-red-400">•</span>
+                      {error}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Actions */}
       <div

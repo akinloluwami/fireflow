@@ -1,8 +1,8 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { Handle, Position } from "@xyflow/react";
 import { NodeIcon } from "../icons";
 import { useWorkflowStore } from "@/lib/workflow/store";
-import { Trash2, Copy } from "lucide-react";
+import { Trash2, Copy, AlertTriangle } from "lucide-react";
 import type { NodeData, NodeCategory } from "@/lib/workflow/types";
 
 interface BaseNodeProps {
@@ -25,7 +25,12 @@ function BaseNodeComponent({
   hasOutputHandle = true,
   outputHandles,
 }: BaseNodeProps) {
-  const { removeNode, duplicateNode, selectNode } = useWorkflowStore();
+  const { removeNode, duplicateNode, selectNode, nodeErrors } =
+    useWorkflowStore();
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  const errors = nodeErrors[id] || [];
+  const hasErrors = errors.length > 0;
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -82,6 +87,35 @@ function BaseNodeComponent({
           <p className="text-[10px] text-gray-400 line-clamp-2">
             {data.description}
           </p>
+        </div>
+      )}
+
+      {/* Validation Error Indicator */}
+      {hasErrors && (
+        <div
+          className="absolute -bottom-2 left-1/2 -translate-x-1/2 z-10"
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
+        >
+          <div className="w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-sm border border-red-200">
+            <AlertTriangle size={12} className="text-red-500" />
+          </div>
+
+          {/* Tooltip */}
+          {showTooltip && (
+            <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50 w-48">
+              <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-2">
+                <p className="text-xs font-medium text-gray-700 mb-1">
+                  Issues:
+                </p>
+                <ul className="text-[11px] text-gray-600 space-y-0.5">
+                  {errors.map((error, i) => (
+                    <li key={i}>- {error}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
