@@ -37,7 +37,7 @@ export async function executeEmail(
   const interpolatedBody = interpolate(body, context.interpolation);
   const interpolatedFrom = from
     ? interpolate(from, context.interpolation)
-    : "VibeFlow <noreply@vibeflow.app>";
+    : "FireFlow <noreply@fireflow.run>";
 
   try {
     const response = await fetch("https://api.resend.com/emails", {
