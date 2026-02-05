@@ -43,13 +43,18 @@ export const Route = createFileRoute("/api/webhooks/tally/$workflowId")({
             );
           }
 
-          // Check if workflow is active
-          if (workflow[0].status !== "active") {
+          // Check if workflow is active or testing
+          if (
+            workflow[0].status !== "active" &&
+            workflow[0].status !== "testing"
+          ) {
             return Response.json(
-              { error: "Workflow is not active" },
+              { error: "Workflow is not active or in testing mode" },
               { status: 400 },
             );
           }
+
+          const wasTestingMode = workflow[0].status === "testing";
 
           // Optionally validate webhook signature
           const webhookRecord = await db
@@ -104,16 +109,25 @@ export const Route = createFileRoute("/api/webhooks/tally/$workflowId")({
           });
 
           // Execute workflow asynchronously (don't await - return 200 quickly)
-          executeWorkflow(workflowId, executionId, triggerData).catch(
-            (error) => {
+          executeWorkflow(workflowId, executionId, triggerData)
+            .then(async () => {
+              // If was in testing mode, revert to draft after execution
+              if (wasTestingMode) {
+                await db
+                  .update(workflows)
+                  .set({ status: "draft" })
+                  .where(eq(workflows.id, workflowId));
+              }
+            })
+            .catch((error) => {
               console.error(`Workflow execution failed: ${workflowId}`, error);
-            },
-          );
+            });
 
           return Response.json({
             success: true,
             executionId,
             message: "Workflow triggered",
+            testMode: wasTestingMode,
           });
         } catch (error) {
           console.error("Tally webhook error:", error);
