@@ -17,9 +17,14 @@ interface DiscordChannel {
 interface DiscordConfigProps {
   config: Record<string, unknown>;
   onChange: (key: string, value: unknown) => void;
+  workflowId?: string;
 }
 
-export function DiscordConfig({ config, onChange }: DiscordConfigProps) {
+export function DiscordConfig({
+  config,
+  onChange,
+  workflowId,
+}: DiscordConfigProps) {
   const [loading, setLoading] = useState(true);
   const [connected, setConnected] = useState(false);
   const [guilds, setGuilds] = useState<DiscordGuild[]>([]);
@@ -71,7 +76,8 @@ export function DiscordConfig({ config, onChange }: DiscordConfigProps) {
   };
 
   const handleConnect = () => {
-    window.location.href = "/api/integrations/discord/connect";
+    const params = workflowId ? `?workflowId=${workflowId}` : "";
+    window.location.href = `/api/integrations/discord/connect${params}`;
   };
 
   const handleDisconnect = async () => {

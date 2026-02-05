@@ -187,11 +187,19 @@ export function NodeConfigPanel() {
         )}
 
         {selectedNode.subType === "send-slack" && (
-          <SlackConfig config={localConfig} onChange={handleChange} />
+          <SlackConfig
+            config={localConfig}
+            onChange={handleChange}
+            workflowId={workflow.id}
+          />
         )}
 
         {selectedNode.subType === "send-discord" && (
-          <DiscordConfig config={localConfig} onChange={handleChange} />
+          <DiscordConfig
+            config={localConfig}
+            onChange={handleChange}
+            workflowId={workflow.id}
+          />
         )}
 
         {/* Generic config for other node types */}

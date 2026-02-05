@@ -10,9 +10,14 @@ interface SlackChannel {
 interface SlackConfigProps {
   config: Record<string, unknown>;
   onChange: (key: string, value: unknown) => void;
+  workflowId?: string;
 }
 
-export function SlackConfig({ config, onChange }: SlackConfigProps) {
+export function SlackConfig({
+  config,
+  onChange,
+  workflowId,
+}: SlackConfigProps) {
   const [loading, setLoading] = useState(true);
   const [connected, setConnected] = useState(false);
   const [workspace, setWorkspace] = useState<string | null>(null);
@@ -39,8 +44,8 @@ export function SlackConfig({ config, onChange }: SlackConfigProps) {
   };
 
   const handleConnect = () => {
-    // Open Slack OAuth in a popup or redirect
-    window.location.href = "/api/integrations/slack/connect";
+    const params = workflowId ? `?workflowId=${workflowId}` : "";
+    window.location.href = `/api/integrations/slack/connect${params}`;
   };
 
   const handleDisconnect = async () => {
