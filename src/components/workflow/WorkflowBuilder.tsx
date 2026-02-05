@@ -23,9 +23,13 @@ import { Link } from "@tanstack/react-router";
 
 interface WorkflowBuilderProps {
   tamboApiKey: string;
+  workflowId?: string;
 }
 
-export function WorkflowBuilder({ tamboApiKey }: WorkflowBuilderProps) {
+export function WorkflowBuilder({
+  tamboApiKey,
+  workflowId,
+}: WorkflowBuilderProps) {
   const {
     workflow,
     selectedNodeId,
@@ -88,7 +92,7 @@ export function WorkflowBuilder({ tamboApiKey }: WorkflowBuilderProps) {
           <header className="flex items-center justify-between px-4 h-14 bg-white border-b border-gray-200 z-10">
             {/* Left section */}
             <div className="flex items-center gap-4">
-              <Link to="/" className="flex items-center gap-2">
+              <Link to="/workflows" className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
                   <Zap size={16} className="text-white" />
                 </div>
@@ -190,7 +194,9 @@ export function WorkflowBuilder({ tamboApiKey }: WorkflowBuilderProps) {
               <div className="absolute bottom-4 left-4 flex items-center gap-3 px-3 py-2 bg-white rounded-lg border border-gray-200 text-xs text-gray-500">
                 <span className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-accent"></span>
-                  {workflow.nodes.filter((n) => n.type === "trigger").length}{" "}
+                  {
+                    workflow.nodes.filter((n) => n.type === "trigger").length
+                  }{" "}
                   triggers
                 </span>
                 <span className="text-gray-200">•</span>
