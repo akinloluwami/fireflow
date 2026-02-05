@@ -1,4 +1,4 @@
-// VibeFlow Workflow Types
+// FireFlow Workflow Types
 
 // =============================================================================
 // Node Types
