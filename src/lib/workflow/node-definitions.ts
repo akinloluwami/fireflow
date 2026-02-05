@@ -102,9 +102,22 @@ export const nodeDefinitions: NodeDefinition[] = [
     label: "Send Slack",
     description: "Post message to Slack",
     icon: "message-square",
-    color: "#3b82f6",
+    color: "#4A154B",
     defaultConfig: {
       channel: "",
+      message: "",
+    },
+  },
+  {
+    type: "action",
+    subType: "send-discord",
+    label: "Send Discord",
+    description: "Post message to Discord",
+    icon: "message-circle",
+    color: "#5865F2",
+    defaultConfig: {
+      guildId: "",
+      channelId: "",
       message: "",
     },
   },
