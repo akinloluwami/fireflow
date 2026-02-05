@@ -135,7 +135,12 @@ export interface WorkflowEdge {
 // Workflow
 // =============================================================================
 
-export type WorkflowStatus = "draft" | "active" | "paused" | "error";
+export type WorkflowStatus =
+  | "draft"
+  | "active"
+  | "paused"
+  | "error"
+  | "testing";
 
 export interface Workflow {
   id: string;
