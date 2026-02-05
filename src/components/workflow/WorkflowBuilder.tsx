@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { TamboProvider } from "@tambo-ai/react";
 import { ReactFlowProvider } from "@xyflow/react";
 import { WorkflowCanvas } from "./WorkflowCanvas";
@@ -18,12 +18,24 @@ import {
   Redo,
   Sparkles,
   Zap,
+  Rocket,
+  Pause,
+  Square,
+  Loader2,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
 interface WorkflowBuilderProps {
   tamboApiKey: string;
   workflowId?: string;
+}
+
+interface ExecutionResult {
+  status: "success" | "failed";
+  executionId: string;
+  message?: string;
 }
 
 export function WorkflowBuilder({
@@ -41,9 +53,130 @@ export function WorkflowBuilder({
     redo,
     history,
     historyIndex,
+    validateNodes,
+    hasValidationErrors,
   } = useWorkflowStore();
 
   const [isSaving, setIsSaving] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [isWaitingForTrigger, setIsWaitingForTrigger] = useState(false);
+  const [executionResult, setExecutionResult] =
+    useState<ExecutionResult | null>(null);
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const lastExecutionIdRef = useRef<string | null>(null);
+
+  // Validate nodes whenever the workflow changes
+  useEffect(() => {
+    validateNodes();
+  }, [workflow.nodes, validateNodes]);
+
+  // Determine if the workflow has a trigger that requires waiting for an external event
+  const triggerNode = workflow.nodes.find((n) => n.type === "trigger");
+  const requiresExternalTrigger =
+    triggerNode?.subType === "webhook" ||
+    triggerNode?.subType === "form-submission" ||
+    triggerNode?.subType === "email-received";
+
+  // Check if there are validation errors
+  const hasErrors = hasValidationErrors();
+
+  // Poll for execution completion when waiting for trigger
+  useEffect(() => {
+    if (!isWaitingForTrigger || !workflowId) {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+        pollingRef.current = null;
+      }
+      return;
+    }
+
+    // Capture the current latest execution ID so we can detect new ones
+    const captureInitialExecution = async () => {
+      try {
+        const res = await fetch(
+          `/api/workflows/${workflowId}/executions/latest`,
+        );
+        const data = await res.json();
+        lastExecutionIdRef.current = data.execution?.id || null;
+      } catch {
+        lastExecutionIdRef.current = null;
+      }
+    };
+    captureInitialExecution();
+
+    // Start polling
+    pollingRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(
+          `/api/workflows/${workflowId}/executions/latest`,
+        );
+        const data = await res.json();
+
+        console.log(
+          "[Polling] Latest execution:",
+          data.execution?.id,
+          "Status:",
+          data.execution?.status,
+        );
+        console.log("[Polling] Last known ID:", lastExecutionIdRef.current);
+
+        if (data.execution) {
+          const execution = data.execution;
+          const isNewExecution = execution.id !== lastExecutionIdRef.current;
+
+          // Check if execution is done (completed or failed)
+          if (
+            isNewExecution &&
+            (execution.status === "completed" || execution.status === "failed")
+          ) {
+            console.log("[Polling] New completed execution detected!");
+            // Update ref first so we don't trigger again
+            lastExecutionIdRef.current = execution.id;
+
+            // Execution finished
+            setIsWaitingForTrigger(false);
+            setExecutionResult({
+              status: execution.status === "completed" ? "success" : "failed",
+              executionId: execution.id,
+              message:
+                execution.status === "completed"
+                  ? "Workflow executed successfully!"
+                  : execution.error || "Workflow execution failed",
+            });
+
+            // Revert to draft if was testing
+            if (workflow.status === "testing") {
+              useWorkflowStore.getState().setWorkflow({
+                ...workflow,
+                status: "draft",
+              });
+            }
+
+            // Clear result after 5 seconds
+            setTimeout(() => setExecutionResult(null), 5000);
+          } else if (
+            isNewExecution &&
+            (execution.status === "running" || execution.status === "pending")
+          ) {
+            // New execution is in progress - DON'T update ref yet, wait for completion
+            console.log(
+              "[Polling] New execution in progress, waiting for completion...",
+            );
+          }
+        }
+      } catch (error) {
+        console.error("Polling error:", error);
+      }
+    }, 1500); // Poll every 1.5 seconds
+
+    return () => {
+      if (pollingRef.current) {
+        clearInterval(pollingRef.current);
+        pollingRef.current = null;
+      }
+    };
+  }, [isWaitingForTrigger, workflowId, workflow]);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -51,10 +184,116 @@ export function WorkflowBuilder({
     await new Promise((r) => setTimeout(r, 1000));
     setIsSaving(false);
   };
+  const handlePublish = async () => {
+    if (!workflowId) return;
+    setIsPublishing(true);
+    try {
+      const newStatus = workflow.status === "active" ? "draft" : "active";
+      const res = await fetch(`/api/workflows/${workflowId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: workflow.name,
+          description: workflow.description,
+          nodes: workflow.nodes,
+          edges: workflow.edges,
+          status: newStatus,
+        }),
+      });
+      if (res.ok) {
+        useWorkflowStore.getState().setWorkflow({
+          ...workflow,
+          status: newStatus,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to publish workflow:", error);
+    } finally {
+      setIsPublishing(false);
+    }
+  };
 
-  const handleRun = () => {
-    // TODO: Implement workflow execution
-    console.log("Running workflow:", workflow);
+  const handleExecute = async () => {
+    if (!workflowId || hasErrors) return;
+
+    // If trigger requires external event, toggle waiting state
+    if (requiresExternalTrigger) {
+      if (isWaitingForTrigger) {
+        // Stop waiting - revert to draft if we were in testing mode
+        setIsWaitingForTrigger(false);
+        if (workflow.status === "testing") {
+          try {
+            await fetch(`/api/workflows/${workflowId}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                name: workflow.name,
+                description: workflow.description,
+                nodes: workflow.nodes,
+                edges: workflow.edges,
+                status: "draft",
+              }),
+            });
+            useWorkflowStore.getState().setWorkflow({
+              ...workflow,
+              status: "draft",
+            });
+          } catch (error) {
+            console.error("Failed to revert workflow status:", error);
+          }
+        }
+        return;
+      }
+
+      // Start waiting for trigger - set status to "testing" if not already active
+      if (workflow.status !== "active") {
+        try {
+          const res = await fetch(`/api/workflows/${workflowId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: workflow.name,
+              description: workflow.description,
+              nodes: workflow.nodes,
+              edges: workflow.edges,
+              status: "testing",
+            }),
+          });
+          if (res.ok) {
+            useWorkflowStore.getState().setWorkflow({
+              ...workflow,
+              status: "testing",
+            });
+          }
+        } catch (error) {
+          console.error("Failed to set testing status:", error);
+          return;
+        }
+      }
+      setIsWaitingForTrigger(true);
+      return;
+    }
+
+    // For manual/schedule triggers, execute immediately
+    setIsExecuting(true);
+    try {
+      const res = await fetch(`/api/workflows/${workflowId}/test`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ testData: {} }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(`✅ Workflow executed!\n\nExecution ID: ${data.executionId}`);
+      } else {
+        alert(`❌ Execution failed: ${data.error || "Unknown error"}`);
+      }
+    } catch (error) {
+      console.error("Failed to execute workflow:", error);
+      alert("❌ Failed to execute workflow");
+    } finally {
+      setIsExecuting(false);
+    }
   };
 
   // Context helper for Tambo - provides current workflow state
@@ -139,6 +378,17 @@ export function WorkflowBuilder({
 
             {/* Right section */}
             <div className="flex items-center gap-2">
+              {/* Status badge */}
+              <span
+                className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                  workflow.status === "active"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-100 text-gray-600"
+                }`}
+              >
+                {workflow.status === "active" ? "Live" : "Draft"}
+              </span>
+
               <button
                 onClick={handleSave}
                 disabled={isSaving}
@@ -148,15 +398,38 @@ export function WorkflowBuilder({
                 <Save size={14} />
                 {isSaving ? "Saving..." : "Save"}
               </button>
+
               <button
-                onClick={handleRun}
-                disabled={workflow.nodes.length === 0}
-                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white 
-                           bg-accent rounded-lg hover:bg-accent-hover disabled:opacity-50 
-                           disabled:cursor-not-allowed transition-colors"
+                onClick={handlePublish}
+                disabled={
+                  isPublishing ||
+                  workflow.nodes.length === 0 ||
+                  (workflow.status !== "active" && hasErrors)
+                }
+                className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 ${
+                  workflow.status === "active"
+                    ? "text-orange-600 border border-orange-200 hover:bg-orange-50"
+                    : hasErrors
+                      ? "bg-gray-400 text-white"
+                      : "text-white bg-green-600 hover:bg-green-700"
+                }`}
+                title={
+                  hasErrors && workflow.status !== "active"
+                    ? "Fix node configuration errors before publishing"
+                    : undefined
+                }
               >
-                <Play size={14} />
-                Run
+                {workflow.status === "active" ? (
+                  <>
+                    <Pause size={14} />
+                    {isPublishing ? "Pausing..." : "Pause"}
+                  </>
+                ) : (
+                  <>
+                    <Rocket size={14} />
+                    {isPublishing ? "Publishing..." : "Publish"}
+                  </>
+                )}
               </button>
             </div>
           </header>
@@ -215,6 +488,63 @@ export function WorkflowBuilder({
 
             {/* Chat Panel */}
             {isChatOpen && <WorkflowChat />}
+
+            {/* Execute Workflow Button - Bottom Center */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40">
+              {executionResult ? (
+                <div
+                  className={`flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-lg shadow-lg ${
+                    executionResult.status === "success"
+                      ? "bg-green-500 text-white"
+                      : "bg-red-500 text-white"
+                  }`}
+                >
+                  {executionResult.status === "success" ? (
+                    <CheckCircle size={16} />
+                  ) : (
+                    <XCircle size={16} />
+                  )}
+                  <span>{executionResult.message}</span>
+                </div>
+              ) : isWaitingForTrigger ? (
+                <div className="flex items-center gap-2">
+                  <div
+                    className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-gray-700 
+                                  bg-white rounded-lg shadow-lg border border-gray-200"
+                  >
+                    <Loader2 size={16} className="animate-spin text-accent" />
+                    <span>Waiting for trigger event...</span>
+                  </div>
+                  <button
+                    onClick={handleExecute}
+                    className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-white 
+                               bg-red-500 rounded-lg shadow-lg hover:bg-red-600 transition-all"
+                    title="Stop waiting"
+                  >
+                    <Square size={14} fill="white" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={handleExecute}
+                  disabled={
+                    isExecuting || workflow.nodes.length === 0 || hasErrors
+                  }
+                  className={`flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white 
+                             rounded-lg shadow-lg disabled:opacity-50 
+                             disabled:cursor-not-allowed transition-all hover:shadow-xl
+                             ${hasErrors ? "bg-gray-400" : "bg-accent hover:bg-accent-hover"}`}
+                  title={
+                    hasErrors
+                      ? "Fix node configuration errors before executing"
+                      : undefined
+                  }
+                >
+                  <Play size={16} />
+                  {isExecuting ? "Executing..." : "Execute workflow"}
+                </button>
+              )}
+            </div>
 
             {/* Chat toggle when closed */}
             {!isChatOpen && (
