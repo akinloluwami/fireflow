@@ -57,7 +57,7 @@ export function NodePalette({ onDragStart }: NodePaletteProps) {
     subType: NodeSubType,
   ) => {
     event.dataTransfer.setData(
-      "application/vibeflow-node",
+      "application/fireflow-node",
       JSON.stringify({ nodeType, subType }),
     );
     event.dataTransfer.effectAllowed = "move";
