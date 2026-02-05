@@ -1,5 +1,5 @@
 {
-  "projectName": "vibeflow",
+  "projectName": "fireflow",
   "mode": "file-router",
   "typescript": true,
   "packageManager": "npm",
@@ -12,10 +12,5 @@
   "git": true,
   "version": 1,
   "framework": "react-cra",
-  "chosenAddOns": [
-    "nitro",
-    "start",
-    "drizzle",
-    "better-auth"
-  ]
+  "chosenAddOns": ["nitro", "start", "drizzle", "better-auth"]
 }
