@@ -35,6 +35,16 @@ export interface ExecutionContext {
     startedAt: string;
     status: string;
   };
+
+  /** Current loop iteration context (only set inside loops) */
+  loop?: {
+    item: unknown;
+    index: number;
+    total: number;
+    isFirst: boolean;
+    isLast: boolean;
+    [key: string]: unknown;
+  };
 }
 
 /**
@@ -44,8 +54,8 @@ export interface VariableRef {
   /** Full path: "trigger.body.email" or "nodes.abc123.output.data" */
   path: string;
 
-  /** Source type: "trigger" | "nodes" | "execution" */
-  source: "trigger" | "nodes" | "execution";
+  /** Source type: "trigger" | "nodes" | "execution" | "loop" */
+  source: "trigger" | "nodes" | "execution" | "loop";
 
   /** For node references, the node ID */
   nodeId?: string;
@@ -120,6 +130,14 @@ export function parseVariablePath(path: string): VariableRef | null {
     };
   }
 
+  if (source === "loop") {
+    return {
+      path,
+      source: "loop",
+      subPath: parts.slice(1),
+    };
+  }
+
   return null;
 }
 
@@ -142,6 +160,10 @@ export function resolveVariable(
       break;
     case "execution":
       value = context.execution;
+      break;
+    case "loop":
+      if (!context.loop) return undefined;
+      value = context.loop;
       break;
     default:
       return undefined;
@@ -235,12 +257,16 @@ export function hasVariables(input: string): boolean {
  * Build a variable path string for insertion
  */
 export function buildVariablePath(
-  source: "trigger" | "nodes" | "execution",
+  source: "trigger" | "nodes" | "execution" | "loop",
   nodeId: string | null,
   path: string[],
 ): string {
   if (source === "trigger") {
     return `{{ trigger.${path.join(".")} }}`;
+  }
+
+  if (source === "loop") {
+    return `{{ loop.${path.join(".")} }}`;
   }
 
   if (source === "nodes" && nodeId) {
