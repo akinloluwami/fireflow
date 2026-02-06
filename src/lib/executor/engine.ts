@@ -19,6 +19,8 @@ import { InterpolationContext, createEmptyContext } from "./interpolate";
 
 // Node executor imports
 import { executeIfElse } from "./nodes/condition-if";
+import { executeSwitch } from "./nodes/condition-switch";
+import { executeLoop } from "./nodes/condition-loop";
 import { executeSlack } from "./nodes/action-slack";
 import { executeDiscord } from "./nodes/action-discord";
 import { executeHttp } from "./nodes/action-http";
@@ -44,6 +46,16 @@ export interface NodeExecutionResult {
   error?: string;
   // For condition nodes, which branch to take
   conditionResult?: boolean;
+  // For switch nodes, which case branch to take
+  switchResult?: string | null;
+  // For loop nodes, the iterations to process
+  loopIterations?: Array<{
+    item: unknown;
+    index: number;
+    total: number;
+    isFirst: boolean;
+    isLast: boolean;
+  }>;
 }
 
 // =============================================================================
@@ -143,6 +155,61 @@ async function executeNodeChain(
   // Store node output in interpolation context
   context.interpolation.nodes[node.id] = { output: result.output };
 
+  // Special handling for loop nodes - iterate over items
+  if (node.subType === "loop" && result.loopIterations) {
+    const config = node.data.config as Record<string, unknown>;
+    const itemVariable = (config.itemVariable as string) || "item";
+    const indexVariable = (config.indexVariable as string) || "index";
+
+    // Find body branch nodes (connected to "body" or legacy "true" handle)
+    const bodyEdges = allEdges.filter(
+      (e) =>
+        e.source === node.id &&
+        (e.sourceHandle === "body" || e.sourceHandle === "true"),
+    );
+    const bodyNodes = bodyEdges
+      .map((e) => allNodes.find((n) => n.id === e.target))
+      .filter((n): n is WorkflowNode => n !== undefined);
+
+    // Execute body for each iteration
+    for (const iteration of result.loopIterations) {
+      // Add loop context for this iteration
+      context.interpolation.loop = {
+        [itemVariable]: iteration.item,
+        [indexVariable]: iteration.index,
+        item: iteration.item,
+        index: iteration.index,
+        total: iteration.total,
+        isFirst: iteration.isFirst,
+        isLast: iteration.isLast,
+      };
+
+      // Execute all body nodes for this iteration
+      for (const bodyNode of bodyNodes) {
+        await executeNodeChain(bodyNode, allNodes, allEdges, context);
+      }
+    }
+
+    // Clear loop context after iterations complete
+    delete context.interpolation.loop;
+
+    // Find and execute "done" branch nodes (or legacy "false" handle)
+    const doneEdges = allEdges.filter(
+      (e) =>
+        e.source === node.id &&
+        (e.sourceHandle === "done" || e.sourceHandle === "false"),
+    );
+    const doneNodes = doneEdges
+      .map((e) => allNodes.find((n) => n.id === e.target))
+      .filter((n): n is WorkflowNode => n !== undefined);
+
+    for (const doneNode of doneNodes) {
+      await executeNodeChain(doneNode, allNodes, allEdges, context);
+    }
+
+    return; // Don't use getNextNodes for loops
+  }
+
   // Find next nodes to execute
   const nextNodes = getNextNodes(node, allEdges, allNodes, result);
 
@@ -188,6 +255,14 @@ async function executeNode(
       // Conditions
       case "if-else":
         result = await executeIfElse(node, context);
+        break;
+
+      case "switch":
+        result = await executeSwitch(node, context);
+        break;
+
+      case "loop":
+        result = await executeLoop(node, context);
         break;
 
       // Actions
