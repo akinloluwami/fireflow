@@ -28,6 +28,7 @@ export const workflows = pgTable("workflows", {
   nodes: jsonb("nodes").notNull().default([]),
   edges: jsonb("edges").notNull().default([]),
   status: text("status").notNull().default("draft"), // 'draft' | 'active' | 'paused' | 'error'
+  chatThreadId: text("chat_thread_id"), // Tambo thread ID for AI chat history
   userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
