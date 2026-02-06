@@ -405,7 +405,6 @@ export function VariablePicker({
           </div>
         )}
 
-        {/* Trigger section */}
         {!loading && variableTree.trigger && (
           <div className="mb-2">
             <div
