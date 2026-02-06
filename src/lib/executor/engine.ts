@@ -27,6 +27,11 @@ import { executeHttp } from "./nodes/action-http";
 import { executeEmail } from "./nodes/action-email";
 import { executeSetVariable } from "./nodes/transform-variable";
 import { executeWait } from "./nodes/others-wait";
+import { executeCode } from "./nodes/action-code";
+import { executeFilter } from "./nodes/transform-filter";
+import { executeFunction } from "./nodes/transform-function";
+import { executeSplit } from "./nodes/transform-split";
+import { executeAggregate } from "./nodes/transform-aggregate";
 
 // =============================================================================
 // Types
@@ -282,9 +287,29 @@ async function executeNode(
         result = await executeEmail(node, context);
         break;
 
+      case "code":
+        result = await executeCode(node, context);
+        break;
+
       // Transforms
       case "set-variable":
         result = await executeSetVariable(node, context);
+        break;
+
+      case "function":
+        result = await executeFunction(node, context);
+        break;
+
+      case "filter":
+        result = await executeFilter(node, context);
+        break;
+
+      case "split":
+        result = await executeSplit(node, context);
+        break;
+
+      case "aggregate":
+        result = await executeAggregate(node, context);
         break;
 
       case "wait":
