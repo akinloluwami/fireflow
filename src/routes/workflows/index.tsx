@@ -2,7 +2,17 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import type { WorkflowNode, WorkflowEdge } from "@/lib/workflow/types";
-import { Plus, Zap, MoreVertical, Trash2, Edit, Loader2 } from "lucide-react";
+import {
+  Plus,
+  Zap,
+  MoreVertical,
+  Trash2,
+  Edit,
+  Loader2,
+  Sparkles,
+  Clock,
+  ArrowRight,
+} from "lucide-react";
 import { UserMenu } from "@/components/UserMenu";
 
 interface WorkflowItem {
@@ -98,11 +108,11 @@ function WorkflowsListPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200">
+    <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-gray-50">
+      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <span className="text-lg font-semibold text-gray-900">
+          <Link to="/" className="flex items-center gap-2 group">
+            <span className="text-lg font-bold text-gray-900 group-hover:text-accent transition-colors">
               FireFlow
             </span>
           </Link>
@@ -112,20 +122,20 @@ function WorkflowsListPage() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        <div className="flex items-center justify-between mb-8">
+      <main className="max-w-6xl mx-auto px-6 py-12">
+        <div className="flex items-end justify-between mb-10">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
               My Workflows
             </h1>
-            <p className="text-gray-500 mt-1">
+            <p className="text-gray-500">
               Create and manage your automation workflows
             </p>
           </div>
           <button
             onClick={handleCreateWorkflow}
             disabled={isCreating}
-            className="flex items-center gap-2 px-4 py-2 bg-accent text-white font-medium rounded-2xl hover:bg-accent-hover transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-5 py-2.5 bg-accent text-white font-semibold rounded-xl hover:bg-accent-hover transition-all disabled:opacity-50"
           >
             {isCreating ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -137,114 +147,126 @@ function WorkflowsListPage() {
         </div>
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin w-8 h-8 border-2 border-gray-300 border-t-accent rounded-full" />
+          <div className="flex flex-col items-center justify-center py-32">
+            <div className="animate-spin w-10 h-10 border-3 border-gray-200 border-t-accent rounded-full mb-4" />
+            <p className="text-gray-400 text-sm">Loading workflows...</p>
           </div>
         ) : workflows.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gray-100 flex items-center justify-center">
-              <Zap className="w-8 h-8 text-gray-400" />
+          <div className="text-center py-24 px-6">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-linear-to-br from-accent/10 to-purple-100 flex items-center justify-center">
+              <Sparkles className="w-10 h-10 text-accent" />
             </div>
-            <h2 className="text-lg font-medium text-gray-900 mb-2">
-              No workflows yet
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+              Start automating
             </h2>
-            <p className="text-gray-500 mb-6">
-              Create your first workflow to get started
+            <p className="text-gray-500 mb-8 max-w-md mx-auto">
+              Create your first workflow and let AI help you build powerful
+              automations in minutes.
             </p>
             <button
               onClick={handleCreateWorkflow}
               disabled={isCreating}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-accent text-white font-medium rounded-lg hover:bg-accent-hover transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-accent text-white font-semibold rounded-xl hover:bg-accent-hover transition-all disabled:opacity-50"
             >
               {isCreating ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                <Plus className="w-4 h-4" />
+                <Plus className="w-5 h-5" />
               )}
-              Create Workflow
+              Create your first workflow
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {workflows.map((workflow) => (
-              <div
+              <Link
                 key={workflow.id}
-                className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow group relative"
+                to="/workflow/$id"
+                params={{ id: workflow.id }}
+                className="group bg-white rounded-2xl border border-gray-100 p-6 hover:border-gray-300 hover:bg-gray-50/50 transition-all duration-300 relative overflow-hidden"
               >
-                <Link
-                  to="/workflow/$id"
-                  params={{ id: workflow.id }}
-                  className="block"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="w-10 h-10 rounded-lg bg-accent-light flex items-center justify-center">
-                      <Zap className="w-5 h-5 text-accent" />
+                <div className="absolute inset-0 bg-linear-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                <div className="relative">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-12 h-12 rounded-xl bg-linear-to-br from-accent/10 to-accent/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Zap className="w-6 h-6 text-accent" />
                     </div>
                     <span
-                      className={`text-xs px-2 py-1 rounded-full ${
+                      className={`text-xs font-medium px-2.5 py-1 rounded-full ${
                         workflow.status === "active"
-                          ? "bg-green-100 text-green-700"
+                          ? "bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200"
                           : workflow.status === "error"
-                            ? "bg-red-100 text-red-700"
-                            : "bg-gray-100 text-gray-600"
+                            ? "bg-red-50 text-red-600 ring-1 ring-red-200"
+                            : "bg-gray-50 text-gray-500 ring-1 ring-gray-200"
                       }`}
                     >
-                      {workflow.status}
+                      {workflow.status === "active" ? "Live" : workflow.status}
                     </span>
                   </div>
-                  <h3 className="font-medium text-gray-900 mb-1 truncate">
+
+                  <h3 className="font-semibold text-gray-900 mb-1.5 truncate group-hover:text-accent transition-colors">
                     {workflow.name}
                   </h3>
-                  <p className="text-sm text-gray-500 line-clamp-2 mb-3">
+                  <p className="text-sm text-gray-500 line-clamp-2 mb-4 min-h-10">
                     {workflow.description || "No description"}
                   </p>
-                  <div className="flex items-center gap-4 text-xs text-gray-400">
-                    <span>{workflow.nodes.length} nodes</span>
-                    <span>
-                      Updated{" "}
-                      {workflow.updatedAt
-                        ? new Date(workflow.updatedAt).toLocaleDateString()
-                        : "never"}
-                    </span>
-                  </div>
-                </Link>
 
-                <div className="absolute top-4 right-4">
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setMenuOpen(
-                        menuOpen === workflow.id ? null : workflow.id,
-                      );
-                    }}
-                    className="p-1.5 rounded-lg hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <MoreVertical className="w-4 h-4 text-gray-500" />
-                  </button>
-                  {menuOpen === workflow.id && (
-                    <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-10 min-w-30">
-                      <Link
-                        to="/workflow/$id"
-                        params={{ id: workflow.id }}
-                        className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      >
-                        <Edit className="w-4 h-4" />
-                        Edit
-                      </Link>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleDeleteWorkflow(workflow.id);
-                        }}
-                        className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 w-full"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        Delete
-                      </button>
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <div className="flex items-center gap-3 text-xs text-gray-400">
+                      <span className="flex items-center gap-1">
+                        <div className="w-1.5 h-1.5 rounded-full bg-accent" />
+                        {workflow.nodes.length} nodes
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {workflow.updatedAt
+                          ? new Date(workflow.updatedAt).toLocaleDateString()
+                          : "—"}
+                      </span>
                     </div>
-                  )}
+                    <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-accent group-hover:translate-x-1 transition-all" />
+                  </div>
                 </div>
-              </div>
+
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setMenuOpen(menuOpen === workflow.id ? null : workflow.id);
+                  }}
+                  className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                >
+                  <MoreVertical className="w-4 h-4 text-gray-400" />
+                </button>
+
+                {menuOpen === workflow.id && (
+                  <div
+                    className="absolute right-4 top-12 bg-white border border-gray-200 rounded-xl py-1.5 z-20 min-w-32"
+                    onClick={(e) => e.preventDefault()}
+                  >
+                    <Link
+                      to="/workflow/$id"
+                      params={{ id: workflow.id }}
+                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      <Edit className="w-4 h-4" />
+                      Edit
+                    </Link>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleDeleteWorkflow(workflow.id);
+                      }}
+                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </Link>
             ))}
           </div>
         )}
