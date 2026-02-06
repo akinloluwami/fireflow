@@ -37,6 +37,7 @@ interface WorkflowActions {
   setWorkflow: (workflow: Workflow) => void;
   updateWorkflowMeta: (name: string, description?: string) => void;
   resetWorkflow: () => void;
+  setChatThreadId: (threadId: string) => void;
 
   // Node actions
   addNode: (
@@ -153,6 +154,16 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       history: [],
       historyIndex: -1,
     });
+  },
+
+  setChatThreadId: (threadId) => {
+    set((state) => ({
+      workflow: {
+        ...state.workflow,
+        chatThreadId: threadId,
+        updatedAt: new Date(),
+      },
+    }));
   },
 
   // ---------------------------------------------------------------------------
