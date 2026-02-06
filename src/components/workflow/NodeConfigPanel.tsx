@@ -3,7 +3,12 @@ import { getNodeDefinition } from "@/lib/workflow/node-definitions";
 import { NodeIcon } from "./icons";
 import { X, Save, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { TriggerConfig, SlackConfig, DiscordConfig } from "./config";
+import {
+  TriggerConfig,
+  SlackConfig,
+  DiscordConfig,
+  WaitConfig,
+} from "./config";
 
 export function NodeConfigPanel() {
   const { workflow, selectedNodeId, selectNode, updateNodeConfig, removeNode } =
@@ -202,10 +207,15 @@ export function NodeConfigPanel() {
           />
         )}
 
+        {selectedNode.subType === "wait" && (
+          <WaitConfig config={localConfig} onChange={handleChange} />
+        )}
+
         {/* Generic config for other node types */}
         {selectedNode.type !== "trigger" &&
           selectedNode.subType !== "send-slack" &&
           selectedNode.subType !== "send-discord" &&
+          selectedNode.subType !== "wait" &&
           Object.entries(localConfig).map(([key, value]) => {
             // Skip complex objects for now
             if (typeof value === "object" && value !== null) return null;
@@ -223,6 +233,7 @@ export function NodeConfigPanel() {
         {selectedNode.type !== "trigger" &&
           selectedNode.subType !== "send-slack" &&
           selectedNode.subType !== "send-discord" &&
+          selectedNode.subType !== "wait" &&
           Object.keys(localConfig).length === 0 && (
             <p className="text-xs text-gray-400 text-center py-6">
               No configuration options
