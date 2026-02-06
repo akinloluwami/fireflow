@@ -11,6 +11,7 @@ export interface InterpolationContext {
   trigger: Record<string, unknown>;
   nodes: Record<string, { output: unknown }>;
   variables: Record<string, unknown>;
+  loop?: Record<string, unknown>;
 }
 
 const VARIABLE_PATTERN = /\{\{([^}]+)\}\}/g;
