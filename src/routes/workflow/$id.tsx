@@ -45,7 +45,12 @@ function WorkflowEditorPage() {
           return;
         }
         const data = await res.json();
-        console.log("[Workflow] Loaded:", data.name);
+        console.log(
+          "[Workflow] Loaded:",
+          data.name,
+          "chatThreadId:",
+          data.chatThreadId,
+        );
         setWorkflow({
           id: data.id,
           name: data.name,
@@ -55,6 +60,7 @@ function WorkflowEditorPage() {
           status: data.status as "draft" | "active" | "paused" | "error",
           createdAt: data.createdAt || undefined,
           updatedAt: data.updatedAt || undefined,
+          chatThreadId: data.chatThreadId || undefined,
         });
         lastSavedRef.current = JSON.stringify({
           nodes: data.nodes,
@@ -81,6 +87,7 @@ function WorkflowEditorPage() {
       nodes: workflow.nodes,
       edges: workflow.edges,
       name: workflow.name,
+      chatThreadId: workflow.chatThreadId,
     });
 
     // Don't save if nothing changed
@@ -95,6 +102,7 @@ function WorkflowEditorPage() {
           description: workflow.description,
           nodes: workflow.nodes,
           edges: workflow.edges,
+          chatThreadId: workflow.chatThreadId,
         }),
       });
       lastSavedRef.current = currentState;
@@ -125,6 +133,7 @@ function WorkflowEditorPage() {
     workflow.edges,
     workflow.name,
     workflow.description,
+    workflow.chatThreadId,
     saveWorkflow,
   ]);
 
