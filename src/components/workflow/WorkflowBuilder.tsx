@@ -332,13 +332,28 @@ export function WorkflowBuilder({
       });
       const data = await res.json();
       if (res.ok) {
-        alert(`✅ Workflow executed!\n\nExecution ID: ${data.executionId}`);
+        setExecutionResult({
+          status: "success",
+          executionId: data.executionId,
+          message: "Workflow executed successfully!",
+        });
       } else {
-        alert(`❌ Execution failed: ${data.error || "Unknown error"}`);
+        setExecutionResult({
+          status: "failed",
+          executionId: data.executionId || "",
+          message: data.error || "Execution failed",
+        });
       }
+      // Clear result after 5 seconds
+      setTimeout(() => setExecutionResult(null), 5000);
     } catch (error) {
       console.error("Failed to execute workflow:", error);
-      alert("❌ Failed to execute workflow");
+      setExecutionResult({
+        status: "failed",
+        executionId: "",
+        message: "Failed to execute workflow",
+      });
+      setTimeout(() => setExecutionResult(null), 5000);
     } finally {
       setIsExecuting(false);
     }
