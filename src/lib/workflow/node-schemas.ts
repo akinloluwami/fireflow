@@ -342,23 +342,6 @@ export const nodeOutputSchemas: Record<string, NodeOutputSchema> = {
     },
   },
 
-  merge: {
-    type: "object",
-    description: "Merged data from multiple branches",
-    properties: {
-      branches: {
-        type: "array",
-        description: "Data from each merged branch",
-        items: { type: "unknown" },
-      },
-      mode: {
-        type: "string",
-        description: "Merge mode used",
-        example: "wait-all",
-      },
-    },
-  },
-
   // ===========================================================================
   // TRANSFORM NODES
   // ===========================================================================
