@@ -1,8 +1,8 @@
 import { useWorkflowStore } from "@/lib/workflow/store";
 import { getNodeDefinition } from "@/lib/workflow/node-definitions";
 import { NodeIcon } from "./icons";
-import { X, Save, Trash2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { X, Trash2, Check, Loader2 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import {
   TriggerConfig,
   SlackConfig,
@@ -13,9 +13,17 @@ import {
   LoopConfig,
 } from "./config";
 
+type SaveStatus = "idle" | "saving" | "saved";
+
 export function NodeConfigPanel() {
-  const { workflow, selectedNodeId, selectNode, updateNodeConfig, removeNode } =
-    useWorkflowStore();
+  const {
+    workflow,
+    selectedNodeId,
+    selectNode,
+    updateNodeConfig,
+    updateNode,
+    removeNode,
+  } = useWorkflowStore();
 
   const selectedNode = workflow.nodes.find((n) => n.id === selectedNodeId);
   const definition = selectedNode
@@ -23,12 +31,54 @@ export function NodeConfigPanel() {
     : null;
 
   const [localConfig, setLocalConfig] = useState<Record<string, unknown>>({});
+  const [localLabel, setLocalLabel] = useState("");
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  const isInitialMount = useRef(true);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const labelInputRef = useRef<HTMLInputElement>(null);
 
+  // Sync local config and label when selected node changes
   useEffect(() => {
     if (selectedNode) {
       setLocalConfig(selectedNode.data.config as Record<string, unknown>);
+      setLocalLabel(selectedNode.data.label || "");
+      isInitialMount.current = true;
+      setSaveStatus("idle");
     }
-  }, [selectedNode]);
+  }, [selectedNode?.id]);
+
+  // Auto-save with debounce when localConfig changes
+  useEffect(() => {
+    // Skip initial mount to avoid saving on load
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    if (!selectedNode) return;
+
+    setSaveStatus("saving");
+
+    // Clear existing timeout
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    // Debounce the save
+    debounceRef.current = setTimeout(() => {
+      updateNodeConfig(selectedNode.id, localConfig);
+      setSaveStatus("saved");
+
+      // Reset to idle after 2 seconds
+      setTimeout(() => setSaveStatus("idle"), 2000);
+    }, 300);
+
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, [localConfig, selectedNode?.id, updateNodeConfig]);
 
   if (!selectedNode || !definition) {
     return (
@@ -48,8 +98,28 @@ export function NodeConfigPanel() {
     setLocalConfig((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSave = () => {
-    updateNodeConfig(selectedNode.id, localConfig);
+  const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalLabel(e.target.value);
+  };
+
+  const handleLabelConfirm = () => {
+    if (selectedNode && localLabel.trim()) {
+      updateNode(selectedNode.id, {
+        data: { ...selectedNode.data, label: localLabel.trim() },
+      });
+      setSaveStatus("saved");
+      setTimeout(() => setSaveStatus("idle"), 2000);
+    }
+    labelInputRef.current?.blur();
+  };
+
+  const handleLabelKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleLabelConfirm();
+    } else if (e.key === "Escape") {
+      setLocalLabel(selectedNode?.data.label || "");
+      labelInputRef.current?.blur();
+    }
   };
 
   const handleDelete = () => {
@@ -157,7 +227,7 @@ export function NodeConfigPanel() {
       {/* Header */}
       <div className="flex items-center gap-2.5 p-3 border-b border-gray-100">
         <div
-          className="flex items-center justify-center w-8 h-8 rounded-lg"
+          className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-lg"
           style={{ backgroundColor: `${definition.color}10` }}
         >
           <NodeIcon
@@ -167,19 +237,43 @@ export function NodeConfigPanel() {
           />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-medium text-gray-800 truncate">
-            {selectedNode.data.label}
-          </h3>
+          <input
+            ref={labelInputRef}
+            type="text"
+            value={localLabel}
+            onChange={handleLabelChange}
+            onBlur={handleLabelConfirm}
+            onKeyDown={handleLabelKeyDown}
+            className="w-full text-sm font-medium text-gray-800 bg-transparent border-0 
+                       focus:outline-none focus:ring-0 px-0 py-0.5
+                       hover:bg-gray-50 focus:bg-gray-50 rounded transition-colors"
+            placeholder="Node name..."
+          />
           <p className="text-[10px] text-gray-400 truncate">
             {definition.description}
           </p>
         </div>
-        <button
-          onClick={() => selectNode(null)}
-          className="p-1 rounded hover:bg-gray-100 transition-colors"
-        >
-          <X size={14} className="text-gray-400" />
-        </button>
+        <div className="flex items-center gap-1.5">
+          {/* Save Status */}
+          {saveStatus === "saving" && (
+            <span className="flex items-center gap-1 text-[10px] text-gray-400">
+              <Loader2 size={10} className="animate-spin" />
+              Saving...
+            </span>
+          )}
+          {saveStatus === "saved" && (
+            <span className="flex items-center gap-1 text-[10px] text-green-600">
+              <Check size={10} />
+              Saved
+            </span>
+          )}
+          <button
+            onClick={() => selectNode(null)}
+            className="p-1 rounded hover:bg-gray-100 transition-colors"
+          >
+            <X size={14} className="text-gray-400" />
+          </button>
+        </div>
       </div>
 
       {/* Config Fields */}
@@ -277,16 +371,7 @@ export function NodeConfigPanel() {
       </div>
 
       {/* Actions */}
-      <div className="p-3 border-t border-gray-100 space-y-1.5">
-        <button
-          onClick={handleSave}
-          className="w-full flex items-center justify-center gap-1.5 px-3 py-2 
-                     bg-accent text-white text-xs font-medium rounded-md
-                     hover:bg-accent-hover transition-colors"
-        >
-          <Save size={14} />
-          Save Changes
-        </button>
+      <div className="p-3 border-t border-gray-100">
         <button
           onClick={handleDelete}
           className="w-full flex items-center justify-center gap-1.5 px-3 py-2 
