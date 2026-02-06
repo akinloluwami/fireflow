@@ -12,6 +12,7 @@ import { DemoWorkflowCanvas } from "@/components/DemoWorkflowCanvas";
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { IntegrationsSection } from "@/components/IntegrationsSection";
 import { CTASection } from "@/components/CTASection";
+import { UserMenu } from "@/components/UserMenu";
 import { SiGithub } from "react-icons/si";
 
 export const Route = createFileRoute("/")({ component: LandingPage });
@@ -48,11 +49,7 @@ function LandingPage() {
               >
                 Open App
               </Link>
-              <img
-                src={session.user.image || ""}
-                alt={session.user.name || "User"}
-                className="w-8 h-8 rounded-full ring-2 ring-white"
-              />
+              <UserMenu user={session.user} />
             </div>
           ) : (
             <button
