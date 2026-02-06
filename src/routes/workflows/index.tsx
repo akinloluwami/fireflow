@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import type { WorkflowNode, WorkflowEdge } from "@/lib/workflow/types";
 import { Plus, Zap, MoreVertical, Trash2, Edit, Loader2 } from "lucide-react";
+import { UserMenu } from "@/components/UserMenu";
 
 interface WorkflowItem {
   id: string;
@@ -110,15 +111,7 @@ function WorkflowsListPage() {
             </span>
           </Link>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">{session.user.email}</span>
-            <img
-              src={
-                session.user.image ||
-                `https://ui-avatars.com/api/?name=${encodeURIComponent(session.user.name || "User")}`
-              }
-              alt={session.user.name || "User"}
-              className="w-8 h-8 rounded-full"
-            />
+            <UserMenu user={session.user} />
           </div>
         </div>
       </header>
