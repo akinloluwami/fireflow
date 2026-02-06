@@ -113,7 +113,7 @@ interface WorkflowGeneratorProps {
   description?: string;
   nodes: Array<{
     id: string;
-    type: "trigger" | "action" | "condition" | "transform";
+    type: "trigger" | "action" | "condition" | "transform" | "others";
     subType: string;
     position: { x: number; y: number };
     data: {
