@@ -14,13 +14,12 @@ function WorkflowEditorPage() {
   const navigate = useNavigate();
   const { data: session, isPending: isAuthPending } = authClient.useSession();
 
-  const { workflow, setWorkflow, resetWorkflow } = useWorkflowStore();
+  const { workflow, setWorkflow } = useWorkflowStore();
   const isLoadingRef = useRef(false);
   const hasLoadedRef = useRef(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedRef = useRef<string>("");
 
-  // Load workflow on mount
   useEffect(() => {
     console.log("[Workflow] Load effect:", {
       userId: session?.user?.id,
