@@ -73,7 +73,6 @@ export function NodePalette({ onDragStart }: NodePaletteProps) {
 
   return (
     <div className="flex flex-col h-full bg-white">
-      {/* Header */}
       <div className="p-3 border-b border-gray-100">
         <h2 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2.5">
           Nodes
@@ -95,11 +94,9 @@ export function NodePalette({ onDragStart }: NodePaletteProps) {
         </div>
       </div>
 
-      {/* Node Categories */}
       <div className="flex-1 overflow-y-auto p-2">
         {categories.map((category) => (
           <div key={category.id} className="mb-1">
-            {/* Category Header */}
             <button
               onClick={() => toggleCategory(category.id)}
               className="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 transition-colors"
@@ -121,7 +118,6 @@ export function NodePalette({ onDragStart }: NodePaletteProps) {
               </span>
             </button>
 
-            {/* Nodes in Category */}
             {expandedCategories[category.id] && (
               <div className="ml-4 mt-0.5 space-y-0.5">
                 {category.nodes.map((node) => (
@@ -168,7 +164,6 @@ export function NodePalette({ onDragStart }: NodePaletteProps) {
         ))}
       </div>
 
-      {/* Help text */}
       <div className="p-2 border-t border-gray-100 bg-gray-50">
         <p className="text-[10px] text-gray-400 text-center">
           Drag or click to add
