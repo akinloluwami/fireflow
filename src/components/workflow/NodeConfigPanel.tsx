@@ -11,6 +11,9 @@ import {
   ConditionConfig,
   SwitchConfig,
   LoopConfig,
+  HttpRequestConfig,
+  EmailConfig,
+  SetVariableConfig,
 } from "./config";
 
 type SaveStatus = "idle" | "saving" | "saved";
@@ -334,6 +337,30 @@ export function NodeConfigPanel() {
           />
         )}
 
+        {selectedNode.subType === "http-request" && (
+          <HttpRequestConfig
+            config={localConfig}
+            onChange={handleChange}
+            nodeId={selectedNode.id}
+          />
+        )}
+
+        {selectedNode.subType === "send-email" && (
+          <EmailConfig
+            config={localConfig}
+            onChange={handleChange}
+            nodeId={selectedNode.id}
+          />
+        )}
+
+        {selectedNode.subType === "set-variable" && (
+          <SetVariableConfig
+            config={localConfig}
+            onChange={handleChange}
+            nodeId={selectedNode.id}
+          />
+        )}
+
         {/* Generic config for other node types */}
         {selectedNode.type !== "trigger" &&
           selectedNode.subType !== "send-slack" &&
@@ -342,6 +369,9 @@ export function NodeConfigPanel() {
           selectedNode.subType !== "if-else" &&
           selectedNode.subType !== "switch" &&
           selectedNode.subType !== "loop" &&
+          selectedNode.subType !== "http-request" &&
+          selectedNode.subType !== "send-email" &&
+          selectedNode.subType !== "set-variable" &&
           Object.entries(localConfig).map(([key, value]) => {
             // Skip complex objects for now
             if (typeof value === "object" && value !== null) return null;
@@ -363,6 +393,9 @@ export function NodeConfigPanel() {
           selectedNode.subType !== "if-else" &&
           selectedNode.subType !== "switch" &&
           selectedNode.subType !== "loop" &&
+          selectedNode.subType !== "http-request" &&
+          selectedNode.subType !== "send-email" &&
+          selectedNode.subType !== "set-variable" &&
           Object.keys(localConfig).length === 0 && (
             <p className="text-xs text-gray-400 text-center py-6">
               No configuration options
