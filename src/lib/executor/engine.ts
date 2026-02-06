@@ -182,7 +182,6 @@ async function executeNode(
       case "form-submission":
       case "manual":
       case "schedule":
-      case "email-received":
         result = { success: true, output: context.triggerData };
         break;
 
