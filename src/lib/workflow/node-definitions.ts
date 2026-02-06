@@ -90,7 +90,7 @@ export const nodeDefinitions: NodeDefinition[] = [
     subType: "send-slack",
     label: "Send Slack",
     description: "Post message to Slack",
-    icon: "message-square",
+    icon: "slack",
     color: "#4A154B",
     defaultConfig: {
       channel: "",
@@ -102,7 +102,7 @@ export const nodeDefinitions: NodeDefinition[] = [
     subType: "send-discord",
     label: "Send Discord",
     description: "Post message to Discord",
-    icon: "message-circle",
+    icon: "discord",
     color: "#5865F2",
     defaultConfig: {
       guildId: "",
