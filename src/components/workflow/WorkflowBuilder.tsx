@@ -75,8 +75,7 @@ export function WorkflowBuilder({
   const triggerNode = workflow.nodes.find((n) => n.type === "trigger");
   const requiresExternalTrigger =
     triggerNode?.subType === "webhook" ||
-    triggerNode?.subType === "form-submission" ||
-    triggerNode?.subType === "email-received";
+    triggerNode?.subType === "form-submission";
 
   // Check if there are validation errors
   const hasErrors = hasValidationErrors();
