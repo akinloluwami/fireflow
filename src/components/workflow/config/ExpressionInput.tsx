@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Database } from "lucide-react";
 import { VariablePicker } from "./VariablePicker";
+import { useWorkflowStore } from "@/lib/workflow/store";
 
 interface ExpressionInputProps {
   value: string;
@@ -12,9 +13,35 @@ interface ExpressionInputProps {
 }
 
 /**
+ * Convert a variable path with node UUID to a friendly display name
+ * e.g., "{{ nodes.abc-123.output.status }}" -> "{{ HTTP Request.status }}"
+ */
+function getFriendlyVariablePath(
+  path: string,
+  nodeMap: Map<string, string>,
+): string {
+  // Match nodes.UUID.output.xxx pattern
+  const nodeMatch = path.match(/nodes\.([a-f0-9-]+)\.output\.(.+)/);
+  if (nodeMatch) {
+    const [, nodeId, restPath] = nodeMatch;
+    const nodeName = nodeMap.get(nodeId) || "Unknown Node";
+    return `${nodeName}.${restPath}`;
+  }
+
+  // For trigger, loop, etc., just show as-is but cleaner
+  return path;
+}
+
+/**
  * Render text with highlighted variable syntax
  */
-function HighlightedText({ text }: { text: string }) {
+function HighlightedText({
+  text,
+  nodeMap,
+}: {
+  text: string;
+  nodeMap: Map<string, string>;
+}) {
   const VARIABLE_REGEX = /(\{\{[^}]+\}\})/g;
   const parts = text.split(VARIABLE_REGEX);
 
@@ -22,12 +49,19 @@ function HighlightedText({ text }: { text: string }) {
     <>
       {parts.map((part, i) => {
         if (part.match(VARIABLE_REGEX)) {
+          // Extract the inner path (without {{ }})
+          const innerPath = part.replace(/\{\{\s*|\s*\}\}/g, "");
+          const friendlyPath = getFriendlyVariablePath(innerPath, nodeMap);
+
           return (
             <span
               key={i}
               className="bg-accent/15 text-accent font-medium px-0.5 rounded"
+              title={part} // Show original path on hover
             >
-              {part}
+              {"{{ "}
+              {friendlyPath}
+              {" }}"}
             </span>
           );
         }
@@ -45,11 +79,18 @@ export function ExpressionInput({
   multiline = false,
   className = "",
 }: ExpressionInputProps) {
+  const { workflow } = useWorkflowStore();
   const [showPicker, setShowPicker] = useState(false);
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
+
+  // Build a map of node IDs to their labels for friendly display
+  const nodeMap = new Map<string, string>();
+  for (const node of workflow.nodes) {
+    nodeMap.set(node.id, node.data.label || node.subType);
+  }
 
   // Close picker when clicking outside
   useEffect(() => {
@@ -139,7 +180,7 @@ export function ExpressionInput({
           `}
           style={{ lineHeight: multiline ? "1.5" : "1.5rem" }}
         >
-          <HighlightedText text={value} />
+          <HighlightedText text={value} nodeMap={nodeMap} />
         </div>
       )}
 
