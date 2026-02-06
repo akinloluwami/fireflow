@@ -70,10 +70,13 @@ function LandingPage() {
 
       <div className="pt-32 pb-8 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl md:text-[5rem] font-semibold text-gray-700 leading-[1.05] tracking-tight mb-6">
-            Unbelievably good
+          <h1 className="text-5xl md:text-[4rem] font-semibold text-gray-700 leading-[1.05] tracking-tight mb-6">
+            The{" "}
+            <span className="bg-linear-to-r from-accent via-purple-500 to-pink-500 bg-clip-text text-transparent animate-pulse">
+              workflow automation
+            </span>
             <br />
-            workflow automation
+            she told you not to worry about.
           </h1>
 
           <p className="text-lg md:text-xl text-gray-500 mb-6 max-w-2xl mx-auto font-medium">
