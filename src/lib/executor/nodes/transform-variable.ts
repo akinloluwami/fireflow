@@ -6,9 +6,18 @@ import type { WorkflowNode } from "@/lib/workflow/types";
 import type { ExecutionContext, NodeExecutionResult } from "../engine";
 import { interpolate } from "../interpolate";
 
-interface SetVariableConfig {
-  variableName: string;
+interface Variable {
+  id: string;
+  name: string;
   value: string;
+}
+
+interface SetVariableConfig {
+  // New format: array of variables
+  variables?: Variable[] | Record<string, string>;
+  // Legacy format: single variable
+  variableName?: string;
+  value?: string;
 }
 
 export async function executeSetVariable(
@@ -16,37 +25,75 @@ export async function executeSetVariable(
   context: ExecutionContext,
 ): Promise<NodeExecutionResult> {
   const config = node.data.config as unknown as SetVariableConfig;
-  const { variableName, value } = config;
+  const results: Record<string, unknown> = {};
 
-  if (!variableName) {
+  // Handle new array format
+  if (config.variables) {
+    const vars = config.variables;
+
+    // Array of { id, name, value }
+    if (Array.isArray(vars)) {
+      for (const v of vars) {
+        if (!v.name?.trim()) continue; // Skip empty names
+
+        const interpolatedValue = interpolate(
+          v.value || "",
+          context.interpolation,
+        );
+        const parsedValue = tryParseJson(interpolatedValue);
+
+        context.interpolation.variables[v.name.trim()] = parsedValue;
+        results[v.name.trim()] = parsedValue;
+      }
+    }
+    // Object format { name: value }
+    else if (typeof vars === "object") {
+      for (const [name, value] of Object.entries(vars)) {
+        if (!name?.trim()) continue;
+
+        const interpolatedValue = interpolate(
+          value || "",
+          context.interpolation,
+        );
+        const parsedValue = tryParseJson(interpolatedValue);
+
+        context.interpolation.variables[name.trim()] = parsedValue;
+        results[name.trim()] = parsedValue;
+      }
+    }
+  }
+  // Handle legacy single variable format
+  else if (config.variableName) {
+    const { variableName, value } = config;
+
+    const interpolatedValue = interpolate(value || "", context.interpolation);
+    const parsedValue = tryParseJson(interpolatedValue);
+
+    context.interpolation.variables[variableName] = parsedValue;
+    results[variableName] = parsedValue;
+  }
+
+  if (Object.keys(results).length === 0) {
     return {
       success: false,
       output: null,
-      error: "Variable name is required",
+      error: "No valid variables defined",
     };
   }
 
-  // Interpolate the value
-  const interpolatedValue = interpolate(value || "", context.interpolation);
+  return {
+    success: true,
+    output: results,
+  };
+}
 
-  // Try to parse as JSON if it looks like JSON
-  let parsedValue: unknown = interpolatedValue;
-  if (interpolatedValue.startsWith("{") || interpolatedValue.startsWith("[")) {
+function tryParseJson(value: string): unknown {
+  if (value.startsWith("{") || value.startsWith("[")) {
     try {
-      parsedValue = JSON.parse(interpolatedValue);
+      return JSON.parse(value);
     } catch {
       // Keep as string if not valid JSON
     }
   }
-
-  // Set the variable in context
-  context.interpolation.variables[variableName] = parsedValue;
-
-  return {
-    success: true,
-    output: {
-      variableName,
-      value: parsedValue,
-    },
-  };
+  return value;
 }
