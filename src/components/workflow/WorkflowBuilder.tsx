@@ -10,7 +10,6 @@ import { workflowComponents } from "@/lib/workflow/tambo-components";
 import { workflowTools } from "@/lib/workflow/tambo-tools";
 import { nodeDefinitions } from "@/lib/workflow/node-definitions";
 import {
-  Save,
   Play,
   ChevronLeft,
   ChevronRight,
@@ -24,6 +23,8 @@ import {
   Loader2,
   CheckCircle,
   XCircle,
+  Check,
+  Cloud,
 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
@@ -57,19 +58,73 @@ export function WorkflowBuilder({
     hasValidationErrors,
   } = useWorkflowStore();
 
-  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
+    "idle",
+  );
   const [isPublishing, setIsPublishing] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
   const [isWaitingForTrigger, setIsWaitingForTrigger] = useState(false);
   const [executionResult, setExecutionResult] =
     useState<ExecutionResult | null>(null);
+  const [localWorkflowName, setLocalWorkflowName] = useState(workflow.name);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const lastExecutionIdRef = useRef<string | null>(null);
+  const saveDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   // Validate nodes whenever the workflow changes
   useEffect(() => {
     validateNodes();
   }, [workflow.nodes, validateNodes]);
+
+  // Sync local workflow name when workflow changes externally
+  useEffect(() => {
+    setLocalWorkflowName(workflow.name);
+  }, [workflow.name]);
+
+  // Auto-save workflow when it changes
+  useEffect(() => {
+    if (!workflowId) return;
+
+    setSaveStatus("saving");
+
+    if (saveDebounceRef.current) {
+      clearTimeout(saveDebounceRef.current);
+    }
+
+    saveDebounceRef.current = setTimeout(async () => {
+      try {
+        await fetch(`/api/workflows/${workflowId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: workflow.name,
+            description: workflow.description,
+            nodes: workflow.nodes,
+            edges: workflow.edges,
+            status: workflow.status,
+          }),
+        });
+        setSaveStatus("saved");
+        setTimeout(() => setSaveStatus("idle"), 2000);
+      } catch (error) {
+        console.error("Auto-save failed:", error);
+        setSaveStatus("idle");
+      }
+    }, 1000);
+
+    return () => {
+      if (saveDebounceRef.current) {
+        clearTimeout(saveDebounceRef.current);
+      }
+    };
+  }, [
+    workflow.name,
+    workflow.description,
+    workflow.nodes,
+    workflow.edges,
+    workflowId,
+  ]);
 
   // Determine if the workflow has a trigger that requires waiting for an external event
   const triggerNode = workflow.nodes.find((n) => n.type === "trigger");
@@ -177,12 +232,6 @@ export function WorkflowBuilder({
     };
   }, [isWaitingForTrigger, workflowId, workflow]);
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    // TODO: Implement save to database
-    await new Promise((r) => setTimeout(r, 1000));
-    setIsSaving(false);
-  };
   const handlePublish = async () => {
     if (!workflowId) return;
     setIsPublishing(true);
@@ -341,16 +390,31 @@ export function WorkflowBuilder({
 
               {/* Workflow name */}
               <input
+                ref={nameInputRef}
                 type="text"
-                value={workflow.name}
-                onChange={(e) =>
-                  useWorkflowStore
-                    .getState()
-                    .updateWorkflowMeta(e.target.value, workflow.description)
-                }
+                value={localWorkflowName}
+                onChange={(e) => setLocalWorkflowName(e.target.value)}
+                onBlur={() => {
+                  if (localWorkflowName.trim()) {
+                    useWorkflowStore
+                      .getState()
+                      .updateWorkflowMeta(
+                        localWorkflowName.trim(),
+                        workflow.description,
+                      );
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    nameInputRef.current?.blur();
+                  } else if (e.key === "Escape") {
+                    setLocalWorkflowName(workflow.name);
+                    nameInputRef.current?.blur();
+                  }
+                }}
                 className="px-2 py-1 text-sm font-medium text-gray-700 bg-transparent border border-transparent 
                            rounded hover:border-gray-200 focus:border-accent focus:outline-none 
-                           transition-colors min-w-[180px]"
+                           transition-colors min-w-[280px]"
                 placeholder="Workflow name"
               />
             </div>
@@ -376,7 +440,31 @@ export function WorkflowBuilder({
             </div>
 
             {/* Right section */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              {/* Save Status */}
+              <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                {saveStatus === "saving" && (
+                  <>
+                    <Loader2 size={12} className="animate-spin" />
+                    <span>Saving...</span>
+                  </>
+                )}
+                {saveStatus === "saved" && (
+                  <>
+                    <Check size={12} className="text-green-600" />
+                    <span className="text-green-600">Saved</span>
+                  </>
+                )}
+                {saveStatus === "idle" && (
+                  <>
+                    <Cloud size={12} />
+                    <span>All changes saved</span>
+                  </>
+                )}
+              </div>
+
+              <div className="w-px h-5 bg-gray-200" />
+
               {/* Status badge */}
               <span
                 className={`px-2 py-0.5 text-xs font-medium rounded-full ${
@@ -387,16 +475,6 @@ export function WorkflowBuilder({
               >
                 {workflow.status === "active" ? "Live" : "Draft"}
               </span>
-
-              <button
-                onClick={handleSave}
-                disabled={isSaving}
-                className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-600 
-                           border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-colors"
-              >
-                <Save size={14} />
-                {isSaving ? "Saving..." : "Save"}
-              </button>
 
               <button
                 onClick={handlePublish}
