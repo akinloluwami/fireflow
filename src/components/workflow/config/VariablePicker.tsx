@@ -178,7 +178,11 @@ export function VariablePicker({
       // Check if this is a loop node - its variables should use {{ loop.xxx }} syntax
       const isLoopNode = node.subType === "loop";
 
-      const schema = getNodeOutputSchema(node.subType);
+      // Pass node config for dynamic schema generation (e.g., set-variable)
+      const nodeConfig = node.data.config as
+        | Record<string, unknown>
+        | undefined;
+      const schema = getNodeOutputSchema(node.subType, nodeConfig);
       if (schema) {
         // Use actual node output if available
         const nodeOutput = executionData?.nodeOutputs?.[node.id] as
