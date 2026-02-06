@@ -247,7 +247,7 @@ export const workflowGeneratorComponent: TamboComponent = {
     - For condition nodes, use sourceHandle "true" or "false" to specify the branch
     
     AVAILABLE NODE TYPES:
-    - Triggers: webhook, schedule, manual, email-received, form-submission
+    - Triggers: webhook, schedule, manual, form-submission
     - Actions: http-request, send-email, send-slack, database-query, code
     - Conditions: if-else, switch, loop, merge, wait
     - Transforms: set-variable, function, filter, split, aggregate
