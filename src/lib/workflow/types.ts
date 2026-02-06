@@ -15,7 +15,6 @@ export type TriggerSubType =
   | "webhook"
   | "schedule"
   | "manual"
-  | "email-received"
   | "form-submission";
 
 export type ActionSubType =
