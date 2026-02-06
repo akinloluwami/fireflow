@@ -25,7 +25,7 @@ export type ActionSubType =
   | "database-query"
   | "code";
 
-export type ConditionSubType = "if-else" | "switch" | "loop" | "merge";
+export type ConditionSubType = "if-else" | "switch" | "loop";
 
 export type TransformSubType =
   | "set-variable"
