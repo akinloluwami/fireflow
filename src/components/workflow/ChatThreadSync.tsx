@@ -10,32 +10,69 @@ import { useWorkflowStore } from "@/lib/workflow/store";
 export function ChatThreadSync() {
   const { thread, switchCurrentThread } = useTamboThread();
   const { workflow, setChatThreadId } = useWorkflowStore();
-  const hasInitialized = useRef(false);
-  const lastWorkflowId = useRef<string | null>(null);
+  const switchAttemptedRef = useRef<string | null>(null);
+  const isMountedRef = useRef(true);
 
-  // When workflow changes or loads, switch to the correct thread
+  // Track mount state
   useEffect(() => {
-    if (!workflow.id) return;
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
-    // Only run when workflow ID changes
-    if (lastWorkflowId.current === workflow.id && hasInitialized.current) {
+  // When workflow loads with a chatThreadId, switch to it
+  useEffect(() => {
+    const threadIdToSwitch = workflow.chatThreadId;
+
+    if (!workflow.id || !threadIdToSwitch) {
       return;
     }
-    lastWorkflowId.current = workflow.id;
 
-    // If workflow has a chat thread ID, switch to it
-    if (workflow.chatThreadId) {
-      switchCurrentThread(workflow.chatThreadId);
-      hasInitialized.current = true;
-    } else {
-      // No thread yet - will be set when first message is sent
-      hasInitialized.current = true;
+    // Only attempt once per thread ID
+    if (switchAttemptedRef.current === threadIdToSwitch) {
+      return;
     }
+    switchAttemptedRef.current = threadIdToSwitch;
+
+    // Perform the switch after a delay for TamboProvider to fully initialize components
+    const doSwitch = async () => {
+      // Wait longer for TamboProvider to register all components
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      if (!isMountedRef.current) return;
+
+      try {
+        await switchCurrentThread(threadIdToSwitch);
+      } catch (err) {
+        // Component not found errors are expected on first load, retry once
+        if (err instanceof Error && err.message.includes("not found")) {
+          // Wait a bit more and retry
+          await new Promise((resolve) => setTimeout(resolve, 300));
+          if (!isMountedRef.current) return;
+          
+          try {
+            await switchCurrentThread(threadIdToSwitch);
+          } catch (retryErr) {
+            console.error("[ChatThreadSync] Thread switch retry failed:", retryErr);
+            switchAttemptedRef.current = null;
+          }
+        } else {
+          console.error("[ChatThreadSync] Thread switch failed:", err);
+          switchAttemptedRef.current = null;
+        }
+      }
+    };
+
+    doSwitch();
   }, [workflow.id, workflow.chatThreadId, switchCurrentThread]);
 
   // When thread changes and we don't have a chatThreadId saved, save it
   useEffect(() => {
     if (!thread?.id || !workflow.id) return;
+
+    // Skip placeholder or invalid thread IDs
+    if (thread.id === "placeholder" || thread.id.length < 10) return;
 
     // If this is a new thread (workflow doesn't have one yet), save it
     if (!workflow.chatThreadId && thread.id) {
