@@ -42,18 +42,7 @@ export const nodeDefinitions: NodeDefinition[] = [
     color: "#10b981",
     defaultConfig: {},
   },
-  {
-    type: "trigger",
-    subType: "email-received",
-    label: "Email Received",
-    description: "Trigger when email arrives",
-    icon: "mail",
-    color: "#10b981",
-    defaultConfig: {
-      folder: "INBOX",
-      filter: "",
-    },
-  },
+
   {
     type: "trigger",
     subType: "form-submission",
