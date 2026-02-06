@@ -425,12 +425,62 @@ export const nodeOutputSchemas: Record<string, NodeOutputSchema> = {
   },
 };
 
+interface Variable {
+  id: string;
+  name: string;
+  value: string;
+}
+
 /**
  * Get the output schema for a node subtype
+ * For dynamic nodes like set-variable, pass the node config to build the schema
  */
 export function getNodeOutputSchema(
   subType: string,
+  nodeConfig?: Record<string, unknown>,
 ): NodeOutputSchema | undefined {
+  // For set-variable, dynamically build schema from configured variables
+  if (subType === "set-variable" && nodeConfig?.variables) {
+    const vars = nodeConfig.variables;
+    const properties: Record<string, NodeOutputSchema> = {};
+
+    // Handle array format: [{ id, name, value }]
+    if (Array.isArray(vars)) {
+      for (const v of vars as Variable[]) {
+        if (v.name?.trim()) {
+          properties[v.name.trim()] = {
+            type: "unknown",
+            description: `Variable: ${v.name}`,
+            example: v.value || "value",
+          };
+        }
+      }
+    }
+    // Handle object format: { name: value }
+    else if (typeof vars === "object") {
+      for (const [name, value] of Object.entries(
+        vars as Record<string, string>,
+      )) {
+        if (name?.trim()) {
+          properties[name.trim()] = {
+            type: "unknown",
+            description: `Variable: ${name}`,
+            example: value || "value",
+          };
+        }
+      }
+    }
+
+    // If variables defined, return dynamic schema
+    if (Object.keys(properties).length > 0) {
+      return {
+        type: "object",
+        description: "Variables that were set",
+        properties,
+      };
+    }
+  }
+
   return nodeOutputSchemas[subType];
 }
 
