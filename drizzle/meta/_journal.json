@@ -15,6 +15,13 @@
       "when": 1770321526428,
       "tag": "0001_deep_the_professor",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1770403760722,
+      "tag": "0002_lovely_surge",
+      "breakpoints": true
     }
   ]
 }
