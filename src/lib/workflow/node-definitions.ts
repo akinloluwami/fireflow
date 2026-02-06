@@ -174,17 +174,6 @@ export const nodeDefinitions: NodeDefinition[] = [
       items: "",
     },
   },
-  {
-    type: "condition",
-    subType: "merge",
-    label: "Merge",
-    description: "Combine branches",
-    icon: "git-pull-request",
-    color: "#f59e0b",
-    defaultConfig: {
-      mode: "wait-all",
-    },
-  },
 
   // ---------------------------------------------------------------------------
   // TRANSFORM NODES (Purple)
