@@ -31,7 +31,7 @@ interface TreeNode {
   key: string;
   path: string[];
   schema: NodeOutputSchema;
-  source: "trigger" | "nodes";
+  source: "trigger" | "nodes" | "loop";
   nodeId?: string;
   children?: TreeNode[];
 }
@@ -82,7 +82,7 @@ export function VariablePicker({
     data: unknown,
     schema: NodeOutputSchema | undefined,
     parentPath: string[],
-    source: "trigger" | "nodes",
+    source: "trigger" | "nodes" | "loop",
     nodeId?: string,
   ): TreeNode[] {
     if (data === null || data === undefined) {
@@ -175,21 +175,28 @@ export function VariablePicker({
     for (const { node } of upstreamNodes) {
       if (node.type === "trigger") continue; // Already handled
 
+      // Check if this is a loop node - its variables should use {{ loop.xxx }} syntax
+      const isLoopNode = node.subType === "loop";
+
       const schema = getNodeOutputSchema(node.subType);
       if (schema) {
         // Use actual node output if available
         const nodeOutput = executionData?.nodeOutputs?.[node.id] as
           | Record<string, unknown>
           | undefined;
+
+        // For loop nodes, use "loop" source so it generates {{ loop.item }} syntax
+        const source = isLoopNode ? "loop" : "nodes";
+
         tree.nodes.push({
           key: node.id,
           path: [],
           schema,
-          source: "nodes",
+          source,
           nodeId: node.id,
           children: nodeOutput
-            ? buildTreeFromData(nodeOutput, schema, [], "nodes", node.id)
-            : buildChildren(schema, [], "nodes", node.id),
+            ? buildTreeFromData(nodeOutput, schema, [], source, node.id)
+            : buildChildren(schema, [], source, node.id),
         });
       }
     }
@@ -200,7 +207,7 @@ export function VariablePicker({
   function buildChildren(
     schema: NodeOutputSchema,
     parentPath: string[],
-    source: "trigger" | "nodes",
+    source: "trigger" | "nodes" | "loop",
     nodeId?: string,
   ): TreeNode[] | undefined {
     if (schema.type !== "object" || !schema.properties) {
