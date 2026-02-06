@@ -22,6 +22,8 @@ import {
   Layers,
   LucideIcon,
 } from "lucide-react";
+import { SiSlack, SiDiscord } from "react-icons/si";
+import type { IconType } from "react-icons";
 
 // Map icon names to Lucide components
 const iconMap: Record<string, LucideIcon> = {
@@ -47,6 +49,12 @@ const iconMap: Record<string, LucideIcon> = {
   layers: Layers,
 };
 
+// Map for react-icons (brand icons)
+const brandIconMap: Record<string, IconType> = {
+  slack: SiSlack,
+  discord: SiDiscord,
+};
+
 interface NodeIconProps {
   name: string;
   size?: number;
@@ -60,6 +68,13 @@ export function NodeIcon({
   className = "",
   style,
 }: NodeIconProps) {
+  // Check brand icons first
+  const BrandIcon = brandIconMap[name];
+  if (BrandIcon) {
+    return <BrandIcon size={size} className={className} style={style} />;
+  }
+
+  // Fall back to Lucide icons
   const Icon = iconMap[name] || Code;
   return <Icon size={size} className={className} style={style} />;
 }
