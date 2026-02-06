@@ -24,6 +24,7 @@ import { executeDiscord } from "./nodes/action-discord";
 import { executeHttp } from "./nodes/action-http";
 import { executeEmail } from "./nodes/action-email";
 import { executeSetVariable } from "./nodes/transform-variable";
+import { executeWait } from "./nodes/others-wait";
 
 // =============================================================================
 // Types
@@ -210,6 +211,10 @@ async function executeNode(
       // Transforms
       case "set-variable":
         result = await executeSetVariable(node, context);
+        break;
+
+      case "wait":
+        result = await executeWait(node, context);
         break;
 
       default:
