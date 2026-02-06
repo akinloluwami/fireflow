@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Loader2, Check, Unlink } from "lucide-react";
+import { ExpressionTextarea } from "./ExpressionInput";
 
 interface DiscordGuild {
   id: string;
@@ -18,12 +19,14 @@ interface DiscordConfigProps {
   config: Record<string, unknown>;
   onChange: (key: string, value: unknown) => void;
   workflowId?: string;
+  nodeId?: string;
 }
 
 export function DiscordConfig({
   config,
   onChange,
   workflowId,
+  nodeId,
 }: DiscordConfigProps) {
   const [loading, setLoading] = useState(true);
   const [connected, setConnected] = useState(false);
@@ -211,35 +214,15 @@ export function DiscordConfig({
         <label className="block text-xs font-medium text-gray-600 mb-1">
           Message
         </label>
-        <textarea
+        <ExpressionTextarea
           value={(config.message as string) || ""}
-          onChange={(e) => onChange("message", e.target.value)}
-          rows={4}
-          placeholder="🎉 New submission from **{{trigger.name}}**!"
-          className="w-full px-2.5 py-1.5 text-xs bg-white border border-gray-200 rounded-md
-                     focus:outline-none focus:ring-1 focus:ring-accent/30 focus:border-accent
-                     placeholder:text-gray-400"
+          onChange={(value) => onChange("message", value)}
+          nodeId={nodeId || ""}
+          placeholder="🎉 New submission from **{{trigger.body.name}}**!"
         />
         <p className="text-[10px] text-gray-400 mt-1">
-          Supports Discord markdown: **bold**, *italic*, `code`
+          Supports Discord markdown. Click 📊 to insert variables.
         </p>
-      </div>
-
-      {/* Available Variables */}
-      <div className="bg-gray-50 rounded-lg p-3">
-        <p className="text-[11px] font-medium text-gray-600 mb-2">
-          Available variables:
-        </p>
-        <div className="flex flex-wrap gap-1.5">
-          {["trigger.name", "trigger.email", "trigger.amount"].map((v) => (
-            <code
-              key={v}
-              className="px-1.5 py-0.5 bg-white border border-gray-200 rounded text-[10px] text-gray-600 font-mono"
-            >
-              {`{{${v}}}`}
-            </code>
-          ))}
-        </div>
       </div>
     </div>
   );
