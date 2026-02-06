@@ -4,7 +4,12 @@
 // Node Types
 // =============================================================================
 
-export type NodeCategory = "trigger" | "action" | "condition" | "transform";
+export type NodeCategory =
+  | "trigger"
+  | "action"
+  | "condition"
+  | "transform"
+  | "others";
 
 export type TriggerSubType =
   | "webhook"
@@ -21,7 +26,7 @@ export type ActionSubType =
   | "database-query"
   | "code";
 
-export type ConditionSubType = "if-else" | "switch" | "loop" | "merge" | "wait";
+export type ConditionSubType = "if-else" | "switch" | "loop" | "merge";
 
 export type TransformSubType =
   | "set-variable"
@@ -30,11 +35,14 @@ export type TransformSubType =
   | "split"
   | "aggregate";
 
+export type OthersSubType = "wait" | "note" | "sticky";
+
 export type NodeSubType =
   | TriggerSubType
   | ActionSubType
   | ConditionSubType
-  | TransformSubType;
+  | TransformSubType
+  | OthersSubType;
 
 // =============================================================================
 // Node Configuration Types
