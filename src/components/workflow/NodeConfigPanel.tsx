@@ -9,6 +9,8 @@ import {
   DiscordConfig,
   WaitConfig,
   ConditionConfig,
+  SwitchConfig,
+  LoopConfig,
 } from "./config";
 
 export function NodeConfigPanel() {
@@ -222,12 +224,30 @@ export function NodeConfigPanel() {
           />
         )}
 
+        {selectedNode.subType === "switch" && (
+          <SwitchConfig
+            config={localConfig}
+            onChange={handleChange}
+            nodeId={selectedNode.id}
+          />
+        )}
+
+        {selectedNode.subType === "loop" && (
+          <LoopConfig
+            config={localConfig}
+            onChange={handleChange}
+            nodeId={selectedNode.id}
+          />
+        )}
+
         {/* Generic config for other node types */}
         {selectedNode.type !== "trigger" &&
           selectedNode.subType !== "send-slack" &&
           selectedNode.subType !== "send-discord" &&
           selectedNode.subType !== "wait" &&
           selectedNode.subType !== "if-else" &&
+          selectedNode.subType !== "switch" &&
+          selectedNode.subType !== "loop" &&
           Object.entries(localConfig).map(([key, value]) => {
             // Skip complex objects for now
             if (typeof value === "object" && value !== null) return null;
@@ -247,6 +267,8 @@ export function NodeConfigPanel() {
           selectedNode.subType !== "send-discord" &&
           selectedNode.subType !== "wait" &&
           selectedNode.subType !== "if-else" &&
+          selectedNode.subType !== "switch" &&
+          selectedNode.subType !== "loop" &&
           Object.keys(localConfig).length === 0 && (
             <p className="text-xs text-gray-400 text-center py-6">
               No configuration options
