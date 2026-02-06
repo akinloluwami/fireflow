@@ -14,6 +14,11 @@ import {
   HttpRequestConfig,
   EmailConfig,
   SetVariableConfig,
+  CodeConfig,
+  FilterConfig,
+  FunctionConfig,
+  SplitConfig,
+  AggregateConfig,
 } from "./config";
 
 type SaveStatus = "idle" | "saving" | "saved";
@@ -361,6 +366,46 @@ export function NodeConfigPanel() {
           />
         )}
 
+        {selectedNode.subType === "code" && (
+          <CodeConfig
+            config={localConfig}
+            onChange={handleChange}
+            nodeId={selectedNode.id}
+          />
+        )}
+
+        {selectedNode.subType === "filter" && (
+          <FilterConfig
+            config={localConfig}
+            onChange={handleChange}
+            nodeId={selectedNode.id}
+          />
+        )}
+
+        {selectedNode.subType === "function" && (
+          <FunctionConfig
+            config={localConfig}
+            onChange={handleChange}
+            nodeId={selectedNode.id}
+          />
+        )}
+
+        {selectedNode.subType === "split" && (
+          <SplitConfig
+            config={localConfig}
+            onChange={handleChange}
+            nodeId={selectedNode.id}
+          />
+        )}
+
+        {selectedNode.subType === "aggregate" && (
+          <AggregateConfig
+            config={localConfig}
+            onChange={handleChange}
+            nodeId={selectedNode.id}
+          />
+        )}
+
         {/* Generic config for other node types */}
         {selectedNode.type !== "trigger" &&
           selectedNode.subType !== "send-slack" &&
@@ -372,6 +417,11 @@ export function NodeConfigPanel() {
           selectedNode.subType !== "http-request" &&
           selectedNode.subType !== "send-email" &&
           selectedNode.subType !== "set-variable" &&
+          selectedNode.subType !== "code" &&
+          selectedNode.subType !== "filter" &&
+          selectedNode.subType !== "function" &&
+          selectedNode.subType !== "split" &&
+          selectedNode.subType !== "aggregate" &&
           Object.entries(localConfig).map(([key, value]) => {
             // Skip complex objects for now
             if (typeof value === "object" && value !== null) return null;
@@ -396,6 +446,11 @@ export function NodeConfigPanel() {
           selectedNode.subType !== "http-request" &&
           selectedNode.subType !== "send-email" &&
           selectedNode.subType !== "set-variable" &&
+          selectedNode.subType !== "code" &&
+          selectedNode.subType !== "filter" &&
+          selectedNode.subType !== "function" &&
+          selectedNode.subType !== "split" &&
+          selectedNode.subType !== "aggregate" &&
           Object.keys(localConfig).length === 0 && (
             <p className="text-xs text-gray-400 text-center py-6">
               No configuration options
