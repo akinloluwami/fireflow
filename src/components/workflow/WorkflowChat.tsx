@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useTamboThread, useTamboThreadInput } from "@tambo-ai/react";
 import {
   Send,
@@ -24,6 +24,40 @@ export function WorkflowChat() {
   const { value, setValue, submit, isPending } = useTamboThreadInput();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [hasTimedOut, setHasTimedOut] = useState(false);
+
+  // Reset timeout when workflow changes
+  useEffect(() => {
+    setHasTimedOut(false);
+  }, [workflow.id]);
+
+  // Timeout loading state after 3 seconds
+  useEffect(() => {
+    if (!workflow.chatThreadId) return;
+
+    const timer = setTimeout(() => {
+      setHasTimedOut(true);
+    }, 3000);
+
+    // Clear timeout if messages load
+    if (thread?.messages && thread.messages.length > 0) {
+      clearTimeout(timer);
+      setHasTimedOut(false);
+    }
+
+    return () => clearTimeout(timer);
+  }, [workflow.chatThreadId, thread?.messages]);
+
+  // Determine if we're loading a thread (has chatThreadId but thread not loaded yet)
+  const threadNotReady = !thread?.id || thread.id === "placeholder";
+  const threadSwitchingOrLoading =
+    thread?.id === workflow.chatThreadId &&
+    (!thread.messages || thread.messages.length === 0);
+
+  const isLoadingThread =
+    !hasTimedOut &&
+    !!workflow.chatThreadId &&
+    (threadNotReady || threadSwitchingOrLoading);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -95,45 +129,71 @@ export function WorkflowChat() {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {/* Welcome message */}
-        {(!thread?.messages || thread.messages.length === 0) && (
-          <div className="space-y-4">
-            <div className="p-3 bg-gray-50 rounded-lg border border-gray-100">
-              <div className="flex items-center gap-2 mb-1.5">
-                <MessageSquare size={14} className="text-accent" />
-                <span className="font-medium text-gray-800 text-sm">
-                  Welcome to FireFlow!
-                </span>
-              </div>
-              <p className="text-xs text-gray-500 leading-relaxed">
-                Describe the workflow you want to create in natural language,
-                and I'll build it for you.
-              </p>
+        {/* Loading skeleton when fetching existing thread */}
+        {isLoadingThread && (
+          <div className="space-y-4 animate-pulse">
+            {/* Skeleton for user message */}
+            <div className="flex justify-end">
+              <div className="w-3/4 h-10 bg-gray-200 rounded-xl" />
             </div>
-
-            {/* Suggested prompts */}
-            <div>
-              <p className="text-xs text-gray-400 mb-2">Try these examples:</p>
-              <div className="space-y-1.5">
-                {SUGGESTED_PROMPTS.map((prompt, i) => (
-                  <button
-                    key={i}
-                    onClick={() => handleSuggestedPrompt(prompt)}
-                    className="w-full text-left p-2.5 bg-white border border-gray-100 rounded-lg
-                               hover:border-accent/30 hover:bg-accent-light transition-colors
-                               text-xs text-gray-600 group flex items-center justify-between"
-                  >
-                    <span className="line-clamp-2">{prompt}</span>
-                    <ArrowRight
-                      size={12}
-                      className="text-gray-300 group-hover:text-accent transition-colors flex-shrink-0 ml-2"
-                    />
-                  </button>
-                ))}
+            {/* Skeleton for assistant message */}
+            <div className="flex justify-start">
+              <div className="w-4/5 space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-full" />
+                <div className="h-4 bg-gray-200 rounded w-5/6" />
+                <div className="h-4 bg-gray-200 rounded w-4/6" />
               </div>
+            </div>
+            {/* Loading indicator */}
+            <div className="flex items-center justify-center gap-2 text-gray-400 text-xs py-2">
+              <Loader2 size={12} className="animate-spin" />
+              <span>Loading conversation...</span>
             </div>
           </div>
         )}
+
+        {/* Welcome message - only show when no chatThreadId and no messages */}
+        {!isLoadingThread &&
+          (!thread?.messages || thread.messages.length === 0) && (
+            <div className="space-y-4">
+              <div className="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <MessageSquare size={14} className="text-accent" />
+                  <span className="font-medium text-gray-800 text-sm">
+                    Welcome to FireFlow!
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  Describe the workflow you want to create in natural language,
+                  and I'll build it for you.
+                </p>
+              </div>
+
+              {/* Suggested prompts */}
+              <div>
+                <p className="text-xs text-gray-400 mb-2">
+                  Try these examples:
+                </p>
+                <div className="space-y-1.5">
+                  {SUGGESTED_PROMPTS.map((prompt, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleSuggestedPrompt(prompt)}
+                      className="w-full text-left p-2.5 bg-white border border-gray-100 rounded-lg
+                               hover:border-accent/30 hover:bg-accent-light transition-colors
+                               text-xs text-gray-600 group flex items-center justify-between"
+                    >
+                      <span className="line-clamp-2">{prompt}</span>
+                      <ArrowRight
+                        size={12}
+                        className="text-gray-300 group-hover:text-accent transition-colors flex-shrink-0 ml-2"
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
         {/* Messages list */}
         {thread?.messages?.map((message) => (
