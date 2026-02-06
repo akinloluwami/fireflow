@@ -39,7 +39,7 @@ export const Route = createFileRoute("/api/workflows/$id/")({
 
         const { id } = params;
         const body = await request.json();
-        const { name, description, nodes, edges, status } = body;
+        const { name, description, nodes, edges, status, chatThreadId } = body;
 
         const existing = await db
           .select({ userId: workflows.userId })
@@ -60,6 +60,7 @@ export const Route = createFileRoute("/api/workflows/$id/")({
         if (nodes !== undefined) updates.nodes = nodes;
         if (edges !== undefined) updates.edges = edges;
         if (status !== undefined) updates.status = status;
+        if (chatThreadId !== undefined) updates.chatThreadId = chatThreadId;
 
         await db.update(workflows).set(updates).where(eq(workflows.id, id));
 
