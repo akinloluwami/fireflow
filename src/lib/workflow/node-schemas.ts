@@ -92,55 +92,6 @@ export const nodeOutputSchemas: Record<string, NodeOutputSchema> = {
     },
   },
 
-  "email-received": {
-    type: "object",
-    description: "Incoming email data",
-    properties: {
-      from: {
-        type: "string",
-        description: "Sender email address",
-        example: "sender@example.com",
-      },
-      to: {
-        type: "string",
-        description: "Recipient email address",
-        example: "inbox@yourapp.com",
-      },
-      subject: {
-        type: "string",
-        description: "Email subject line",
-        example: "Hello World",
-      },
-      body: {
-        type: "string",
-        description: "Email body (plain text)",
-        example: "This is the email content...",
-      },
-      html: {
-        type: "string",
-        description: "Email body (HTML)",
-        example: "<p>This is the email content...</p>",
-      },
-      receivedAt: {
-        type: "string",
-        description: "When email was received",
-        example: "2026-02-06T14:30:00Z",
-      },
-      attachments: {
-        type: "array",
-        description: "Email attachments",
-        items: {
-          type: "object",
-          properties: {
-            filename: { type: "string", example: "document.pdf" },
-            contentType: { type: "string", example: "application/pdf" },
-            size: { type: "number", example: 1024 },
-          },
-        },
-      },
-    },
-  },
-
   "form-submission": {
     type: "object",
     description: "Form submission data",
