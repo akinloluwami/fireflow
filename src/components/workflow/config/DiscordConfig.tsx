@@ -221,7 +221,7 @@ export function DiscordConfig({
           placeholder="🎉 New submission from **{{trigger.body.name}}**!"
         />
         <p className="text-[10px] text-gray-400 mt-1">
-          Supports Discord markdown. Click 📊 to insert variables.
+          Supports Discord markdown.
         </p>
       </div>
     </div>
