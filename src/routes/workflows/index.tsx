@@ -102,13 +102,9 @@ function WorkflowsListPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
-              <Zap className="w-4 h-4 text-white" />
-            </div>
             <span className="text-lg font-semibold text-gray-900">
               FireFlow
             </span>
@@ -127,7 +123,6 @@ function WorkflowsListPage() {
         </div>
       </header>
 
-      {/* Content */}
       <main className="max-w-6xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -141,7 +136,7 @@ function WorkflowsListPage() {
           <button
             onClick={handleCreateWorkflow}
             disabled={isCreating}
-            className="flex items-center gap-2 px-4 py-2 bg-accent text-white font-medium rounded-lg hover:bg-accent-hover transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-accent text-white font-medium rounded-2xl hover:bg-accent-hover transition-colors disabled:opacity-50"
           >
             {isCreating ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -225,7 +220,6 @@ function WorkflowsListPage() {
                   </div>
                 </Link>
 
-                {/* Menu */}
                 <div className="absolute top-4 right-4">
                   <button
                     onClick={(e) => {
@@ -239,7 +233,7 @@ function WorkflowsListPage() {
                     <MoreVertical className="w-4 h-4 text-gray-500" />
                   </button>
                   {menuOpen === workflow.id && (
-                    <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-10 min-w-[120px]">
+                    <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-10 min-w-30">
                       <Link
                         to="/workflow/$id"
                         params={{ id: workflow.id }}
