@@ -196,18 +196,6 @@ export const nodeDefinitions: NodeDefinition[] = [
       mode: "wait-all",
     },
   },
-  {
-    type: "condition",
-    subType: "wait",
-    label: "Wait",
-    description: "Delay execution",
-    icon: "timer",
-    color: "#f59e0b",
-    defaultConfig: {
-      duration: 1000,
-      unit: "ms",
-    },
-  },
 
   // ---------------------------------------------------------------------------
   // TRANSFORM NODES (Purple)
@@ -267,6 +255,22 @@ export const nodeDefinitions: NodeDefinition[] = [
       operation: "array",
     },
   },
+
+  // ---------------------------------------------------------------------------
+  // OTHERS (Gray)
+  // ---------------------------------------------------------------------------
+  {
+    type: "others",
+    subType: "wait",
+    label: "Wait",
+    description: "Delay execution",
+    icon: "timer",
+    color: "#6b7280",
+    defaultConfig: {
+      duration: 1000,
+      unit: "ms",
+    },
+  },
 ];
 
 // =============================================================================
@@ -292,6 +296,7 @@ export function getCategoryColor(category: string): string {
     action: "#3b82f6",
     condition: "#f59e0b",
     transform: "#8b5cf6",
+    others: "#6b7280",
   };
   return colors[category] || "#6b7280";
 }
@@ -302,6 +307,7 @@ export function getCategoryLabel(category: string): string {
     action: "Actions",
     condition: "Logic",
     transform: "Transform",
+    others: "Others",
   };
   return labels[category] || category;
 }
