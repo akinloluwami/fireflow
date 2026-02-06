@@ -156,6 +156,7 @@ export interface Workflow {
   nodes: WorkflowNode[];
   edges: WorkflowEdge[];
   status: WorkflowStatus;
+  chatThreadId?: string; // Tambo thread ID for AI chat history
   createdAt?: Date;
   updatedAt?: Date;
   userId?: string;
