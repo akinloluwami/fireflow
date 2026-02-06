@@ -36,12 +36,14 @@ export function NodePalette({ onDragStart }: NodePaletteProps) {
         node.description.toLowerCase().includes(search.toLowerCase()),
     );
 
-    return ["trigger", "action", "condition", "transform"].map((category) => ({
-      id: category,
-      label: getCategoryLabel(category),
-      color: getCategoryColor(category),
-      nodes: filtered.filter((node) => node.type === category),
-    }));
+    return ["trigger", "action", "condition", "transform", "others"].map(
+      (category) => ({
+        id: category,
+        label: getCategoryLabel(category),
+        color: getCategoryColor(category),
+        nodes: filtered.filter((node) => node.type === category),
+      }),
+    );
   }, [search]);
 
   const toggleCategory = (categoryId: string) => {
