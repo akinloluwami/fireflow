@@ -17,7 +17,6 @@ import {
   Undo,
   Redo,
   Sparkles,
-  Zap,
   Rocket,
   Pause,
   Square,
@@ -392,20 +391,14 @@ export function WorkflowBuilder({
       <ChatThreadSync />
       <ReactFlowProvider>
         <div className="flex flex-col h-screen bg-gray-50">
-          {/* Top Bar */}
           <header className="flex items-center justify-between px-4 h-14 bg-white border-b border-gray-200 z-10">
-            {/* Left section */}
             <div className="flex items-center gap-4">
               <Link to="/workflows" className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
-                  <Zap size={16} className="text-white" />
-                </div>
                 <span className="font-semibold text-gray-900">FireFlow</span>
               </Link>
 
               <div className="w-px h-5 bg-gray-200" />
 
-              {/* Workflow name */}
               <input
                 ref={nameInputRef}
                 type="text"
@@ -431,12 +424,11 @@ export function WorkflowBuilder({
                 }}
                 className="px-2 py-1 text-sm font-medium text-gray-700 bg-transparent border border-transparent 
                            rounded hover:border-gray-200 focus:border-accent focus:outline-none 
-                           transition-colors min-w-[280px]"
+                           transition-colors min-w-70"
                 placeholder="Workflow name"
               />
             </div>
 
-            {/* Center section - Undo/Redo */}
             <div className="flex items-center gap-1">
               <button
                 onClick={undo}
@@ -456,9 +448,7 @@ export function WorkflowBuilder({
               </button>
             </div>
 
-            {/* Right section */}
             <div className="flex items-center gap-3">
-              {/* Save Status */}
               <div className="flex items-center gap-1.5 text-xs text-gray-500">
                 {saveStatus === "saving" && (
                   <>
@@ -482,7 +472,6 @@ export function WorkflowBuilder({
 
               <div className="w-px h-5 bg-gray-200" />
 
-              {/* Status badge */}
               <span
                 className={`px-2 py-0.5 text-xs font-medium rounded-full ${
                   workflow.status === "active"
@@ -528,22 +517,19 @@ export function WorkflowBuilder({
             </div>
           </header>
 
-          {/* Main Content */}
           <div className="flex flex-1 overflow-hidden">
-            {/* Left Sidebar - Node Palette */}
             <div
               className={`
-                flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden bg-white border-r border-gray-200
+                shrink-0 transition-all duration-300 ease-in-out overflow-hidden bg-white border-r border-gray-200
                 ${isPanelOpen ? "w-60" : "w-0"}
               `}
             >
               <NodePalette />
             </div>
 
-            {/* Toggle button for palette */}
             <button
               onClick={togglePanel}
-              className="flex-shrink-0 w-4 flex items-center justify-center bg-gray-50 
+              className="shrink-0 w-4 flex items-center justify-center bg-gray-50 
                          hover:bg-gray-100 border-r border-gray-200 transition-colors"
             >
               {isPanelOpen ? (
@@ -553,11 +539,9 @@ export function WorkflowBuilder({
               )}
             </button>
 
-            {/* Canvas */}
             <div className="flex-1 relative bg-[#fafafa]">
               <WorkflowCanvas />
 
-              {/* Floating stats */}
               <div className="absolute bottom-4 left-4 flex items-center gap-3 px-3 py-2 bg-white rounded-lg border border-gray-200 text-xs text-gray-500">
                 <span className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-accent"></span>
@@ -573,17 +557,14 @@ export function WorkflowBuilder({
               </div>
             </div>
 
-            {/* Right Sidebar - Config Panel */}
             {selectedNodeId && (
-              <div className="flex-shrink-0 w-72 overflow-hidden bg-white border-l border-gray-200">
+              <div className="shrink-0 w-72 overflow-hidden bg-white border-l border-gray-200">
                 <NodeConfigPanel />
               </div>
             )}
 
-            {/* Chat Panel */}
             {isChatOpen && <WorkflowChat />}
 
-            {/* Execute Workflow Button - Bottom Center */}
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40">
               {executionResult ? (
                 <div
@@ -640,7 +621,6 @@ export function WorkflowBuilder({
               )}
             </div>
 
-            {/* Chat toggle when closed */}
             {!isChatOpen && (
               <button
                 onClick={toggleChat}
