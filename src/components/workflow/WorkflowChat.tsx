@@ -9,6 +9,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useWorkflowStore } from "@/lib/workflow/store";
+import ReactMarkdown from "react-markdown";
 
 const SUGGESTED_PROMPTS = [
   "When I receive a webhook, send a Slack message",
@@ -95,10 +96,7 @@ export function WorkflowChat() {
           <div className="space-y-4">
             <div className="p-3 bg-gray-50 rounded-lg border border-gray-100">
               <div className="flex items-center gap-2 mb-1.5">
-                <MessageSquare
-                  size={14}
-                  className="text-accent"
-                />
+                <MessageSquare size={14} className="text-accent" />
                 <span className="font-medium text-gray-800 text-sm">
                   Welcome to FireFlow!
                 </span>
@@ -156,14 +154,83 @@ export function WorkflowChat() {
                       part?.type === "text" && typeof part?.text === "string",
                   )
                   .map((part, i) => (
-                    <p key={i} className="text-xs whitespace-pre-wrap">
-                      {part.text}
-                    </p>
+                    <div
+                      key={i}
+                      className="text-xs prose prose-sm prose-gray max-w-none"
+                    >
+                      <ReactMarkdown
+                        components={{
+                          p: ({ children }) => (
+                            <p className="mb-2 last:mb-0">{children}</p>
+                          ),
+                          ul: ({ children }) => (
+                            <ul className="list-disc pl-4 mb-2 space-y-1">
+                              {children}
+                            </ul>
+                          ),
+                          ol: ({ children }) => (
+                            <ol className="list-decimal pl-4 mb-2 space-y-1">
+                              {children}
+                            </ol>
+                          ),
+                          li: ({ children }) => <li>{children}</li>,
+                          strong: ({ children }) => (
+                            <strong className="font-semibold">
+                              {children}
+                            </strong>
+                          ),
+                          code: ({ children }) => (
+                            <code className="px-1 py-0.5 bg-gray-200 rounded text-[11px] font-mono">
+                              {children}
+                            </code>
+                          ),
+                          pre: ({ children }) => (
+                            <pre className="bg-gray-800 text-gray-100 p-2 rounded text-[11px] overflow-x-auto my-2">
+                              {children}
+                            </pre>
+                          ),
+                        }}
+                      >
+                        {part.text}
+                      </ReactMarkdown>
+                    </div>
                   ))
               ) : message.content ? (
-                <p className="text-xs whitespace-pre-wrap">
-                  {String(message.content)}
-                </p>
+                <div className="text-xs prose prose-sm prose-gray max-w-none">
+                  <ReactMarkdown
+                    components={{
+                      p: ({ children }) => (
+                        <p className="mb-2 last:mb-0">{children}</p>
+                      ),
+                      ul: ({ children }) => (
+                        <ul className="list-disc pl-4 mb-2 space-y-1">
+                          {children}
+                        </ul>
+                      ),
+                      ol: ({ children }) => (
+                        <ol className="list-decimal pl-4 mb-2 space-y-1">
+                          {children}
+                        </ol>
+                      ),
+                      li: ({ children }) => <li>{children}</li>,
+                      strong: ({ children }) => (
+                        <strong className="font-semibold">{children}</strong>
+                      ),
+                      code: ({ children }) => (
+                        <code className="px-1 py-0.5 bg-gray-200 rounded text-[11px] font-mono">
+                          {children}
+                        </code>
+                      ),
+                      pre: ({ children }) => (
+                        <pre className="bg-gray-800 text-gray-100 p-2 rounded text-[11px] overflow-x-auto my-2">
+                          {children}
+                        </pre>
+                      ),
+                    }}
+                  >
+                    {String(message.content)}
+                  </ReactMarkdown>
+                </div>
               ) : null}
 
               {/* Rendered component */}
@@ -179,10 +246,7 @@ export function WorkflowChat() {
           <div className="flex justify-start">
             <div className="bg-gray-100 rounded-xl px-3 py-2">
               <div className="flex items-center gap-2">
-                <Loader2
-                  size={14}
-                  className="animate-spin text-accent"
-                />
+                <Loader2 size={14} className="animate-spin text-accent" />
                 <span className="text-xs text-gray-500">
                   Creating your workflow...
                 </span>
