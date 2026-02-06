@@ -8,6 +8,7 @@ import {
   SlackConfig,
   DiscordConfig,
   WaitConfig,
+  ConditionConfig,
 } from "./config";
 
 export function NodeConfigPanel() {
@@ -196,6 +197,7 @@ export function NodeConfigPanel() {
             config={localConfig}
             onChange={handleChange}
             workflowId={workflow.id}
+            nodeId={selectedNode.id}
           />
         )}
 
@@ -204,6 +206,7 @@ export function NodeConfigPanel() {
             config={localConfig}
             onChange={handleChange}
             workflowId={workflow.id}
+            nodeId={selectedNode.id}
           />
         )}
 
@@ -211,11 +214,20 @@ export function NodeConfigPanel() {
           <WaitConfig config={localConfig} onChange={handleChange} />
         )}
 
+        {selectedNode.subType === "if-else" && (
+          <ConditionConfig
+            config={localConfig}
+            onChange={handleChange}
+            nodeId={selectedNode.id}
+          />
+        )}
+
         {/* Generic config for other node types */}
         {selectedNode.type !== "trigger" &&
           selectedNode.subType !== "send-slack" &&
           selectedNode.subType !== "send-discord" &&
           selectedNode.subType !== "wait" &&
+          selectedNode.subType !== "if-else" &&
           Object.entries(localConfig).map(([key, value]) => {
             // Skip complex objects for now
             if (typeof value === "object" && value !== null) return null;
@@ -234,6 +246,7 @@ export function NodeConfigPanel() {
           selectedNode.subType !== "send-slack" &&
           selectedNode.subType !== "send-discord" &&
           selectedNode.subType !== "wait" &&
+          selectedNode.subType !== "if-else" &&
           Object.keys(localConfig).length === 0 && (
             <p className="text-xs text-gray-400 text-center py-6">
               No configuration options
