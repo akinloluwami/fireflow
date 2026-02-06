@@ -1,0 +1,1 @@
+ALTER TABLE "workflows" ADD COLUMN "chat_thread_id" text;
