@@ -18,6 +18,7 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiWorkflowsIdIndexRouteImport } from './routes/api/workflows/$id/index'
 import { Route as ApiWorkflowsIdTestRouteImport } from './routes/api/workflows/$id/test'
 import { Route as ApiWebhooksTallyWorkflowIdRouteImport } from './routes/api/webhooks/tally.$workflowId'
+import { Route as ApiWebhooksGenericWorkflowIdRouteImport } from './routes/api/webhooks/generic.$workflowId'
 import { Route as ApiIntegrationsSlackDisconnectRouteImport } from './routes/api/integrations/slack.disconnect'
 import { Route as ApiIntegrationsSlackConnectRouteImport } from './routes/api/integrations/slack.connect'
 import { Route as ApiIntegrationsSlackChannelsRouteImport } from './routes/api/integrations/slack.channels'
@@ -73,6 +74,12 @@ const ApiWebhooksTallyWorkflowIdRoute =
   ApiWebhooksTallyWorkflowIdRouteImport.update({
     id: '/api/webhooks/tally/$workflowId',
     path: '/api/webhooks/tally/$workflowId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiWebhooksGenericWorkflowIdRoute =
+  ApiWebhooksGenericWorkflowIdRouteImport.update({
+    id: '/api/webhooks/generic/$workflowId',
+    path: '/api/webhooks/generic/$workflowId',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiIntegrationsSlackDisconnectRoute =
@@ -152,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/api/integrations/slack/channels': typeof ApiIntegrationsSlackChannelsRoute
   '/api/integrations/slack/connect': typeof ApiIntegrationsSlackConnectRoute
   '/api/integrations/slack/disconnect': typeof ApiIntegrationsSlackDisconnectRoute
+  '/api/webhooks/generic/$workflowId': typeof ApiWebhooksGenericWorkflowIdRoute
   '/api/webhooks/tally/$workflowId': typeof ApiWebhooksTallyWorkflowIdRoute
   '/api/workflows/$id/test': typeof ApiWorkflowsIdTestRoute
   '/api/workflows/$id/': typeof ApiWorkflowsIdIndexRoute
@@ -173,6 +181,7 @@ export interface FileRoutesByTo {
   '/api/integrations/slack/channels': typeof ApiIntegrationsSlackChannelsRoute
   '/api/integrations/slack/connect': typeof ApiIntegrationsSlackConnectRoute
   '/api/integrations/slack/disconnect': typeof ApiIntegrationsSlackDisconnectRoute
+  '/api/webhooks/generic/$workflowId': typeof ApiWebhooksGenericWorkflowIdRoute
   '/api/webhooks/tally/$workflowId': typeof ApiWebhooksTallyWorkflowIdRoute
   '/api/workflows/$id/test': typeof ApiWorkflowsIdTestRoute
   '/api/workflows/$id': typeof ApiWorkflowsIdIndexRoute
@@ -195,6 +204,7 @@ export interface FileRoutesById {
   '/api/integrations/slack/channels': typeof ApiIntegrationsSlackChannelsRoute
   '/api/integrations/slack/connect': typeof ApiIntegrationsSlackConnectRoute
   '/api/integrations/slack/disconnect': typeof ApiIntegrationsSlackDisconnectRoute
+  '/api/webhooks/generic/$workflowId': typeof ApiWebhooksGenericWorkflowIdRoute
   '/api/webhooks/tally/$workflowId': typeof ApiWebhooksTallyWorkflowIdRoute
   '/api/workflows/$id/test': typeof ApiWorkflowsIdTestRoute
   '/api/workflows/$id/': typeof ApiWorkflowsIdIndexRoute
@@ -218,6 +228,7 @@ export interface FileRouteTypes {
     | '/api/integrations/slack/channels'
     | '/api/integrations/slack/connect'
     | '/api/integrations/slack/disconnect'
+    | '/api/webhooks/generic/$workflowId'
     | '/api/webhooks/tally/$workflowId'
     | '/api/workflows/$id/test'
     | '/api/workflows/$id/'
@@ -239,6 +250,7 @@ export interface FileRouteTypes {
     | '/api/integrations/slack/channels'
     | '/api/integrations/slack/connect'
     | '/api/integrations/slack/disconnect'
+    | '/api/webhooks/generic/$workflowId'
     | '/api/webhooks/tally/$workflowId'
     | '/api/workflows/$id/test'
     | '/api/workflows/$id'
@@ -260,6 +272,7 @@ export interface FileRouteTypes {
     | '/api/integrations/slack/channels'
     | '/api/integrations/slack/connect'
     | '/api/integrations/slack/disconnect'
+    | '/api/webhooks/generic/$workflowId'
     | '/api/webhooks/tally/$workflowId'
     | '/api/workflows/$id/test'
     | '/api/workflows/$id/'
@@ -282,6 +295,7 @@ export interface RootRouteChildren {
   ApiIntegrationsSlackChannelsRoute: typeof ApiIntegrationsSlackChannelsRoute
   ApiIntegrationsSlackConnectRoute: typeof ApiIntegrationsSlackConnectRoute
   ApiIntegrationsSlackDisconnectRoute: typeof ApiIntegrationsSlackDisconnectRoute
+  ApiWebhooksGenericWorkflowIdRoute: typeof ApiWebhooksGenericWorkflowIdRoute
   ApiWebhooksTallyWorkflowIdRoute: typeof ApiWebhooksTallyWorkflowIdRoute
   ApiWorkflowsIdTestRoute: typeof ApiWorkflowsIdTestRoute
   ApiWorkflowsIdIndexRoute: typeof ApiWorkflowsIdIndexRoute
@@ -351,6 +365,13 @@ declare module '@tanstack/react-router' {
       path: '/api/webhooks/tally/$workflowId'
       fullPath: '/api/webhooks/tally/$workflowId'
       preLoaderRoute: typeof ApiWebhooksTallyWorkflowIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/webhooks/generic/$workflowId': {
+      id: '/api/webhooks/generic/$workflowId'
+      path: '/api/webhooks/generic/$workflowId'
+      fullPath: '/api/webhooks/generic/$workflowId'
+      preLoaderRoute: typeof ApiWebhooksGenericWorkflowIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/integrations/slack/disconnect': {
@@ -442,6 +463,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiIntegrationsSlackChannelsRoute: ApiIntegrationsSlackChannelsRoute,
   ApiIntegrationsSlackConnectRoute: ApiIntegrationsSlackConnectRoute,
   ApiIntegrationsSlackDisconnectRoute: ApiIntegrationsSlackDisconnectRoute,
+  ApiWebhooksGenericWorkflowIdRoute: ApiWebhooksGenericWorkflowIdRoute,
   ApiWebhooksTallyWorkflowIdRoute: ApiWebhooksTallyWorkflowIdRoute,
   ApiWorkflowsIdTestRoute: ApiWorkflowsIdTestRoute,
   ApiWorkflowsIdIndexRoute: ApiWorkflowsIdIndexRoute,
