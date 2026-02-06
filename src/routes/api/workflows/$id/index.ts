@@ -60,7 +60,14 @@ export const Route = createFileRoute("/api/workflows/$id/")({
         if (nodes !== undefined) updates.nodes = nodes;
         if (edges !== undefined) updates.edges = edges;
         if (status !== undefined) updates.status = status;
-        if (chatThreadId !== undefined) updates.chatThreadId = chatThreadId;
+        // Only save valid chat thread IDs (skip placeholder values)
+        if (
+          chatThreadId !== undefined &&
+          chatThreadId !== "placeholder" &&
+          chatThreadId.length >= 10
+        ) {
+          updates.chatThreadId = chatThreadId;
+        }
 
         await db.update(workflows).set(updates).where(eq(workflows.id, id));
 
