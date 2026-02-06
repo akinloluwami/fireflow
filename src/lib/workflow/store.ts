@@ -10,10 +10,6 @@ import type {
 } from "./types";
 import { getNodeDefinition } from "./node-definitions";
 
-// =============================================================================
-// Store State
-// =============================================================================
-
 interface WorkflowState {
   // Current workflow
   workflow: Workflow;
@@ -73,6 +69,7 @@ interface WorkflowActions {
   // UI
   togglePanel: () => void;
   toggleChat: () => void;
+  setIsPanelOpen: (isOpen: boolean) => void;
   setIsChatOpen: (isOpen: boolean) => void;
 
   // History
@@ -94,10 +91,6 @@ interface WorkflowActions {
 
 type WorkflowStore = WorkflowState & WorkflowActions;
 
-// =============================================================================
-// Initial State
-// =============================================================================
-
 const createEmptyWorkflow = (): Workflow => ({
   id: uuid(),
   name: "Untitled Workflow",
@@ -113,23 +106,15 @@ const initialState: WorkflowState = {
   workflow: createEmptyWorkflow(),
   selectedNodeId: null,
   selectedEdgeId: null,
-  isPanelOpen: true,
-  isChatOpen: true,
+  isPanelOpen: false,
+  isChatOpen: false,
   nodeErrors: {},
   history: [],
   historyIndex: -1,
 };
 
-// =============================================================================
-// Store
-// =============================================================================
-
 export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
   ...initialState,
-
-  // ---------------------------------------------------------------------------
-  // Workflow Actions
-  // ---------------------------------------------------------------------------
 
   setWorkflow: (workflow) => {
     set({ workflow, selectedNodeId: null, selectedEdgeId: null });
@@ -165,10 +150,6 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       },
     }));
   },
-
-  // ---------------------------------------------------------------------------
-  // Node Actions
-  // ---------------------------------------------------------------------------
 
   addNode: (type, subType, position, config) => {
     const definition = getNodeDefinition(type, subType);
@@ -291,10 +272,6 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     return newNodeId;
   },
 
-  // ---------------------------------------------------------------------------
-  // Edge Actions
-  // ---------------------------------------------------------------------------
-
   addEdge: (source, target, sourceHandle, targetHandle) => {
     const edgeId = uuid();
 
@@ -350,10 +327,6 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     }));
   },
 
-  // ---------------------------------------------------------------------------
-  // Selection
-  // ---------------------------------------------------------------------------
-
   selectNode: (nodeId) => {
     set({ selectedNodeId: nodeId, selectedEdgeId: null });
   },
@@ -366,10 +339,6 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     set({ selectedNodeId: null, selectedEdgeId: null });
   },
 
-  // ---------------------------------------------------------------------------
-  // UI
-  // ---------------------------------------------------------------------------
-
   togglePanel: () => {
     set((state) => ({ isPanelOpen: !state.isPanelOpen }));
   },
@@ -378,13 +347,13 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     set((state) => ({ isChatOpen: !state.isChatOpen }));
   },
 
+  setIsPanelOpen: (isOpen) => {
+    set({ isPanelOpen: isOpen });
+  },
+
   setIsChatOpen: (isOpen) => {
     set({ isChatOpen: isOpen });
   },
-
-  // ---------------------------------------------------------------------------
-  // History
-  // ---------------------------------------------------------------------------
 
   saveToHistory: () => {
     set((state) => {
@@ -419,10 +388,6 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
     });
   },
 
-  // ---------------------------------------------------------------------------
-  // Bulk Operations (for AI)
-  // ---------------------------------------------------------------------------
-
   setNodes: (nodes) => {
     get().saveToHistory();
     set((state) => ({
@@ -456,10 +421,6 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       },
     }));
   },
-
-  // ---------------------------------------------------------------------------
-  // Validation
-  // ---------------------------------------------------------------------------
 
   validateNodes: () => {
     const { workflow } = get();

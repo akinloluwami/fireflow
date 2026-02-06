@@ -17,10 +17,6 @@ export const todos = pgTable("todos", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// =============================================================================
-// Workflow Tables
-// =============================================================================
-
 export const workflows = pgTable("workflows", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
@@ -62,10 +58,6 @@ export const workflowNodeExecutions = pgTable("workflow_node_executions", {
   duration: text("duration"), // in milliseconds
 });
 
-// =============================================================================
-// Integration Tables (Slack, Discord, etc.)
-// =============================================================================
-
 export const integrations = pgTable("integrations", {
   id: text("id").primaryKey(),
   userId: text("user_id")
@@ -77,10 +69,6 @@ export const integrations = pgTable("integrations", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
-
-// =============================================================================
-// Webhook Tables (for Tally, etc.)
-// =============================================================================
 
 export const workflowWebhooks = pgTable("workflow_webhooks", {
   id: text("id").primaryKey(),

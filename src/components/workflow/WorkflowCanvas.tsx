@@ -7,7 +7,6 @@ import {
   Panel,
   useNodesState,
   useEdgesState,
-  addEdge,
   useReactFlow,
   type Connection,
   type Node,
@@ -22,11 +21,7 @@ import { nodeTypes } from "./nodes";
 import { WorkflowEdge } from "./edges/WorkflowEdge";
 import { useWorkflowStore } from "@/lib/workflow/store";
 import { getCategoryColor } from "@/lib/workflow/node-definitions";
-import type {
-  NodeCategory,
-  NodeSubType,
-  WorkflowNode,
-} from "@/lib/workflow/types";
+import type { NodeCategory, NodeSubType } from "@/lib/workflow/types";
 import { useEffect } from "react";
 
 const edgeTypes = {
@@ -44,6 +39,8 @@ export function WorkflowCanvas() {
     selectNode,
     selectEdge,
     clearSelection,
+    setIsPanelOpen,
+    setIsChatOpen,
   } = useWorkflowStore();
 
   // Convert workflow nodes to React Flow nodes
@@ -207,7 +204,6 @@ export function WorkflowCanvas() {
         proOptions={{ hideAttribution: true }}
         className="bg-gray-50"
       >
-        {/* Background grid */}
         <Background
           variant={BackgroundVariant.Dots}
           gap={20}
@@ -215,32 +211,28 @@ export function WorkflowCanvas() {
           color="#e5e7eb"
         />
 
-        {/* Controls */}
         <Controls
           showZoom={true}
           showFitView={true}
           showInteractive={false}
-          className="!bg-white !border !border-gray-200 !rounded-xl !shadow-lg"
+          className="bg-white! border! border-gray-200! rounded-xl! shadow-lg!"
         />
 
-        {/* Mini-map */}
         <MiniMap
           nodeColor={nodeColor}
           nodeStrokeWidth={3}
           zoomable
           pannable
-          className="!bg-white !border !border-gray-200 !rounded-xl !shadow-lg"
+          className="bg-white! border! border-gray-200! rounded-xl! shadow-lg!"
         />
 
-        {/* Empty state */}
         {nodes.length === 0 && (
-          <Panel position="top-center" className="!top-1/2 !-translate-y-1/2">
+          <Panel position="top-center" className="top-1/2! -translate-y-1/2!">
             <div className="flex items-center gap-6">
-              {/* Add first step */}
               <button
                 className="flex flex-col items-center gap-3 group"
                 onClick={() => {
-                  // Open node palette or trigger add node
+                  setIsPanelOpen(true);
                 }}
               >
                 <div
@@ -269,11 +261,10 @@ export function WorkflowCanvas() {
 
               <span className="text-sm text-gray-400">or</span>
 
-              {/* Build with AI */}
               <button
                 className="flex flex-col items-center gap-3 group"
                 onClick={() => {
-                  // Open AI chat or trigger AI builder
+                  setIsChatOpen(true);
                 }}
               >
                 <div

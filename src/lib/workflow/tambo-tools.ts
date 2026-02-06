@@ -4,10 +4,6 @@ import { useWorkflowStore } from "./store";
 import { nodeDefinitions } from "./node-definitions";
 import type { NodeCategory, NodeSubType } from "./types";
 
-// =============================================================================
-// Tool: Get Current Workflow State
-// =============================================================================
-
 export const getCurrentWorkflowTool: TamboTool = {
   name: "getCurrentWorkflow",
   description:
@@ -62,10 +58,6 @@ export const getCurrentWorkflowTool: TamboTool = {
   }),
 };
 
-// =============================================================================
-// Tool: Get Available Node Types
-// =============================================================================
-
 export const getAvailableNodesTool: TamboTool = {
   name: "getAvailableNodes",
   description:
@@ -88,10 +80,6 @@ export const getAvailableNodesTool: TamboTool = {
     }),
   ),
 };
-
-// =============================================================================
-// Tool: Add Node
-// =============================================================================
 
 export const addNodeTool: TamboTool = {
   name: "addNode",
@@ -169,10 +157,6 @@ export const addNodeTool: TamboTool = {
   }),
 };
 
-// =============================================================================
-// Tool: Remove Node
-// =============================================================================
-
 export const removeNodeTool: TamboTool = {
   name: "removeNode",
   description:
@@ -196,10 +180,6 @@ export const removeNodeTool: TamboTool = {
     error: z.string().optional(),
   }),
 };
-
-// =============================================================================
-// Tool: Connect Nodes
-// =============================================================================
 
 export const connectNodesTool: TamboTool = {
   name: "connectNodes",
@@ -230,10 +210,6 @@ export const connectNodesTool: TamboTool = {
     edgeId: z.string(),
   }),
 };
-
-// =============================================================================
-// Tool: Update Node Configuration
-// =============================================================================
 
 export const updateNodeConfigTool: TamboTool = {
   name: "updateNodeConfig",
@@ -292,10 +268,6 @@ export const updateNodeConfigTool: TamboTool = {
   }),
 };
 
-// =============================================================================
-// Tool: Clear Workflow
-// =============================================================================
-
 export const clearWorkflowTool: TamboTool = {
   name: "clearWorkflow",
   description:
@@ -310,10 +282,6 @@ export const clearWorkflowTool: TamboTool = {
     success: z.boolean(),
   }),
 };
-
-// =============================================================================
-// Tool: Update Workflow Metadata
-// =============================================================================
 
 export const updateWorkflowMetaTool: TamboTool = {
   name: "updateWorkflowMeta",
@@ -331,10 +299,6 @@ export const updateWorkflowMetaTool: TamboTool = {
     success: z.boolean(),
   }),
 };
-
-// =============================================================================
-// Export All Tools
-// =============================================================================
 
 export const workflowTools: TamboTool[] = [
   getCurrentWorkflowTool,

@@ -1,10 +1,3 @@
-/**
- * Workflow Execution Engine
- *
- * Executes workflows by walking through nodes and edges,
- * calling appropriate node executors for each node type.
- */
-
 import { db } from "@/db";
 import {
   workflows,
@@ -17,7 +10,6 @@ import { v4 as uuid } from "uuid";
 import type { WorkflowNode, WorkflowEdge } from "@/lib/workflow/types";
 import { InterpolationContext, createEmptyContext } from "./interpolate";
 
-// Node executor imports
 import { executeIfElse } from "./nodes/condition-if";
 import { executeSwitch } from "./nodes/condition-switch";
 import { executeLoop } from "./nodes/condition-loop";
@@ -32,10 +24,6 @@ import { executeFilter } from "./nodes/transform-filter";
 import { executeFunction } from "./nodes/transform-function";
 import { executeSplit } from "./nodes/transform-split";
 import { executeAggregate } from "./nodes/transform-aggregate";
-
-// =============================================================================
-// Types
-// =============================================================================
 
 export interface ExecutionContext {
   workflowId: string;
@@ -62,11 +50,6 @@ export interface NodeExecutionResult {
     isLast: boolean;
   }>;
 }
-
-// =============================================================================
-// Main Executor
-// =============================================================================
-
 export async function executeWorkflow(
   workflowId: string,
   executionId: string,
@@ -144,10 +127,6 @@ export async function executeWorkflow(
   }
 }
 
-// =============================================================================
-// Node Chain Executor
-// =============================================================================
-
 async function executeNodeChain(
   node: WorkflowNode,
   allNodes: WorkflowNode[],
@@ -223,10 +202,6 @@ async function executeNodeChain(
     await executeNodeChain(nextNode, allNodes, allEdges, context);
   }
 }
-
-// =============================================================================
-// Individual Node Executor
-// =============================================================================
 
 async function executeNode(
   node: WorkflowNode,
@@ -354,11 +329,6 @@ async function executeNode(
     return { success: false, output: null, error: errorMessage };
   }
 }
-
-// =============================================================================
-// Edge Following Logic
-// =============================================================================
-
 function getNextNodes(
   currentNode: WorkflowNode,
   allEdges: WorkflowEdge[],
@@ -387,10 +357,6 @@ function getNextNodes(
     .map((e) => allNodes.find((n) => n.id === e.target))
     .filter((n): n is WorkflowNode => n !== undefined);
 }
-
-// =============================================================================
-// Helper: Get user's integration token
-// =============================================================================
 
 export async function getIntegrationToken(
   userId: string,

@@ -32,9 +32,6 @@ function getFriendlyVariablePath(
   return path;
 }
 
-/**
- * Render text with highlighted variable syntax
- */
 function HighlightedText({
   text,
   nodeMap,

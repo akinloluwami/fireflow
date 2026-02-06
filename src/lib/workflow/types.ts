@@ -1,9 +1,5 @@
 // FireFlow Workflow Types
 
-// =============================================================================
-// Node Types
-// =============================================================================
-
 export type NodeCategory =
   | "trigger"
   | "action"
@@ -43,9 +39,7 @@ export type NodeSubType =
   | TransformSubType
   | OthersSubType;
 
-// =============================================================================
 // Node Configuration Types
-// =============================================================================
 
 export interface WebhookConfig {
   method: "GET" | "POST" | "PUT" | "DELETE";
@@ -100,10 +94,6 @@ export type NodeConfig =
   | CodeConfig
   | Record<string, unknown>;
 
-// =============================================================================
-// Workflow Node
-// =============================================================================
-
 export interface NodePosition {
   x: number;
   y: number;
@@ -124,10 +114,6 @@ export interface WorkflowNode {
   data: NodeData;
 }
 
-// =============================================================================
-// Workflow Edge
-// =============================================================================
-
 export interface WorkflowEdge {
   id: string;
   source: string;
@@ -137,10 +123,6 @@ export interface WorkflowEdge {
   label?: string;
   animated?: boolean;
 }
-
-// =============================================================================
-// Workflow
-// =============================================================================
 
 export type WorkflowStatus =
   | "draft"
@@ -162,10 +144,6 @@ export interface Workflow {
   userId?: string;
 }
 
-// =============================================================================
-// Node Definition (for palette and AI)
-// =============================================================================
-
 export interface NodeDefinition {
   type: NodeCategory;
   subType: NodeSubType;
@@ -176,10 +154,6 @@ export interface NodeDefinition {
   defaultConfig: NodeConfig;
   configSchema?: Record<string, unknown>;
 }
-
-// =============================================================================
-// Execution Types
-// =============================================================================
 
 export type ExecutionStatus = "pending" | "running" | "completed" | "failed";
 

@@ -1,10 +1,3 @@
-/**
- * Node Output Schemas
- *
- * Defines the data shape that each node type produces as output.
- * Used by the Variable Picker to show available data from upstream nodes.
- */
-
 export interface NodeOutputSchema {
   type: "object" | "array" | "string" | "number" | "boolean" | "unknown";
   properties?: Record<string, NodeOutputSchema>;
@@ -13,14 +6,7 @@ export interface NodeOutputSchema {
   example?: unknown;
 }
 
-/**
- * Output schemas for all node subtypes
- */
 export const nodeOutputSchemas: Record<string, NodeOutputSchema> = {
-  // ===========================================================================
-  // TRIGGER NODES
-  // ===========================================================================
-
   webhook: {
     type: "object",
     description: "Incoming webhook request data",
@@ -127,10 +113,6 @@ export const nodeOutputSchemas: Record<string, NodeOutputSchema> = {
       },
     },
   },
-
-  // ===========================================================================
-  // ACTION NODES
-  // ===========================================================================
 
   "http-request": {
     type: "object",
@@ -264,11 +246,6 @@ export const nodeOutputSchemas: Record<string, NodeOutputSchema> = {
     description: "Custom code output (depends on your code)",
     example: { result: "Custom value" },
   },
-
-  // ===========================================================================
-  // CONDITION NODES
-  // ===========================================================================
-
   "if-else": {
     type: "object",
     description: "Condition evaluation result",
@@ -341,11 +318,6 @@ export const nodeOutputSchemas: Record<string, NodeOutputSchema> = {
       },
     },
   },
-
-  // ===========================================================================
-  // TRANSFORM NODES
-  // ===========================================================================
-
   "set-variable": {
     type: "object",
     description: "Variables that were set",
@@ -402,10 +374,6 @@ export const nodeOutputSchemas: Record<string, NodeOutputSchema> = {
       },
     },
   },
-
-  // ===========================================================================
-  // OTHERS
-  // ===========================================================================
 
   wait: {
     type: "object",

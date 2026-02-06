@@ -1,9 +1,5 @@
 import { z } from "zod";
 
-// =============================================================================
-// Node Schema
-// =============================================================================
-
 export const NodePositionSchema = z.object({
   x: z.number().describe("X coordinate position on canvas"),
   y: z.number().describe("Y coordinate position on canvas"),
@@ -33,10 +29,6 @@ export const WorkflowNodeSchema = z
   })
   .describe("A workflow node representing a step in the automation");
 
-// =============================================================================
-// Edge Schema
-// =============================================================================
-
 export const WorkflowEdgeSchema = z
   .object({
     id: z.string().describe("Unique identifier for the edge"),
@@ -51,10 +43,6 @@ export const WorkflowEdgeSchema = z
     targetHandle: z.string().optional().describe("Handle ID on target node"),
   })
   .describe("A connection between two nodes");
-
-// =============================================================================
-// Workflow Schema (for AI generation)
-// =============================================================================
 
 export const GeneratedWorkflowSchema = z
   .object({
@@ -80,10 +68,6 @@ export const GeneratedWorkflowSchema = z
     "Complete workflow definition. Always include at least one trigger node as the starting point.",
   );
 
-// =============================================================================
-// Node Addition Schema
-// =============================================================================
-
 export const AddNodeSchema = z
   .object({
     node: WorkflowNodeSchema.describe("The node to add"),
@@ -101,10 +85,6 @@ export const AddNodeSchema = z
   .describe(
     "Add a new node to the workflow, optionally connecting it to an existing node",
   );
-
-// =============================================================================
-// Workflow Modification Schema
-// =============================================================================
 
 export const ModifyNodeSchema = z
   .object({
@@ -137,10 +117,6 @@ export const WorkflowModificationSchema = z
       .describe("IDs of edges to remove"),
   })
   .describe("Batch modifications to apply to the workflow");
-
-// =============================================================================
-// Type Exports
-// =============================================================================
 
 export type GeneratedWorkflow = z.infer<typeof GeneratedWorkflowSchema>;
 export type AddNode = z.infer<typeof AddNodeSchema>;

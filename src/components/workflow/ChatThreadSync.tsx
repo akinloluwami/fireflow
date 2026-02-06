@@ -2,11 +2,6 @@ import { useEffect, useRef } from "react";
 import { useTamboThread } from "@tambo-ai/react";
 import { useWorkflowStore } from "@/lib/workflow/store";
 
-/**
- * This component syncs the Tambo chat thread with the workflow.
- * - When the workflow has a chatThreadId, it switches to that thread
- * - When a new thread is created, it saves the thread ID to the workflow
- */
 export function ChatThreadSync() {
   const { thread, switchCurrentThread } = useTamboThread();
   const { workflow, setChatThreadId } = useWorkflowStore();

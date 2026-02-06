@@ -1,13 +1,6 @@
 import type { NodeDefinition } from "./types";
 
-// =============================================================================
-// Node Definitions - Catalog of all available nodes
-// =============================================================================
-
 export const nodeDefinitions: NodeDefinition[] = [
-  // ---------------------------------------------------------------------------
-  // TRIGGER NODES (Green)
-  // ---------------------------------------------------------------------------
   {
     type: "trigger",
     subType: "webhook",
@@ -55,9 +48,6 @@ export const nodeDefinitions: NodeDefinition[] = [
     },
   },
 
-  // ---------------------------------------------------------------------------
-  // ACTION NODES (Blue)
-  // ---------------------------------------------------------------------------
   {
     type: "action",
     subType: "http-request",
@@ -135,9 +125,6 @@ export const nodeDefinitions: NodeDefinition[] = [
     },
   },
 
-  // ---------------------------------------------------------------------------
-  // CONDITION NODES (Amber)
-  // ---------------------------------------------------------------------------
   {
     type: "condition",
     subType: "if-else",
@@ -175,9 +162,6 @@ export const nodeDefinitions: NodeDefinition[] = [
     },
   },
 
-  // ---------------------------------------------------------------------------
-  // TRANSFORM NODES (Purple)
-  // ---------------------------------------------------------------------------
   {
     type: "transform",
     subType: "set-variable",
@@ -234,9 +218,6 @@ export const nodeDefinitions: NodeDefinition[] = [
     },
   },
 
-  // ---------------------------------------------------------------------------
-  // OTHERS (Gray)
-  // ---------------------------------------------------------------------------
   {
     type: "others",
     subType: "wait",
@@ -250,10 +231,6 @@ export const nodeDefinitions: NodeDefinition[] = [
     },
   },
 ];
-
-// =============================================================================
-// Helper Functions
-// =============================================================================
 
 export function getNodeDefinition(
   type: string,
