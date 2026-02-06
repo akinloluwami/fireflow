@@ -1,10 +1,27 @@
 import { ExpressionInput } from "./ExpressionInput";
 import { Info } from "lucide-react";
+import { useWorkflowStore } from "@/lib/workflow/store";
 
 interface ConditionConfigProps {
   config: Record<string, unknown>;
   onChange: (key: string, value: unknown) => void;
   nodeId: string;
+}
+
+/**
+ * Convert a variable path with node UUID to a friendly display name
+ */
+function getFriendlyField(field: string, nodeMap: Map<string, string>): string {
+  // Match {{ nodes.UUID.output.xxx }} pattern
+  const nodeMatch = field.match(
+    /\{\{\s*nodes\.([a-f0-9-]+)\.output\.(.+?)\s*\}\}/,
+  );
+  if (nodeMatch) {
+    const [, nodeId, restPath] = nodeMatch;
+    const nodeName = nodeMap.get(nodeId) || "Unknown Node";
+    return `{{ ${nodeName}.${restPath} }}`;
+  }
+  return field;
 }
 
 const OPERATORS = [
@@ -64,12 +81,22 @@ export function ConditionConfig({
   onChange,
   nodeId,
 }: ConditionConfigProps) {
+  const { workflow } = useWorkflowStore();
   const field = (config.field as string) || "";
   const operator = (config.operator as string) || "equals";
   const value = (config.value as string) || "";
 
+  // Build a map of node IDs to their labels for friendly display
+  const nodeMap = new Map<string, string>();
+  for (const node of workflow.nodes) {
+    nodeMap.set(node.id, node.data.label || node.subType);
+  }
+
   // Some operators don't need a value
   const operatorNeedsValue = !["is-empty", "is-not-empty"].includes(operator);
+
+  // Get friendly field name for preview
+  const friendlyField = getFriendlyField(field, nodeMap);
 
   return (
     <div className="space-y-4">
@@ -169,7 +196,7 @@ export function ConditionConfig({
           <p className="text-[11px] font-medium text-gray-500 mb-2">Preview</p>
           <div className="px-3 py-2 bg-gray-50 rounded-md border border-gray-200">
             <code className="text-[11px] text-gray-700 font-mono break-all">
-              if ({field} {getOperatorSymbol(operator)}{" "}
+              if ({friendlyField} {getOperatorSymbol(operator)}{" "}
               {operatorNeedsValue ? value || '""' : ""})
             </code>
           </div>
