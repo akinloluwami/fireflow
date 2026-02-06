@@ -41,6 +41,10 @@ export function WorkflowChat() {
     e.preventDefault();
     if (!value.trim() || isPending) return;
     submit();
+    // Reset textarea height after submit
+    if (inputRef.current) {
+      inputRef.current.style.height = "auto";
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -275,15 +279,21 @@ export function WorkflowChat() {
           <textarea
             ref={inputRef}
             value={value}
-            onChange={(e) => setValue(e.target.value)}
+            onChange={(e) => {
+              setValue(e.target.value);
+              // Auto-resize textarea
+              e.target.style.height = "auto";
+              e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
+            }}
             onKeyDown={handleKeyDown}
             placeholder="Describe your workflow..."
-            rows={2}
+            rows={1}
             disabled={isPending}
             className="w-full px-3 py-2.5 pr-10 bg-gray-50 border border-gray-200 rounded-lg
                        resize-none focus:outline-none focus:ring-1 focus:ring-accent/30 
                        focus:border-accent placeholder:text-gray-400 text-xs
-                       disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                       disabled:opacity-50 disabled:cursor-not-allowed transition-colors
+                       min-h-[40px] max-h-[200px] overflow-y-auto"
           />
           <button
             type="submit"
