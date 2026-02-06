@@ -8,6 +8,7 @@ import {
   useNodesState,
   useEdgesState,
   addEdge,
+  useReactFlow,
   type Connection,
   type Node,
   type Edge,
@@ -144,6 +145,8 @@ export function WorkflowCanvas() {
     event.dataTransfer.dropEffect = "move";
   }, []);
 
+  const { screenToFlowPosition } = useReactFlow();
+
   const onDrop = useCallback(
     (event: React.DragEvent) => {
       event.preventDefault();
@@ -156,17 +159,19 @@ export function WorkflowCanvas() {
         subType: NodeSubType;
       };
 
-      const reactFlowBounds = reactFlowWrapper.current?.getBoundingClientRect();
-      if (!reactFlowBounds) return;
+      // Use screenToFlowPosition for accurate placement accounting for zoom/pan
+      const position = screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
 
-      const position = {
-        x: event.clientX - reactFlowBounds.left - 100,
-        y: event.clientY - reactFlowBounds.top - 40,
-      };
+      // Offset to center the node on cursor
+      position.x -= 80;
+      position.y -= 40;
 
       addNode(nodeType, subType, position);
     },
-    [addNode],
+    [addNode, screenToFlowPosition],
   );
 
   // Mini-map node color
