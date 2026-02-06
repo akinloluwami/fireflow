@@ -50,11 +50,14 @@ export function ChatThreadSync() {
           // Wait a bit more and retry
           await new Promise((resolve) => setTimeout(resolve, 300));
           if (!isMountedRef.current) return;
-          
+
           try {
             await switchCurrentThread(threadIdToSwitch);
           } catch (retryErr) {
-            console.error("[ChatThreadSync] Thread switch retry failed:", retryErr);
+            console.error(
+              "[ChatThreadSync] Thread switch retry failed:",
+              retryErr,
+            );
             switchAttemptedRef.current = null;
           }
         } else {
