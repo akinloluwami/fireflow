@@ -5,6 +5,7 @@ import { WorkflowCanvas } from "./WorkflowCanvas";
 import { NodePalette } from "./NodePalette";
 import { NodeConfigPanel } from "./NodeConfigPanel";
 import { WorkflowChat } from "./WorkflowChat";
+import { ChatThreadSync } from "./ChatThreadSync";
 import { useWorkflowStore } from "@/lib/workflow/store";
 import { workflowComponents } from "@/lib/workflow/tambo-components";
 import { workflowTools } from "@/lib/workflow/tambo-tools";
@@ -388,6 +389,7 @@ export function WorkflowBuilder({
       tools={workflowTools}
       contextHelpers={contextHelpers}
     >
+      <ChatThreadSync />
       <ReactFlowProvider>
         <div className="flex flex-col h-screen bg-gray-50">
           {/* Top Bar */}
