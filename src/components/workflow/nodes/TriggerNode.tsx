@@ -74,7 +74,8 @@ function TriggerNodeComponent({ id, data, selected }: TriggerNodeProps) {
       <div
         className={`
           absolute -top-6 right-0 flex gap-0.5 transition-opacity duration-150
-          ${selected ? "opacity-100" : "opacity-0"}
+                    opacity-0 group-hover:opacity-100
+          ${selected ? "opacity-100" : ""}
         `}
       >
         <button
@@ -97,6 +98,7 @@ function TriggerNodeComponent({ id, data, selected }: TriggerNodeProps) {
       <Handle
         type="source"
         position={Position.Right}
+        id="output"
         className="!w-2.5 !h-2.5 !bg-emerald-500 !border-2 !border-white transition-colors"
       />
     </div>

@@ -107,7 +107,8 @@ function OthersNodeComponent({ id, data, selected }: OthersNodeProps) {
       <div
         className={`
           absolute -top-6 right-0 flex gap-0.5 transition-opacity duration-150
-          ${selected ? "opacity-100" : "opacity-0"}
+          opacity-0 group-hover:opacity-100
+          ${selected ? "opacity-100" : ""}
         `}
       >
         <button
@@ -130,6 +131,7 @@ function OthersNodeComponent({ id, data, selected }: OthersNodeProps) {
       <Handle
         type="target"
         position={Position.Left}
+        id="input"
         className="!w-2.5 !h-2.5 !bg-gray-300 !border-2 !border-white transition-colors hover:!bg-gray-500"
       />
 
@@ -137,6 +139,7 @@ function OthersNodeComponent({ id, data, selected }: OthersNodeProps) {
       <Handle
         type="source"
         position={Position.Right}
+        id="output"
         className="!w-2.5 !h-2.5 !bg-gray-500 !border-2 !border-white transition-colors"
       />
     </div>
