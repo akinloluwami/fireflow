@@ -1,4 +1,5 @@
 import type { TamboComponent } from "@tambo-ai/react";
+import { useTamboCurrentMessage } from "@tambo-ai/react";
 import { useWorkflowStore } from "./store";
 import { v4 as uuid } from "uuid";
 import { useEffect, useRef } from "react";
@@ -11,7 +12,6 @@ import type {
 import { getNodeDefinition } from "./node-definitions";
 import type { JSONSchema7 } from "json-schema";
 
-// JSON Schema definition for Tambo (avoiding Zod v4 compatibility issues)
 const GeneratedWorkflowJSONSchema: JSONSchema7 = {
   type: "object",
   description: `Complete workflow definition with nodes and connections.
@@ -116,10 +116,6 @@ Do not leave config empty except for trigger nodes.`,
     },
   },
 };
-
-// =============================================================================
-// Config Inference from Labels/Descriptions
-// =============================================================================
 
 /**
  * Infer config values from node label and description when AI doesn't populate them.
@@ -226,10 +222,6 @@ function inferConfigFromContext(
   return config;
 }
 
-// =============================================================================
-// WorkflowGenerator Component
-// =============================================================================
-
 interface WorkflowGeneratorProps {
   name: string;
   description?: string;
@@ -261,8 +253,18 @@ function WorkflowGenerator({
 }: WorkflowGeneratorProps) {
   const { updateWorkflowMeta, applyWorkflowChanges } = useWorkflowStore();
   const lastAppliedCount = useRef(0);
+  const message = useTamboCurrentMessage();
 
   useEffect(() => {
+    // Skip if this is a historical message (older than 10 seconds)
+    if (message?.createdAt) {
+      const messageAge = Date.now() - new Date(message.createdAt).getTime();
+      if (messageAge > 10000) {
+        // Message is older than 10 seconds, it's from history - don't apply
+        return;
+      }
+    }
+
     // Wait until we have valid nodes array
     if (!nodes || !Array.isArray(nodes) || nodes.length === 0) return;
 
@@ -270,7 +272,7 @@ function WorkflowGenerator({
     const safeEdges = Array.isArray(edges) ? edges : [];
 
     // Only re-apply if node count increased (streaming more nodes in)
-    // This ensures we always have the latest complete state
+    // This ensures we always have the latest complete state during streaming
     const totalCount = nodes.length + safeEdges.length;
     if (totalCount <= lastAppliedCount.current) return;
     lastAppliedCount.current = totalCount;
@@ -330,7 +332,6 @@ function WorkflowGenerator({
       animated: true,
     }));
 
-    // Apply to store
     updateWorkflowMeta(name, description);
     applyWorkflowChanges(workflowNodes, workflowEdges);
   }, [
@@ -342,11 +343,10 @@ function WorkflowGenerator({
     applyWorkflowChanges,
   ]);
 
-  // This component renders a confirmation message
   return (
     <div className="p-3 bg-accent-light rounded-lg border border-orange-100">
       <div className="flex items-start gap-2.5">
-        <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
+        <div className="shrink-0 w-7 h-7 rounded-lg bg-accent flex items-center justify-center">
           <svg
             className="w-4 h-4 text-white"
             fill="none"
@@ -383,10 +383,6 @@ function WorkflowGenerator({
     </div>
   );
 }
-
-// =============================================================================
-// Tambo Component Registration
-// =============================================================================
 
 export const workflowGeneratorComponent: TamboComponent = {
   name: "WorkflowGenerator",
@@ -452,10 +448,6 @@ export const workflowGeneratorComponent: TamboComponent = {
   component: WorkflowGenerator,
   propsSchema: GeneratedWorkflowJSONSchema,
 };
-
-// =============================================================================
-// Export Components List
-// =============================================================================
 
 export const workflowComponents: TamboComponent[] = [
   workflowGeneratorComponent,
