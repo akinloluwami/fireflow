@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppWorkflowsIndexRouteImport } from './routes/app/workflows/index'
+import { Route as AppIntegrationsIndexRouteImport } from './routes/app/integrations/index'
+import { Route as AppCredentialsIndexRouteImport } from './routes/app/credentials/index'
 import { Route as ApiWorkflowsIndexRouteImport } from './routes/api/workflows/index'
 import { Route as AppWorkflowIdRouteImport } from './routes/app_.workflow/$id'
 import { Route as AppWorkflowLayoutRouteImport } from './routes/app/workflow/_layout'
@@ -45,6 +47,16 @@ const IndexRoute = IndexRouteImport.update({
 const AppWorkflowsIndexRoute = AppWorkflowsIndexRouteImport.update({
   id: '/workflows/',
   path: '/workflows/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppIntegrationsIndexRoute = AppIntegrationsIndexRouteImport.update({
+  id: '/integrations/',
+  path: '/integrations/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCredentialsIndexRoute = AppCredentialsIndexRouteImport.update({
+  id: '/credentials/',
+  path: '/credentials/',
   getParentRoute: () => AppRoute,
 } as any)
 const ApiWorkflowsIndexRoute = ApiWorkflowsIndexRouteImport.update({
@@ -163,6 +175,8 @@ export interface FileRoutesByFullPath {
   '/app/workflow': typeof AppWorkflowLayoutRoute
   '/app/workflow/$id': typeof AppWorkflowIdRoute
   '/api/workflows/': typeof ApiWorkflowsIndexRoute
+  '/app/credentials/': typeof AppCredentialsIndexRoute
+  '/app/integrations/': typeof AppIntegrationsIndexRoute
   '/app/workflows/': typeof AppWorkflowsIndexRoute
   '/api/integrations/discord/callback': typeof ApiIntegrationsDiscordCallbackRoute
   '/api/integrations/discord/channels': typeof ApiIntegrationsDiscordChannelsRoute
@@ -187,6 +201,8 @@ export interface FileRoutesByTo {
   '/app/workflow': typeof AppWorkflowLayoutRoute
   '/app/workflow/$id': typeof AppWorkflowIdRoute
   '/api/workflows': typeof ApiWorkflowsIndexRoute
+  '/app/credentials': typeof AppCredentialsIndexRoute
+  '/app/integrations': typeof AppIntegrationsIndexRoute
   '/app/workflows': typeof AppWorkflowsIndexRoute
   '/api/integrations/discord/callback': typeof ApiIntegrationsDiscordCallbackRoute
   '/api/integrations/discord/channels': typeof ApiIntegrationsDiscordChannelsRoute
@@ -212,6 +228,8 @@ export interface FileRoutesById {
   '/app/workflow/_layout': typeof AppWorkflowLayoutRoute
   '/app_/workflow/$id': typeof AppWorkflowIdRoute
   '/api/workflows/': typeof ApiWorkflowsIndexRoute
+  '/app/credentials/': typeof AppCredentialsIndexRoute
+  '/app/integrations/': typeof AppIntegrationsIndexRoute
   '/app/workflows/': typeof AppWorkflowsIndexRoute
   '/api/integrations/discord/callback': typeof ApiIntegrationsDiscordCallbackRoute
   '/api/integrations/discord/channels': typeof ApiIntegrationsDiscordChannelsRoute
@@ -238,6 +256,8 @@ export interface FileRouteTypes {
     | '/app/workflow'
     | '/app/workflow/$id'
     | '/api/workflows/'
+    | '/app/credentials/'
+    | '/app/integrations/'
     | '/app/workflows/'
     | '/api/integrations/discord/callback'
     | '/api/integrations/discord/channels'
@@ -262,6 +282,8 @@ export interface FileRouteTypes {
     | '/app/workflow'
     | '/app/workflow/$id'
     | '/api/workflows'
+    | '/app/credentials'
+    | '/app/integrations'
     | '/app/workflows'
     | '/api/integrations/discord/callback'
     | '/api/integrations/discord/channels'
@@ -286,6 +308,8 @@ export interface FileRouteTypes {
     | '/app/workflow/_layout'
     | '/app_/workflow/$id'
     | '/api/workflows/'
+    | '/app/credentials/'
+    | '/app/integrations/'
     | '/app/workflows/'
     | '/api/integrations/discord/callback'
     | '/api/integrations/discord/channels'
@@ -347,6 +371,20 @@ declare module '@tanstack/react-router' {
       path: '/workflows'
       fullPath: '/app/workflows/'
       preLoaderRoute: typeof AppWorkflowsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/integrations/': {
+      id: '/app/integrations/'
+      path: '/integrations'
+      fullPath: '/app/integrations/'
+      preLoaderRoute: typeof AppIntegrationsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/credentials/': {
+      id: '/app/credentials/'
+      path: '/credentials'
+      fullPath: '/app/credentials/'
+      preLoaderRoute: typeof AppCredentialsIndexRouteImport
       parentRoute: typeof AppRoute
     }
     '/api/workflows/': {
@@ -487,11 +525,15 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppWorkflowLayoutRoute: typeof AppWorkflowLayoutRoute
+  AppCredentialsIndexRoute: typeof AppCredentialsIndexRoute
+  AppIntegrationsIndexRoute: typeof AppIntegrationsIndexRoute
   AppWorkflowsIndexRoute: typeof AppWorkflowsIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppWorkflowLayoutRoute: AppWorkflowLayoutRoute,
+  AppCredentialsIndexRoute: AppCredentialsIndexRoute,
+  AppIntegrationsIndexRoute: AppIntegrationsIndexRoute,
   AppWorkflowsIndexRoute: AppWorkflowsIndexRoute,
 }
 
