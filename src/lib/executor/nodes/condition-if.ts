@@ -26,7 +26,12 @@ export async function executeIfElse(
       Object.entries(context.interpolation.nodes || {}).map(
         ([nodeId, nodeData]) => [
           nodeId,
-          { output: nodeData.output, executedAt: new Date().toISOString() },
+          {
+            output: nodeData.output,
+            error: nodeData.error,
+            success: nodeData.success,
+            executedAt: new Date().toISOString(),
+          },
         ],
       ),
     ),
