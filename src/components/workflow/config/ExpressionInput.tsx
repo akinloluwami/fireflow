@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Database } from "lucide-react";
 import { VariablePicker } from "./VariablePicker";
 import { useWorkflowStore } from "@/lib/workflow/store";
+import type { CredentialType } from "@/lib/credentials/types";
 
 interface ExpressionInputProps {
   value: string;
@@ -10,15 +11,21 @@ interface ExpressionInputProps {
   placeholder?: string;
   multiline?: boolean;
   className?: string;
+  /** Optional: filter credentials in picker to specific types */
+  credentialTypes?: CredentialType[];
+  /** Optional: show/hide credentials in picker (default: true) */
+  showCredentials?: boolean;
 }
 
 /**
  * Convert a variable path with node UUID to a friendly display name
  * e.g., "{{ nodes.abc-123.output.status }}" -> "{{ HTTP Request.status }}"
+ * e.g., "{{ credentials.abc-123.url }}" -> "{{ API Token.url }}"
  */
 function getFriendlyVariablePath(
   path: string,
   nodeMap: Map<string, string>,
+  credentialMap: Map<string, string>,
 ): string {
   // Match nodes.UUID.output.xxx pattern
   const nodeMatch = path.match(/nodes\.([a-f0-9-]+)\.output\.(.+)/);
@@ -28,6 +35,14 @@ function getFriendlyVariablePath(
     return `${nodeName}.${restPath}`;
   }
 
+  // Match credentials.UUID.field pattern
+  const credMatch = path.match(/credentials\.([a-f0-9-]+)\.(.+)/);
+  if (credMatch) {
+    const [, credId, field] = credMatch;
+    const credName = credentialMap.get(credId) || "Credential";
+    return `${credName}.${field}`;
+  }
+
   // For trigger, loop, etc., just show as-is but cleaner
   return path;
 }
@@ -35,9 +50,11 @@ function getFriendlyVariablePath(
 function HighlightedText({
   text,
   nodeMap,
+  credentialMap,
 }: {
   text: string;
   nodeMap: Map<string, string>;
+  credentialMap: Map<string, string>;
 }) {
   const VARIABLE_REGEX = /(\{\{[^}]+\}\})/g;
   const parts = text.split(VARIABLE_REGEX);
@@ -48,7 +65,11 @@ function HighlightedText({
         if (part.match(VARIABLE_REGEX)) {
           // Extract the inner path (without {{ }})
           const innerPath = part.replace(/\{\{\s*|\s*\}\}/g, "");
-          const friendlyPath = getFriendlyVariablePath(innerPath, nodeMap);
+          const friendlyPath = getFriendlyVariablePath(
+            innerPath,
+            nodeMap,
+            credentialMap,
+          );
 
           return (
             <span
@@ -75,11 +96,16 @@ export function ExpressionInput({
   placeholder,
   multiline = false,
   className = "",
+  credentialTypes,
+  showCredentials = true,
 }: ExpressionInputProps) {
   const { workflow } = useWorkflowStore();
   const [showPicker, setShowPicker] = useState(false);
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
   const [isFocused, setIsFocused] = useState(false);
+  const [credentialMap, setCredentialMap] = useState<Map<string, string>>(
+    new Map(),
+  );
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
 
@@ -88,6 +114,26 @@ export function ExpressionInput({
   for (const node of workflow.nodes) {
     nodeMap.set(node.id, node.data.label || node.subType);
   }
+
+  // Fetch credentials to build name map for display
+  useEffect(() => {
+    const fetchCredentials = async () => {
+      try {
+        const res = await fetch("/api/credentials");
+        if (res.ok) {
+          const data = await res.json();
+          const map = new Map<string, string>();
+          for (const cred of data) {
+            map.set(cred.id, cred.name);
+          }
+          setCredentialMap(map);
+        }
+      } catch (error) {
+        console.error("Failed to fetch credentials:", error);
+      }
+    };
+    fetchCredentials();
+  }, []);
 
   // Close picker when clicking outside
   useEffect(() => {
@@ -177,7 +223,11 @@ export function ExpressionInput({
           `}
           style={{ lineHeight: multiline ? "1.5" : "1.5rem" }}
         >
-          <HighlightedText text={value} nodeMap={nodeMap} />
+          <HighlightedText
+            text={value}
+            nodeMap={nodeMap}
+            credentialMap={credentialMap}
+          />
         </div>
       )}
 
@@ -230,6 +280,8 @@ export function ExpressionInput({
             nodeId={nodeId}
             onSelect={handleVariableSelect}
             onClose={() => setShowPicker(false)}
+            credentialTypes={credentialTypes}
+            showCredentials={showCredentials}
           />
         </div>
       )}
