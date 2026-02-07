@@ -13,5 +13,6 @@ export { FilterConfig } from "./FilterConfig";
 export { FunctionConfig } from "./FunctionConfig";
 export { SplitConfig } from "./SplitConfig";
 export { AggregateConfig } from "./AggregateConfig";
+export { DatabaseConfig } from "./DatabaseConfig";
 export { VariablePicker } from "./VariablePicker";
 export { ExpressionInput, ExpressionTextarea } from "./ExpressionInput";
