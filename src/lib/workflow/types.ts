@@ -44,7 +44,7 @@ export type NodeSubType =
 export interface WebhookConfig {
   method: "GET" | "POST" | "PUT" | "DELETE";
   path: string;
-  authentication?: "none" | "basic" | "bearer" | "api-key";
+  authentication?: "none" | "basic" | "bearer" | "api_key";
 }
 
 export interface ScheduleConfig {
@@ -57,7 +57,8 @@ export interface HttpRequestConfig {
   url: string;
   headers?: Record<string, string>;
   body?: string;
-  authentication?: "none" | "basic" | "bearer" | "api-key";
+  authentication?: "none" | "basic" | "bearer" | "api_key";
+  authCredentialId?: string;
 }
 
 export interface SendEmailConfig {
