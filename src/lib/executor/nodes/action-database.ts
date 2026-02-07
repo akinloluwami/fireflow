@@ -18,6 +18,8 @@ interface QueryResult {
   rows: unknown[];
   rowCount: number;
   command: string;
+  affectedRows: number;
+  success: boolean;
 }
 
 export async function executeDatabase(
@@ -60,11 +62,21 @@ export async function executeDatabase(
         interpolatedQuery,
         (params || []) as never[],
       );
+
+      const command =
+        interpolatedQuery.trim().split(/\s+/)[0]?.toUpperCase() || "QUERY";
+      const isWriteOperation = ["INSERT", "UPDATE", "DELETE"].includes(command);
+
       const queryResult: QueryResult = {
         rows: Array.isArray(result) ? result : [],
-        rowCount: Array.isArray(result) ? result.length : 0,
-        command:
-          interpolatedQuery.trim().split(/\s+/)[0]?.toUpperCase() || "QUERY",
+        rowCount: isWriteOperation
+          ? (result.count ?? 0)
+          : Array.isArray(result)
+            ? result.length
+            : 0,
+        command,
+        affectedRows: result.count ?? 0,
+        success: true,
       };
 
       return {
