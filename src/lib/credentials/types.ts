@@ -11,7 +11,6 @@ export type CredentialType =
   | "http_bearer"
   | "http_api_key"
   | "http_basic"
-  | "smtp"
   | "webhook"
   | "custom";
 
@@ -42,14 +41,6 @@ export interface HttpBasicCredentialData {
   password: string;
 }
 
-export interface SmtpCredentialData {
-  host: string;
-  port: number;
-  user: string;
-  password: string;
-  secure?: boolean;
-}
-
 export interface WebhookCredentialData {
   secret: string;
   headerName?: string;
@@ -65,7 +56,6 @@ export type CredentialData =
   | HttpBearerCredentialData
   | HttpApiKeyCredentialData
   | HttpBasicCredentialData
-  | SmtpCredentialData
   | WebhookCredentialData
   | CustomCredentialData;
 
@@ -75,7 +65,6 @@ export interface CredentialDataMap {
   http_bearer: HttpBearerCredentialData;
   http_api_key: HttpApiKeyCredentialData;
   http_basic: HttpBasicCredentialData;
-  smtp: SmtpCredentialData;
   webhook: WebhookCredentialData;
   custom: CustomCredentialData;
 }
@@ -260,43 +249,6 @@ export const CREDENTIAL_TYPE_META: Record<CredentialType, CredentialTypeMeta> =
           label: "Password",
           type: "password",
           required: true,
-        },
-      ],
-    },
-    smtp: {
-      type: "smtp",
-      label: "SMTP Server",
-      description: "Email server configuration",
-      icon: "Mail",
-      fields: [
-        {
-          name: "host",
-          label: "Host",
-          type: "text",
-          required: true,
-          placeholder: "smtp.example.com",
-        },
-        {
-          name: "port",
-          label: "Port",
-          type: "number",
-          required: true,
-          placeholder: "587",
-          defaultValue: 587,
-        },
-        { name: "user", label: "Username", type: "text", required: true },
-        {
-          name: "password",
-          label: "Password",
-          type: "password",
-          required: true,
-        },
-        {
-          name: "secure",
-          label: "Use TLS",
-          type: "boolean",
-          required: false,
-          defaultValue: true,
         },
       ],
     },

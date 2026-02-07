@@ -7,7 +7,6 @@ import { decrypt } from "@/lib/credentials/encryption";
 import type {
   CredentialData,
   PostgresCredentialData,
-  SmtpCredentialData,
   HttpBearerCredentialData,
   HttpApiKeyCredentialData,
   HttpBasicCredentialData,
@@ -63,9 +62,6 @@ export const Route = createFileRoute("/api/credentials/$id/test")({
           switch (credential.type) {
             case "postgres":
               return await testPostgres(data as PostgresCredentialData);
-
-            case "smtp":
-              return await testSmtp(data as SmtpCredentialData);
 
             case "http_bearer":
             case "http_api_key":
@@ -139,45 +135,6 @@ async function testPostgres(data: PostgresCredentialData): Promise<Response> {
     });
   } catch (error) {
     await sql.end();
-    throw error;
-  }
-}
-
-async function testSmtp(data: SmtpCredentialData): Promise<Response> {
-  // Dynamic import for nodemailer - using type assertion for optional dependency
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const nodemailer = await (import("nodemailer" as any) as Promise<any>);
-    const transporter = nodemailer.default.createTransport({
-      host: data.host,
-      port: data.port,
-      secure: data.secure,
-      auth: {
-        user: data.user,
-        pass: data.password,
-      },
-      connectionTimeout: 5000,
-    });
-
-    await transporter.verify();
-    transporter.close();
-
-    return Response.json({
-      success: true,
-      message: "Successfully connected to SMTP server",
-    });
-  } catch (error) {
-    // If nodemailer is not installed, provide a helpful message
-    if (
-      error instanceof Error &&
-      error.message.includes("Cannot find module")
-    ) {
-      return Response.json({
-        success: false,
-        error:
-          "SMTP testing requires nodemailer package. Install with: npm install nodemailer",
-      });
-    }
     throw error;
   }
 }
