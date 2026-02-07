@@ -14,20 +14,19 @@ export interface SlackWorkspace {
   teamName: string;
 }
 
-/**
- * Get Slack OAuth authorization URL
- */
 export function getSlackAuthUrl(state: string): string {
   const clientId = process.env.SLACK_CLIENT_ID;
   const redirectUri = process.env.SLACK_REDIRECT_URI;
-  const scopes = ["chat:write", "channels:read", "groups:read"].join(",");
+  const scopes = [
+    "chat:write",
+    "channels:read",
+    "channels:join",
+    "groups:read",
+  ].join(",");
 
   return `https://slack.com/oauth/v2/authorize?client_id=${clientId}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectUri || "")}&state=${state}`;
 }
 
-/**
- * Exchange OAuth code for access token
- */
 export async function exchangeSlackCode(code: string): Promise<{
   accessToken: string;
   teamId: string;
@@ -66,15 +65,11 @@ export async function exchangeSlackCode(code: string): Promise<{
   };
 }
 
-/**
- * Fetch channels from Slack workspace
- */
 export async function fetchSlackChannels(
   accessToken: string,
 ): Promise<SlackChannel[]> {
   const channels: SlackChannel[] = [];
 
-  // Fetch public channels
   const publicResponse = await fetch(
     "https://slack.com/api/conversations.list?types=public_channel&limit=200",
     {
@@ -94,7 +89,6 @@ export async function fetchSlackChannels(
     }
   }
 
-  // Fetch private channels
   const privateResponse = await fetch(
     "https://slack.com/api/conversations.list?types=private_channel&limit=200",
     {
