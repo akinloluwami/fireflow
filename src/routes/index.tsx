@@ -76,7 +76,7 @@ function LandingPage() {
               workflow automation
             </span>
             <br />
-            she told you not to worry about.
+            platform she told you not to worry about.
           </h1>
 
           <p className="text-lg md:text-xl text-gray-500 mb-6 max-w-2xl mx-auto font-medium">
