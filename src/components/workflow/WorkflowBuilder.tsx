@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { TamboProvider } from "@tambo-ai/react";
 import { ReactFlowProvider } from "@xyflow/react";
 import { WorkflowCanvas } from "./WorkflowCanvas";
@@ -71,6 +71,37 @@ export function WorkflowBuilder({
   const lastExecutionIdRef = useRef<string | null>(null);
   const saveDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
+
+  // Config panel resizing
+  const [configPanelWidth, setConfigPanelWidth] = useState(320);
+  const isResizingRef = useRef(false);
+
+  const handleResizeStart = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      isResizingRef.current = true;
+
+      const startX = e.clientX;
+      const startWidth = configPanelWidth;
+
+      const handleMouseMove = (e: MouseEvent) => {
+        if (!isResizingRef.current) return;
+        const delta = startX - e.clientX;
+        const newWidth = Math.min(Math.max(startWidth + delta, 280), 600);
+        setConfigPanelWidth(newWidth);
+      };
+
+      const handleMouseUp = () => {
+        isResizingRef.current = false;
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+      };
+
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    },
+    [configPanelWidth],
+  );
 
   // Validate nodes whenever the workflow changes
   useEffect(() => {
@@ -558,7 +589,15 @@ export function WorkflowBuilder({
             </div>
 
             {selectedNodeId && (
-              <div className="shrink-0 w-72 overflow-hidden bg-white border-l border-gray-200">
+              <div
+                className="shrink-0 overflow-hidden bg-white border-l border-gray-200 relative group"
+                style={{ width: configPanelWidth }}
+              >
+                {/* Resize handle */}
+                <div
+                  className="absolute left-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-accent/30 transition-colors z-10"
+                  onMouseDown={handleResizeStart}
+                />
                 <NodeConfigPanel />
               </div>
             )}
