@@ -192,15 +192,54 @@ export function VariablePicker({
         // For loop nodes, use "loop" source so it generates {{ loop.item }} syntax
         const source = isLoopNode ? "loop" : "nodes";
 
+        // Build children from output schema
+        const outputChildren = nodeOutput
+          ? buildTreeFromData(nodeOutput, schema, ["output"], source, node.id)
+          : buildChildren(schema, ["output"], source, node.id);
+
+        // Add error and success fields for all nodes
+        const metaFields: TreeNode[] = [
+          {
+            key: "error",
+            path: ["error"],
+            schema: {
+              type: "string",
+              description: "Error message if node failed",
+              example: null,
+            },
+            source,
+            nodeId: node.id,
+          },
+          {
+            key: "success",
+            path: ["success"],
+            schema: {
+              type: "boolean",
+              description: "Whether the node executed successfully",
+              example: true,
+            },
+            source,
+            nodeId: node.id,
+          },
+        ];
+
         tree.nodes.push({
           key: node.id,
           path: [],
           schema,
           source,
           nodeId: node.id,
-          children: nodeOutput
-            ? buildTreeFromData(nodeOutput, schema, [], source, node.id)
-            : buildChildren(schema, [], source, node.id),
+          children: [
+            {
+              key: "output",
+              path: ["output"],
+              schema,
+              source,
+              nodeId: node.id,
+              children: outputChildren,
+            },
+            ...metaFields,
+          ],
         });
       }
     }
