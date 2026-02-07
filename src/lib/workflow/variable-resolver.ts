@@ -272,7 +272,7 @@ export function buildVariablePath(
   }
 
   if (source === "nodes" && nodeId) {
-    return `{{ nodes.${nodeId}.output.${path.join(".")} }}`;
+    return `{{ nodes.${nodeId}.${path.join(".")} }}`;
   }
 
   if (source === "execution") {
