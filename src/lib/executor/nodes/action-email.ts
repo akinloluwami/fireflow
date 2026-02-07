@@ -1,7 +1,3 @@
-/**
- * Email Executor (using Resend)
- */
-
 import type { WorkflowNode, SendEmailConfig } from "@/lib/workflow/types";
 import type { ExecutionContext, NodeExecutionResult } from "../engine";
 import { interpolate } from "../interpolate";
