@@ -56,11 +56,14 @@ export interface VariableRef {
   /** Full path: "trigger.body.email" or "nodes.abc123.output.data" */
   path: string;
 
-  /** Source type: "trigger" | "nodes" | "execution" | "loop" */
-  source: "trigger" | "nodes" | "execution" | "loop";
+  /** Source type: "trigger" | "nodes" | "execution" | "loop" | "credentials" */
+  source: "trigger" | "nodes" | "execution" | "loop" | "credentials";
 
   /** For node references, the node ID */
   nodeId?: string;
+
+  /** For credential references, the credential ID */
+  credentialId?: string;
 
   /** The remaining path after the source */
   subPath: string[];
@@ -137,6 +140,17 @@ export function parseVariablePath(path: string): VariableRef | null {
       path,
       source: "loop",
       subPath: parts.slice(1),
+    };
+  }
+
+  if (source === "credentials") {
+    if (parts.length < 2) return null;
+    const credentialId = parts[1];
+    return {
+      path,
+      source: "credentials",
+      credentialId,
+      subPath: parts.slice(2),
     };
   }
 
@@ -259,8 +273,8 @@ export function hasVariables(input: string): boolean {
  * Build a variable path string for insertion
  */
 export function buildVariablePath(
-  source: "trigger" | "nodes" | "execution" | "loop",
-  nodeId: string | null,
+  source: "trigger" | "nodes" | "execution" | "loop" | "credentials",
+  nodeIdOrCredentialId: string | null,
   path: string[],
 ): string {
   if (source === "trigger") {
@@ -271,12 +285,16 @@ export function buildVariablePath(
     return `{{ loop.${path.join(".")} }}`;
   }
 
-  if (source === "nodes" && nodeId) {
-    return `{{ nodes.${nodeId}.${path.join(".")} }}`;
+  if (source === "nodes" && nodeIdOrCredentialId) {
+    return `{{ nodes.${nodeIdOrCredentialId}.${path.join(".")} }}`;
   }
 
   if (source === "execution") {
     return `{{ execution.${path.join(".")} }}`;
+  }
+
+  if (source === "credentials" && nodeIdOrCredentialId) {
+    return `{{ credentials.${nodeIdOrCredentialId}.${path.join(".")} }}`;
   }
 
   return "";
