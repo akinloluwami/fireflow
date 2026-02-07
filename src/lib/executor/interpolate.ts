@@ -9,7 +9,10 @@
 
 export interface InterpolationContext {
   trigger: Record<string, unknown>;
-  nodes: Record<string, { output: unknown }>;
+  nodes: Record<
+    string,
+    { output: unknown; error?: string | null; success?: boolean }
+  >;
   variables: Record<string, unknown>;
   loop?: Record<string, unknown>;
 }
@@ -25,8 +28,11 @@ export function interpolate(
 ): string {
   return template.replace(VARIABLE_PATTERN, (match, path) => {
     const value = getNestedValue(context, path.trim());
-    if (value === undefined || value === null) {
-      return match; // Keep original if not found
+    if (value === undefined) {
+      return match; // Keep original if path not found
+    }
+    if (value === null) {
+      return ""; // Return empty string for null values
     }
     return String(value);
   });
