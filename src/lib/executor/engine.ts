@@ -457,15 +457,16 @@ export async function getIntegrationToken(
   userId: string,
   provider: string,
 ): Promise<string | null> {
-  const integration = await db
+  const [integration] = await db
     .select()
     .from(integrations)
-    .where(eq(integrations.userId, userId))
+    .where(
+      and(eq(integrations.userId, userId), eq(integrations.provider, provider)),
+    )
     .limit(1);
 
-  const match = integration.find((i) => i.provider === provider);
-  if (!match?.credentials) return null;
+  if (!integration?.credentials) return null;
 
-  const creds = match.credentials as Record<string, unknown>;
+  const creds = integration.credentials as Record<string, unknown>;
   return (creds.accessToken as string) || null;
 }
