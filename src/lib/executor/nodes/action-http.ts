@@ -11,7 +11,8 @@ export async function executeHttp(
   context: ExecutionContext,
 ): Promise<NodeExecutionResult> {
   const config = node.data.config as HttpRequestConfig;
-  const { method, url, headers, body, authentication } = config;
+  const { method, url, headers, body, authentication, authCredentialId } =
+    config;
 
   if (!url) {
     return {
@@ -38,22 +39,51 @@ export async function executeHttp(
       : {}),
   };
 
-  // Handle authentication
-  if (authentication === "bearer") {
-    const extConfig = config as unknown as Record<string, unknown>;
-    const token = extConfig.token as string;
-    if (token) {
-      requestHeaders["Authorization"] = `Bearer ${interpolate(
-        token,
-        context.interpolation,
-      )}`;
+  // Handle authentication using credentials
+  if (authentication && authentication !== "none" && authCredentialId) {
+    const credential = context.interpolation.credentials?.[authCredentialId];
+
+    if (credential) {
+      if (authentication === "bearer") {
+        const token = credential.token as string;
+        if (token) {
+          requestHeaders["Authorization"] = `Bearer ${token}`;
+        }
+      } else if (authentication === "api_key") {
+        const key = credential.key as string;
+        const value = credential.value as string;
+        const addTo = credential.addTo as string;
+
+        if (key && value) {
+          if (addTo === "header") {
+            requestHeaders[key] = value;
+          }
+          // For query params, we'll append to URL below
+        }
+      } else if (authentication === "basic") {
+        const username = credential.username as string;
+        const password = credential.password as string;
+        if (username && password) {
+          const encoded = Buffer.from(`${username}:${password}`).toString(
+            "base64",
+          );
+          requestHeaders["Authorization"] = `Basic ${encoded}`;
+        }
+      }
     }
-  } else if (authentication === "api-key") {
-    const extConfig = config as unknown as Record<string, unknown>;
-    const apiKey = extConfig.apiKey as string;
-    const apiKeyHeader = (extConfig.apiKeyHeader as string) || "X-API-Key";
-    if (apiKey) {
-      requestHeaders[apiKeyHeader] = interpolate(apiKey, context.interpolation);
+  }
+
+  // Handle API key in query params
+  let finalUrl = interpolatedUrl;
+  if (authentication === "api_key" && authCredentialId) {
+    const credential = context.interpolation.credentials?.[authCredentialId];
+    if (credential && credential.addTo === "query") {
+      const key = credential.key as string;
+      const value = credential.value as string;
+      if (key && value) {
+        const separator = finalUrl.includes("?") ? "&" : "?";
+        finalUrl = `${finalUrl}${separator}${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+      }
     }
   }
 
@@ -67,7 +97,7 @@ export async function executeHttp(
       fetchOptions.body = interpolatedBody;
     }
 
-    const response = await fetch(interpolatedUrl, fetchOptions);
+    const response = await fetch(finalUrl, fetchOptions);
     const contentType = response.headers.get("content-type") || "";
 
     let responseData: unknown;
