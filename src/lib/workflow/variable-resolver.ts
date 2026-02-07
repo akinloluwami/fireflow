@@ -23,6 +23,8 @@ export interface ExecutionContext {
     string,
     {
       output: unknown;
+      error?: string | null;
+      success?: boolean;
       executedAt: string;
       duration?: number;
     }
@@ -156,7 +158,7 @@ export function resolveVariable(
       break;
     case "nodes":
       if (!ref.nodeId) return undefined;
-      value = context.nodes[ref.nodeId]?.output;
+      value = context.nodes[ref.nodeId];
       break;
     case "execution":
       value = context.execution;
