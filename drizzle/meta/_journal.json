@@ -22,6 +22,13 @@
       "when": 1770403760722,
       "tag": "0002_lovely_surge",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1770458359572,
+      "tag": "0003_tiresome_patch",
+      "breakpoints": true
     }
   ]
 }
