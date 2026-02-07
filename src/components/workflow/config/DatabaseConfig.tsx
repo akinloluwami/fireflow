@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { ExpressionInput, ExpressionTextarea } from "./ExpressionInput";
-import { ChevronDown, ChevronUp, AlertCircle } from "lucide-react";
+import { ExpressionTextarea } from "./ExpressionInput";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { CredentialSelector } from "@/components/credentials";
 
 interface DatabaseConfigProps {
   config: Record<string, unknown>;
@@ -17,21 +18,15 @@ export function DatabaseConfig({
 
   return (
     <div className="space-y-4">
-      <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">
-          PostgreSQL Connection String
-        </label>
-        <ExpressionInput
-          value={(config.connectionString as string) || ""}
-          onChange={(value) => onChange("connectionString", value)}
-          nodeId={nodeId}
-          placeholder="postgresql://user:password@localhost:5432/database"
-        />
-        <p className="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
-          <AlertCircle size={10} />
-          Use environment variables for production credentials
-        </p>
-      </div>
+      {/* Credential Selector */}
+      <CredentialSelector
+        type="postgres"
+        value={config.credentialId as string | undefined}
+        onChange={(credentialId) => onChange("credentialId", credentialId)}
+        label="PostgreSQL Credential"
+        placeholder="Select a database credential..."
+        required
+      />
 
       <div>
         <label className="block text-xs font-medium text-gray-600 mb-1">
