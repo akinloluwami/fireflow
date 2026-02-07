@@ -39,7 +39,6 @@ export function IntegrationsSection() {
   return (
     <section className="py-24 px-6">
       <div className="max-w-5xl mx-auto">
-        {/* Header */}
         <div className="text-center mb-16">
           <p className="text-sm font-medium text-accent uppercase tracking-wider mb-3">
             Integrations
@@ -53,7 +52,6 @@ export function IntegrationsSection() {
           </p>
         </div>
 
-        {/* Integration Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {integrations.map((integration) => (
             <div
@@ -61,7 +59,6 @@ export function IntegrationsSection() {
               className="group relative rounded-3xl p-8 transition-all duration-300 hover:shadow-lg"
               style={{ backgroundColor: integration.bgColor }}
             >
-              {/* Icon */}
               <div
                 className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
                 style={{ backgroundColor: `${integration.color}15` }}
@@ -71,7 +68,6 @@ export function IntegrationsSection() {
                 </div>
               </div>
 
-              {/* Content */}
               <h3 className="text-xl font-semibold text-gray-800 mb-2">
                 {integration.name}
               </h3>
@@ -79,7 +75,6 @@ export function IntegrationsSection() {
                 {integration.description}
               </p>
 
-              {/* Hover indicator */}
               <div
                 className="absolute top-8 right-8 w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                 style={{ backgroundColor: integration.color }}
@@ -102,7 +97,6 @@ export function IntegrationsSection() {
           ))}
         </div>
 
-        {/* Coming soon hint */}
         <p className="text-center text-gray-400 text-sm mt-10">
           More integrations coming soon — Email, Notion, Airtable, and more.
         </p>
