@@ -82,3 +82,18 @@ export const workflowWebhooks = pgTable("workflow_webhooks", {
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+// Credentials for manual entry (database connections, API keys, etc.)
+// NOT for OAuth integrations (Discord, Slack) - those use the integrations table
+export const credentials = pgTable("credentials", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  name: text("name").notNull(), // User-friendly name: "Production DB"
+  type: text("type").notNull(), // 'postgres' | 'http_bearer' | 'http_api_key' | 'http_basic' | 'smtp' | 'webhook' | 'custom'
+  encryptedData: text("encrypted_data").notNull(), // Encrypted JSON blob
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
