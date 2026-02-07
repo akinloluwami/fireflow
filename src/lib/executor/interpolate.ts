@@ -5,6 +5,7 @@
  * - {{trigger.fieldName}} - Form field value from trigger data
  * - {{nodes.nodeId.output}} - Output from a previous node
  * - {{variables.myVar}} - Custom variable set during execution
+ * - {{credentials.credId.field}} - Decrypted credential field value
  */
 
 export interface InterpolationContext {
@@ -15,6 +16,7 @@ export interface InterpolationContext {
   >;
   variables: Record<string, unknown>;
   loop?: Record<string, unknown>;
+  credentials?: Record<string, Record<string, unknown>>;
 }
 
 const VARIABLE_PATTERN = /\{\{([^}]+)\}\}/g;
@@ -100,5 +102,6 @@ export function createEmptyContext(): InterpolationContext {
     trigger: {},
     nodes: {},
     variables: {},
+    credentials: {},
   };
 }
