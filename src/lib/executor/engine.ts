@@ -17,6 +17,7 @@ import { executeSlack } from "./nodes/action-slack";
 import { executeDiscord } from "./nodes/action-discord";
 import { executeHttp } from "./nodes/action-http";
 import { executeEmail } from "./nodes/action-email";
+import { executeDatabase } from "./nodes/action-database";
 import { executeSetVariable } from "./nodes/transform-variable";
 import { executeWait } from "./nodes/others-wait";
 import { executeCode } from "./nodes/action-code";
@@ -264,6 +265,10 @@ async function executeNode(
 
       case "code":
         result = await executeCode(node, context);
+        break;
+
+      case "database-query":
+        result = await executeDatabase(node, context);
         break;
 
       // Transforms
