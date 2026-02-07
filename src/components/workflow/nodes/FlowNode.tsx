@@ -29,6 +29,7 @@ function FlowNodeComponent({
   const { removeNode, duplicateNode, selectNode, nodeErrors } =
     useWorkflowStore();
   const [showActions, setShowActions] = useState(false);
+  const [showErrorTooltip, setShowErrorTooltip] = useState(false);
 
   const errors = nodeErrors[id] || [];
   const hasErrors = errors.length > 0;
@@ -173,9 +174,27 @@ function FlowNodeComponent({
         {hasErrors && (
           <div
             className="absolute -bottom-1 -right-1 w-5 h-5 bg-red-500 rounded-full 
-                          flex items-center justify-center border-2 border-white shadow-sm"
+                          flex items-center justify-center border-2 border-white shadow-sm cursor-help"
+            onMouseEnter={() => setShowErrorTooltip(true)}
+            onMouseLeave={() => setShowErrorTooltip(false)}
           >
             <AlertTriangle size={10} className="text-white" />
+
+            {/* Error Tooltip */}
+            {showErrorTooltip && (
+              <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50 w-48">
+                <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-2">
+                  <p className="text-xs font-medium text-gray-700 mb-1">
+                    Issues:
+                  </p>
+                  <ul className="text-[11px] text-gray-600 space-y-0.5">
+                    {errors.map((error, i) => (
+                      <li key={i}>• {error}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
