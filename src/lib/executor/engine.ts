@@ -4,11 +4,13 @@ import {
   workflowExecutions,
   workflowNodeExecutions,
   integrations,
+  credentials,
 } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 import { v4 as uuid } from "uuid";
 import type { WorkflowNode, WorkflowEdge } from "@/lib/workflow/types";
 import { InterpolationContext, createEmptyContext } from "./interpolate";
+import { decrypt } from "@/lib/credentials/encryption";
 
 import { executeIfElse } from "./nodes/condition-if";
 import { executeSwitch } from "./nodes/condition-switch";
@@ -51,6 +53,85 @@ export interface NodeExecutionResult {
     isLast: boolean;
   }>;
 }
+
+/**
+ * Extract all credential IDs referenced in workflow node configs
+ * Looks for {{ credentials.UUID.field }} patterns AND direct credential ID fields
+ */
+function extractCredentialIds(nodes: WorkflowNode[]): string[] {
+  const credentialIds = new Set<string>();
+
+  // UUID pattern for direct credential ID fields
+  const uuidPattern =
+    /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
+
+  function scanValue(value: unknown, key?: string): void {
+    if (typeof value === "string") {
+      // Check for direct credential ID fields (like authCredentialId, credentialId)
+      if (
+        key &&
+        (key.toLowerCase().includes("credentialid") || key === "credential") &&
+        uuidPattern.test(value)
+      ) {
+        credentialIds.add(value);
+      }
+
+      // Also scan for {{ credentials.UUID.field }} patterns
+      const pattern = /\{\{\s*credentials\.([a-f0-9-]+)\./gi;
+      let match;
+      while ((match = pattern.exec(value)) !== null) {
+        credentialIds.add(match[1]);
+      }
+    } else if (Array.isArray(value)) {
+      value.forEach((v) => scanValue(v));
+    } else if (value !== null && typeof value === "object") {
+      const obj = value as Record<string, unknown>;
+      Object.entries(obj).forEach(([k, v]) => scanValue(v, k));
+    }
+  }
+
+  for (const node of nodes) {
+    if (node.data.config) {
+      scanValue(node.data.config);
+    }
+  }
+
+  return Array.from(credentialIds);
+}
+
+/**
+ * Load and decrypt credentials by IDs for a user
+ */
+async function loadCredentials(
+  credentialIds: string[],
+  userId: string,
+): Promise<Record<string, Record<string, unknown>>> {
+  if (credentialIds.length === 0) return {};
+
+  const result: Record<string, Record<string, unknown>> = {};
+
+  const rows = await db
+    .select()
+    .from(credentials)
+    .where(
+      and(
+        inArray(credentials.id, credentialIds),
+        eq(credentials.userId, userId),
+      ),
+    );
+
+  for (const row of rows) {
+    try {
+      const decrypted = decrypt(row.encryptedData);
+      result[row.id] = decrypted as Record<string, unknown>;
+    } catch (error) {
+      console.error(`Failed to decrypt credential ${row.id}:`, error);
+    }
+  }
+
+  return result;
+}
+
 export async function executeWorkflow(
   workflowId: string,
   executionId: string,
@@ -80,6 +161,10 @@ export async function executeWorkflow(
     const edges = workflow[0].edges as WorkflowEdge[];
     const userId = workflow[0].userId || "";
 
+    // Extract and load any credentials referenced in node configs
+    const credentialIds = extractCredentialIds(nodes);
+    const loadedCredentials = await loadCredentials(credentialIds, userId);
+
     // Create execution context
     const context: ExecutionContext = {
       workflowId,
@@ -89,6 +174,7 @@ export async function executeWorkflow(
       interpolation: {
         ...createEmptyContext(),
         trigger: triggerData,
+        credentials: loadedCredentials,
       },
     };
 
