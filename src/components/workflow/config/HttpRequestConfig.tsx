@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ExpressionInput } from "./ExpressionInput";
-import { Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Trash2, ChevronDown, ChevronUp, Shield } from "lucide-react";
+import { CredentialSelector } from "@/components/credentials";
 
 interface HttpRequestConfigProps {
   config: Record<string, unknown>;
@@ -18,13 +19,26 @@ const HTTP_METHODS = [
   "OPTIONS",
 ];
 
+const AUTH_TYPES = [
+  { value: "none", label: "No Authentication" },
+  { value: "bearer", label: "Bearer Token" },
+  { value: "api_key", label: "API Key" },
+  { value: "basic", label: "Basic Auth" },
+];
+
 export function HttpRequestConfig({
   config,
   onChange,
   nodeId,
 }: HttpRequestConfigProps) {
+  const authentication = (config.authentication as string) || "none";
+  const authCredentialId = config.authCredentialId as string | undefined;
+
   const [showHeaders, setShowHeaders] = useState(false);
   const [showBody, setShowBody] = useState(false);
+  const [showAuth, setShowAuth] = useState(
+    Boolean(config.authentication && config.authentication !== "none"),
+  );
 
   const headers = (config.headers as Record<string, string>) || {};
   const headerEntries = Object.entries(headers);
@@ -215,6 +229,103 @@ export function HttpRequestConfig({
           )}
         </div>
       )}
+
+      {/* Authentication Section */}
+      <div className="border border-gray-200 rounded-lg overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setShowAuth(!showAuth)}
+          className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 hover:bg-gray-100 transition-colors"
+        >
+          <span className="text-xs font-medium text-gray-700 flex items-center gap-1.5">
+            <Shield size={12} className="text-gray-500" />
+            Authentication
+            {authentication !== "none" && (
+              <span className="text-[10px] text-accent bg-accent/10 px-1.5 py-0.5 rounded">
+                {AUTH_TYPES.find((a) => a.value === authentication)?.label ??
+                  ""}
+              </span>
+            )}
+          </span>
+          {showAuth ? (
+            <ChevronUp size={14} className="text-gray-400" />
+          ) : (
+            <ChevronDown size={14} className="text-gray-400" />
+          )}
+        </button>
+
+        {showAuth && (
+          <div className="p-3 space-y-3 bg-white">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Auth Type
+              </label>
+              <select
+                value={authentication}
+                onChange={(e) => {
+                  onChange("authentication", e.target.value);
+                  // Clear credential when changing auth type
+                  onChange("authCredentialId", undefined);
+                }}
+                className="w-full px-2.5 py-1.5 text-xs bg-white border border-gray-200 rounded-md
+                           focus:outline-none focus:ring-1 focus:ring-accent/30"
+              >
+                {AUTH_TYPES.map((auth) => (
+                  <option key={auth.value} value={auth.value}>
+                    {auth.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Bearer Token Auth */}
+            {authentication === "bearer" && (
+              <CredentialSelector
+                type="http_bearer"
+                value={authCredentialId}
+                onChange={(credentialId) =>
+                  onChange("authCredentialId", credentialId)
+                }
+                label="Bearer Token Credential"
+                placeholder="Select a bearer token..."
+              />
+            )}
+
+            {/* API Key Auth */}
+            {authentication === "api_key" && (
+              <CredentialSelector
+                type="http_api_key"
+                value={authCredentialId}
+                onChange={(credentialId) =>
+                  onChange("authCredentialId", credentialId)
+                }
+                label="API Key Credential"
+                placeholder="Select an API key..."
+              />
+            )}
+
+            {/* Basic Auth */}
+            {authentication === "basic" && (
+              <CredentialSelector
+                type="http_basic"
+                value={authCredentialId}
+                onChange={(credentialId) =>
+                  onChange("authCredentialId", credentialId)
+                }
+                label="Basic Auth Credential"
+                placeholder="Select basic auth credentials..."
+              />
+            )}
+
+            {authentication !== "none" && !authCredentialId && (
+              <p className="text-[10px] text-amber-600 bg-amber-50 p-2 rounded">
+                Select a credential or create one to use this authentication
+                method.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Timeout */}
       <div>
