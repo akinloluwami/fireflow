@@ -15,9 +15,11 @@ import { Route as AppWorkflowsIndexRouteImport } from './routes/app/workflows/in
 import { Route as AppIntegrationsIndexRouteImport } from './routes/app/integrations/index'
 import { Route as AppCredentialsIndexRouteImport } from './routes/app/credentials/index'
 import { Route as ApiWorkflowsIndexRouteImport } from './routes/api/workflows/index'
+import { Route as ApiCredentialsIndexRouteImport } from './routes/api/credentials/index'
 import { Route as AppWorkflowIdRouteImport } from './routes/app_.workflow/$id'
 import { Route as AppWorkflowLayoutRouteImport } from './routes/app/workflow/_layout'
 import { Route as ApiIntegrationsStatusRouteImport } from './routes/api/integrations/status'
+import { Route as ApiCredentialsIdRouteImport } from './routes/api/credentials/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiWorkflowsIdIndexRouteImport } from './routes/api/workflows/$id/index'
 import { Route as ApiWorkflowsIdTestRouteImport } from './routes/api/workflows/$id/test'
@@ -32,6 +34,7 @@ import { Route as ApiIntegrationsDiscordDisconnectRouteImport } from './routes/a
 import { Route as ApiIntegrationsDiscordConnectRouteImport } from './routes/api/integrations/discord.connect'
 import { Route as ApiIntegrationsDiscordChannelsRouteImport } from './routes/api/integrations/discord.channels'
 import { Route as ApiIntegrationsDiscordCallbackRouteImport } from './routes/api/integrations/discord.callback'
+import { Route as ApiCredentialsIdTestRouteImport } from './routes/api/credentials/$id.test'
 import { Route as ApiWorkflowsIdExecutionsLatestRouteImport } from './routes/api/workflows/$id/executions.latest'
 
 const AppRoute = AppRouteImport.update({
@@ -64,6 +67,11 @@ const ApiWorkflowsIndexRoute = ApiWorkflowsIndexRouteImport.update({
   path: '/api/workflows/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCredentialsIndexRoute = ApiCredentialsIndexRouteImport.update({
+  id: '/api/credentials/',
+  path: '/api/credentials/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppWorkflowIdRoute = AppWorkflowIdRouteImport.update({
   id: '/app_/workflow/$id',
   path: '/app/workflow/$id',
@@ -77,6 +85,11 @@ const AppWorkflowLayoutRoute = AppWorkflowLayoutRouteImport.update({
 const ApiIntegrationsStatusRoute = ApiIntegrationsStatusRouteImport.update({
   id: '/api/integrations/status',
   path: '/api/integrations/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCredentialsIdRoute = ApiCredentialsIdRouteImport.update({
+  id: '/api/credentials/$id',
+  path: '/api/credentials/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -160,6 +173,11 @@ const ApiIntegrationsDiscordCallbackRoute =
     path: '/api/integrations/discord/callback',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiCredentialsIdTestRoute = ApiCredentialsIdTestRouteImport.update({
+  id: '/test',
+  path: '/test',
+  getParentRoute: () => ApiCredentialsIdRoute,
+} as any)
 const ApiWorkflowsIdExecutionsLatestRoute =
   ApiWorkflowsIdExecutionsLatestRouteImport.update({
     id: '/api/workflows/$id/executions/latest',
@@ -171,13 +189,16 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/credentials/$id': typeof ApiCredentialsIdRouteWithChildren
   '/api/integrations/status': typeof ApiIntegrationsStatusRoute
   '/app/workflow': typeof AppWorkflowLayoutRoute
   '/app/workflow/$id': typeof AppWorkflowIdRoute
+  '/api/credentials/': typeof ApiCredentialsIndexRoute
   '/api/workflows/': typeof ApiWorkflowsIndexRoute
   '/app/credentials/': typeof AppCredentialsIndexRoute
   '/app/integrations/': typeof AppIntegrationsIndexRoute
   '/app/workflows/': typeof AppWorkflowsIndexRoute
+  '/api/credentials/$id/test': typeof ApiCredentialsIdTestRoute
   '/api/integrations/discord/callback': typeof ApiIntegrationsDiscordCallbackRoute
   '/api/integrations/discord/channels': typeof ApiIntegrationsDiscordChannelsRoute
   '/api/integrations/discord/connect': typeof ApiIntegrationsDiscordConnectRoute
@@ -197,13 +218,16 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/credentials/$id': typeof ApiCredentialsIdRouteWithChildren
   '/api/integrations/status': typeof ApiIntegrationsStatusRoute
   '/app/workflow': typeof AppWorkflowLayoutRoute
   '/app/workflow/$id': typeof AppWorkflowIdRoute
+  '/api/credentials': typeof ApiCredentialsIndexRoute
   '/api/workflows': typeof ApiWorkflowsIndexRoute
   '/app/credentials': typeof AppCredentialsIndexRoute
   '/app/integrations': typeof AppIntegrationsIndexRoute
   '/app/workflows': typeof AppWorkflowsIndexRoute
+  '/api/credentials/$id/test': typeof ApiCredentialsIdTestRoute
   '/api/integrations/discord/callback': typeof ApiIntegrationsDiscordCallbackRoute
   '/api/integrations/discord/channels': typeof ApiIntegrationsDiscordChannelsRoute
   '/api/integrations/discord/connect': typeof ApiIntegrationsDiscordConnectRoute
@@ -224,13 +248,16 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/credentials/$id': typeof ApiCredentialsIdRouteWithChildren
   '/api/integrations/status': typeof ApiIntegrationsStatusRoute
   '/app/workflow/_layout': typeof AppWorkflowLayoutRoute
   '/app_/workflow/$id': typeof AppWorkflowIdRoute
+  '/api/credentials/': typeof ApiCredentialsIndexRoute
   '/api/workflows/': typeof ApiWorkflowsIndexRoute
   '/app/credentials/': typeof AppCredentialsIndexRoute
   '/app/integrations/': typeof AppIntegrationsIndexRoute
   '/app/workflows/': typeof AppWorkflowsIndexRoute
+  '/api/credentials/$id/test': typeof ApiCredentialsIdTestRoute
   '/api/integrations/discord/callback': typeof ApiIntegrationsDiscordCallbackRoute
   '/api/integrations/discord/channels': typeof ApiIntegrationsDiscordChannelsRoute
   '/api/integrations/discord/connect': typeof ApiIntegrationsDiscordConnectRoute
@@ -252,13 +279,16 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/api/auth/$'
+    | '/api/credentials/$id'
     | '/api/integrations/status'
     | '/app/workflow'
     | '/app/workflow/$id'
+    | '/api/credentials/'
     | '/api/workflows/'
     | '/app/credentials/'
     | '/app/integrations/'
     | '/app/workflows/'
+    | '/api/credentials/$id/test'
     | '/api/integrations/discord/callback'
     | '/api/integrations/discord/channels'
     | '/api/integrations/discord/connect'
@@ -278,13 +308,16 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/api/auth/$'
+    | '/api/credentials/$id'
     | '/api/integrations/status'
     | '/app/workflow'
     | '/app/workflow/$id'
+    | '/api/credentials'
     | '/api/workflows'
     | '/app/credentials'
     | '/app/integrations'
     | '/app/workflows'
+    | '/api/credentials/$id/test'
     | '/api/integrations/discord/callback'
     | '/api/integrations/discord/channels'
     | '/api/integrations/discord/connect'
@@ -304,13 +337,16 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/api/auth/$'
+    | '/api/credentials/$id'
     | '/api/integrations/status'
     | '/app/workflow/_layout'
     | '/app_/workflow/$id'
+    | '/api/credentials/'
     | '/api/workflows/'
     | '/app/credentials/'
     | '/app/integrations/'
     | '/app/workflows/'
+    | '/api/credentials/$id/test'
     | '/api/integrations/discord/callback'
     | '/api/integrations/discord/channels'
     | '/api/integrations/discord/connect'
@@ -331,8 +367,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiCredentialsIdRoute: typeof ApiCredentialsIdRouteWithChildren
   ApiIntegrationsStatusRoute: typeof ApiIntegrationsStatusRoute
   AppWorkflowIdRoute: typeof AppWorkflowIdRoute
+  ApiCredentialsIndexRoute: typeof ApiCredentialsIndexRoute
   ApiWorkflowsIndexRoute: typeof ApiWorkflowsIndexRoute
   ApiIntegrationsDiscordCallbackRoute: typeof ApiIntegrationsDiscordCallbackRoute
   ApiIntegrationsDiscordChannelsRoute: typeof ApiIntegrationsDiscordChannelsRoute
@@ -394,6 +432,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWorkflowsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/credentials/': {
+      id: '/api/credentials/'
+      path: '/api/credentials'
+      fullPath: '/api/credentials/'
+      preLoaderRoute: typeof ApiCredentialsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app_/workflow/$id': {
       id: '/app_/workflow/$id'
       path: '/app/workflow/$id'
@@ -413,6 +458,13 @@ declare module '@tanstack/react-router' {
       path: '/api/integrations/status'
       fullPath: '/api/integrations/status'
       preLoaderRoute: typeof ApiIntegrationsStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/credentials/$id': {
+      id: '/api/credentials/$id'
+      path: '/api/credentials/$id'
+      fullPath: '/api/credentials/$id'
+      preLoaderRoute: typeof ApiCredentialsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
@@ -513,6 +565,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiIntegrationsDiscordCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/credentials/$id/test': {
+      id: '/api/credentials/$id/test'
+      path: '/test'
+      fullPath: '/api/credentials/$id/test'
+      preLoaderRoute: typeof ApiCredentialsIdTestRouteImport
+      parentRoute: typeof ApiCredentialsIdRoute
+    }
     '/api/workflows/$id/executions/latest': {
       id: '/api/workflows/$id/executions/latest'
       path: '/api/workflows/$id/executions/latest'
@@ -539,12 +598,25 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface ApiCredentialsIdRouteChildren {
+  ApiCredentialsIdTestRoute: typeof ApiCredentialsIdTestRoute
+}
+
+const ApiCredentialsIdRouteChildren: ApiCredentialsIdRouteChildren = {
+  ApiCredentialsIdTestRoute: ApiCredentialsIdTestRoute,
+}
+
+const ApiCredentialsIdRouteWithChildren =
+  ApiCredentialsIdRoute._addFileChildren(ApiCredentialsIdRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiCredentialsIdRoute: ApiCredentialsIdRouteWithChildren,
   ApiIntegrationsStatusRoute: ApiIntegrationsStatusRoute,
   AppWorkflowIdRoute: AppWorkflowIdRoute,
+  ApiCredentialsIndexRoute: ApiCredentialsIndexRoute,
   ApiWorkflowsIndexRoute: ApiWorkflowsIndexRoute,
   ApiIntegrationsDiscordCallbackRoute: ApiIntegrationsDiscordCallbackRoute,
   ApiIntegrationsDiscordChannelsRoute: ApiIntegrationsDiscordChannelsRoute,
