@@ -104,12 +104,13 @@ export const nodeDefinitions: NodeDefinition[] = [
     type: "action",
     subType: "database-query",
     label: "Database Query",
-    description: "Execute SQL query",
+    description: "Execute PostgreSQL query",
     icon: "database",
     color: "#3b82f6",
     defaultConfig: {
+      databaseType: "postgresql",
+      connectionString: "",
       query: "",
-      connection: "",
     },
   },
   {
