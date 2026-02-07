@@ -36,12 +36,34 @@ export async function executeSlack(
   // Interpolate variables in message
   const interpolatedMessage = interpolate(message, context.interpolation);
 
+  console.log("[Slack] Sending message to channel:", channel);
+  console.log("[Slack] Message content:", interpolatedMessage);
+
   try {
+    // First, try to join the channel (in case bot isn't a member yet)
+    const joinResponse = await fetch(
+      "https://slack.com/api/conversations.join",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${slackToken}`,
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify({ channel }),
+      },
+    );
+    const joinData = await joinResponse.json();
+    console.log(
+      "[Slack] Join channel response:",
+      joinData.ok ? "success" : joinData.error,
+    );
+
+    // Now send the message
     const response = await fetch("https://slack.com/api/chat.postMessage", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${slackToken}`,
-        "Content-Type": "application/json",
+        "Content-Type": "application/json; charset=utf-8",
       },
       body: JSON.stringify({
         channel,
@@ -50,8 +72,10 @@ export async function executeSlack(
     });
 
     const data = await response.json();
+    console.log("[Slack] API response:", JSON.stringify(data, null, 2));
 
     if (!data.ok) {
+      console.error("[Slack] API error:", data.error, data);
       return {
         success: false,
         output: data,
