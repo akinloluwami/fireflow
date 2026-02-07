@@ -84,6 +84,15 @@ export interface CodeConfig {
   code: string;
 }
 
+export interface DatabaseQueryConfig {
+  databaseType: "postgresql";
+  connectionString: string;
+  query: string;
+  params?: unknown[];
+  timeout?: number;
+  maxRows?: number;
+}
+
 export type NodeConfig =
   | WebhookConfig
   | ScheduleConfig
