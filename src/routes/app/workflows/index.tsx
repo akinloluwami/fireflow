@@ -13,7 +13,6 @@ import {
   Clock,
   ArrowRight,
 } from "lucide-react";
-import { UserMenu } from "@/components/UserMenu";
 
 interface WorkflowItem {
   id: string;
@@ -109,24 +108,11 @@ function WorkflowsListPage() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 via-white to-gray-50">
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 group">
-            <span className="text-lg font-bold text-gray-900 group-hover:text-accent transition-colors">
-              FireFlow
-            </span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <UserMenu user={session?.user!} />
-          </div>
-        </div>
-      </header>
-
       <main className="max-w-6xl mx-auto px-6 py-12">
         <div className="flex items-end justify-between mb-10">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              My Workflows
+            <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+              Workflows
             </h1>
             <p className="text-gray-500">
               Create and manage your automation workflows
