@@ -19,6 +19,7 @@ import {
   FunctionConfig,
   SplitConfig,
   AggregateConfig,
+  DatabaseConfig,
 } from "./config";
 
 type SaveStatus = "idle" | "saving" | "saved";
@@ -406,6 +407,14 @@ export function NodeConfigPanel() {
           />
         )}
 
+        {selectedNode.subType === "database-query" && (
+          <DatabaseConfig
+            config={localConfig}
+            onChange={handleChange}
+            nodeId={selectedNode.id}
+          />
+        )}
+
         {/* Generic config for other node types */}
         {selectedNode.type !== "trigger" &&
           selectedNode.subType !== "send-slack" &&
@@ -422,6 +431,7 @@ export function NodeConfigPanel() {
           selectedNode.subType !== "function" &&
           selectedNode.subType !== "split" &&
           selectedNode.subType !== "aggregate" &&
+          selectedNode.subType !== "database-query" &&
           Object.entries(localConfig).map(([key, value]) => {
             // Skip complex objects for now
             if (typeof value === "object" && value !== null) return null;
@@ -451,6 +461,7 @@ export function NodeConfigPanel() {
           selectedNode.subType !== "function" &&
           selectedNode.subType !== "split" &&
           selectedNode.subType !== "aggregate" &&
+          selectedNode.subType !== "database-query" &&
           Object.keys(localConfig).length === 0 && (
             <p className="text-xs text-gray-400 text-center py-6">
               No configuration options
