@@ -34,6 +34,7 @@ function LandingPage() {
       <nav className="sticky top-0 z-50 backdrop-blur bg-white/75 border-gray-200">
         <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
+            <img src="/logo.png" alt="FireFlow Logo" className="w-5" />
             <span className="text-lg font-bold text-gray-900 tracking-tight">
               FireFlow
             </span>

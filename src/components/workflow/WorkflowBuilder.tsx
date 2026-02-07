@@ -425,6 +425,7 @@ export function WorkflowBuilder({
           <header className="flex items-center justify-between px-4 h-14 bg-white border-b border-gray-200 z-10">
             <div className="flex items-center gap-4">
               <Link to="/app/workflows" className="flex items-center gap-2">
+                <img src="/logo.png" alt="FireFlow Logo" className="w-5" />
                 <span className="font-semibold text-gray-900">FireFlow</span>
               </Link>
 

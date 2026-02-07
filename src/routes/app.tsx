@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, Link } from "@tanstack/react-router";
 import { UserMenu } from "@/components/UserMenu";
 import { authClient } from "@/lib/auth-client";
-import { Workflow, Key, Settings, Plug } from "lucide-react";
+import { Workflow, Key, Plug } from "lucide-react";
 
 export const Route = createFileRoute("/app")({
   component: RouteComponent,
@@ -23,6 +23,7 @@ function RouteComponent() {
           <div className="flex items-center justify-between h-14">
             <div className="flex items-center gap-8">
               <Link to="/" className="flex items-center gap-2 group">
+                <img src="/logo.png" alt="FireFlow Logo" className="w-5" />
                 <span className="text-lg font-bold text-gray-900 group-hover:text-accent transition-colors">
                   FireFlow
                 </span>
