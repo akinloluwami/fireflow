@@ -137,8 +137,12 @@ async function executeNodeChain(
   // Execute the current node
   const result = await executeNode(node, context);
 
-  // Store node output in interpolation context
-  context.interpolation.nodes[node.id] = { output: result.output };
+  // Store node output in interpolation context (include error if present)
+  context.interpolation.nodes[node.id] = {
+    output: result.output,
+    error: result.error || null,
+    success: result.success,
+  };
 
   // Special handling for loop nodes - iterate over items
   if (node.subType === "loop" && result.loopIterations) {
