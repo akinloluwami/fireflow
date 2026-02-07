@@ -9,7 +9,6 @@ import { exchangeSlackCode } from "@/lib/integrations/slack";
 export const Route = createFileRoute("/api/integrations/slack/callback")({
   server: {
     handlers: {
-      // GET /api/integrations/slack/callback - Handle Slack OAuth callback
       GET: async ({ request }) => {
         const url = new URL(request.url);
         const baseUrl = `${url.protocol}//${url.host}`;
@@ -17,49 +16,44 @@ export const Route = createFileRoute("/api/integrations/slack/callback")({
         const state = url.searchParams.get("state");
         const error = url.searchParams.get("error");
 
-        // Handle Slack errors
         if (error) {
           return Response.redirect(
-            `${baseUrl}/workflows?error=slack_${error}`,
+            `${baseUrl}/app/workflows?error=slack_${error}`,
             302,
           );
         }
 
         if (!code || !state) {
           return Response.redirect(
-            `${baseUrl}/workflows?error=invalid_callback`,
+            `${baseUrl}/app/workflows?error=invalid_callback`,
             302,
           );
         }
 
-        // Validate state and extract user ID and workflow ID
         const [userId, workflowId] = state.split(":");
         if (!userId) {
           return Response.redirect(
-            `${baseUrl}/workflows?error=invalid_state`,
+            `${baseUrl}/app/workflows?error=invalid_state`,
             302,
           );
         }
 
-        // Verify the user is authenticated
         const session = await auth.api.getSession({ headers: request.headers });
         if (!session?.user || session.user.id !== userId) {
           return Response.redirect(
-            `${baseUrl}/workflows?error=auth_mismatch`,
+            `${baseUrl}/app/workflows?error=auth_mismatch`,
             302,
           );
         }
 
-        // Exchange code for token
         const tokenData = await exchangeSlackCode(code);
         if (!tokenData) {
           return Response.redirect(
-            `${baseUrl}/workflows?error=token_exchange_failed`,
+            `${baseUrl}/app/workflows?error=token_exchange_failed`,
             302,
           );
         }
 
-        // Check if integration already exists
         const existing = await db
           .select()
           .from(integrations)
@@ -72,7 +66,6 @@ export const Route = createFileRoute("/api/integrations/slack/callback")({
           .limit(1);
 
         if (existing[0]) {
-          // Update existing integration
           await db
             .update(integrations)
             .set({
@@ -89,7 +82,6 @@ export const Route = createFileRoute("/api/integrations/slack/callback")({
             })
             .where(eq(integrations.id, existing[0].id));
         } else {
-          // Create new integration
           await db.insert(integrations).values({
             id: uuid(),
             userId,
@@ -110,8 +102,8 @@ export const Route = createFileRoute("/api/integrations/slack/callback")({
 
         // Redirect back to workflow with success
         const redirectPath = workflowId
-          ? `/workflow/${workflowId}`
-          : "/workflows";
+          ? `/app/workflow/${workflowId}`
+          : "/app/workflows";
         return Response.redirect(
           `${baseUrl}${redirectPath}?slack=connected&workspace=${encodeURIComponent(tokenData.teamName)}`,
           302,

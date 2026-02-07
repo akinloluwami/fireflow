@@ -9,7 +9,6 @@ import { exchangeDiscordCode } from "@/lib/integrations/discord";
 export const Route = createFileRoute("/api/integrations/discord/callback")({
   server: {
     handlers: {
-      // GET /api/integrations/discord/callback - Handle Discord OAuth callback
       GET: async ({ request }) => {
         const url = new URL(request.url);
         const baseUrl = `${url.protocol}//${url.host}`;
@@ -18,49 +17,44 @@ export const Route = createFileRoute("/api/integrations/discord/callback")({
         const guildId = url.searchParams.get("guild_id");
         const error = url.searchParams.get("error");
 
-        // Handle Discord errors
         if (error) {
           return Response.redirect(
-            `${baseUrl}/workflows?error=discord_${error}`,
+            `${baseUrl}/app/workflows?error=discord_${error}`,
             302,
           );
         }
 
         if (!code || !state) {
           return Response.redirect(
-            `${baseUrl}/workflows?error=invalid_callback`,
+            `${baseUrl}/app/workflows?error=invalid_callback`,
             302,
           );
         }
 
-        // Validate state and extract user ID and workflow ID
         const [userId, workflowId] = state.split(":");
         if (!userId) {
           return Response.redirect(
-            `${baseUrl}/workflows?error=invalid_state`,
+            `${baseUrl}/app/workflows?error=invalid_state`,
             302,
           );
         }
 
-        // Verify the user is authenticated
         const session = await auth.api.getSession({ headers: request.headers });
         if (!session?.user || session.user.id !== userId) {
           return Response.redirect(
-            `${baseUrl}/workflows?error=auth_mismatch`,
+            `${baseUrl}/app/workflows?error=auth_mismatch`,
             302,
           );
         }
 
-        // Exchange code for token
         const tokenData = await exchangeDiscordCode(code);
         if (!tokenData) {
           return Response.redirect(
-            `${baseUrl}/workflows?error=token_exchange_failed`,
+            `${baseUrl}/app/workflows?error=token_exchange_failed`,
             302,
           );
         }
 
-        // Check if integration already exists
         const existing = await db
           .select()
           .from(integrations)
@@ -127,10 +121,9 @@ export const Route = createFileRoute("/api/integrations/discord/callback")({
           });
         }
 
-        // Redirect back to workflow with success
         const redirectPath = workflowId
-          ? `/workflow/${workflowId}`
-          : "/workflows";
+          ? `/app/workflow/${workflowId}`
+          : "/app/workflows";
         return Response.redirect(
           `${baseUrl}${redirectPath}?discord=connected&server=${encodeURIComponent(guildData.name)}`,
           302,
