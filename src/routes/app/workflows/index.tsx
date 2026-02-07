@@ -27,6 +27,9 @@ interface WorkflowItem {
 }
 
 export const Route = createFileRoute("/app/workflows/")({
+  head: () => ({
+    meta: [{ title: "Workflows | FireFlow" }],
+  }),
   component: WorkflowsListPage,
 });
 

@@ -6,6 +6,9 @@ import { WorkflowBuilder } from "@/components/workflow/WorkflowBuilder";
 import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/app_/workflow/$id")({
+  head: () => ({
+    meta: [{ title: "Edit Workflow | FireFlow" }],
+  }),
   component: WorkflowEditorPage,
 });
 

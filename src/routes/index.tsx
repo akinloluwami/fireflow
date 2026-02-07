@@ -15,7 +15,12 @@ import { CTASection } from "@/components/CTASection";
 import { UserMenu } from "@/components/UserMenu";
 import { SiGithub } from "react-icons/si";
 
-export const Route = createFileRoute("/")({ component: LandingPage });
+export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [{ title: "FireFlow - AI Workflow Automation" }],
+  }),
+  component: LandingPage,
+});
 
 function LandingPage() {
   const { data: session, isPending } = authClient.useSession();

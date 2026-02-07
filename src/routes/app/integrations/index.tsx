@@ -11,6 +11,9 @@ import { SiDiscord, SiSlack } from "react-icons/si";
 import { useState, useEffect } from "react";
 
 export const Route = createFileRoute("/app/integrations/")({
+  head: () => ({
+    meta: [{ title: "Integrations | FireFlow" }],
+  }),
   component: IntegrationsPage,
 });
 

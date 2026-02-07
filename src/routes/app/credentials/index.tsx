@@ -10,6 +10,9 @@ import {
 import type { CredentialListItem } from "@/lib/credentials/types";
 
 export const Route = createFileRoute("/app/credentials/")({
+  head: () => ({
+    meta: [{ title: "Credentials | FireFlow" }],
+  }),
   component: CredentialsPage,
 });
 
