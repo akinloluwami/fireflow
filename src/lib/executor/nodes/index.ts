@@ -4,6 +4,7 @@ export { executeSlack } from "./action-slack";
 export { executeDiscord } from "./action-discord";
 export { executeHttp } from "./action-http";
 export { executeEmail } from "./action-email";
+export { executeDatabase } from "./action-database";
 export { executeSetVariable } from "./transform-variable";
 export { executeWait } from "./others-wait";
 export { executeCode } from "./action-code";
