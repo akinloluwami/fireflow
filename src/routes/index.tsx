@@ -44,7 +44,7 @@ function LandingPage() {
           ) : session?.user ? (
             <div className="flex items-center gap-3">
               <Link
-                to="/workflows"
+                to="/app/workflows"
                 className="px-5 py-2.5 bg-accent text-white text-sm font-semibold rounded-2xl hover:bg-accent-hover transition-colors"
               >
                 Open App
@@ -102,7 +102,7 @@ function LandingPage() {
 
           {session?.user ? (
             <Link
-              to="/workflows"
+              to="/app/workflows"
               className="inline-flex items-center gap-2 px-8 py-4 bg-accent text-white text-lg font-semibold rounded-3xl hover:bg-accent-hover transition-colors"
             >
               Go to Workflows
