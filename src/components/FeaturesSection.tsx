@@ -4,9 +4,7 @@ export function FeaturesSection() {
   return (
     <section className="py-20 px-6">
       <div className="max-w-5xl mx-auto space-y-10">
-        {/* Natural Language */}
         <div className="rounded-[40px] overflow-hidden flex flex-col md:flex-row min-h-[80vh]">
-          {/* Left - Content */}
           <div className="w-full md:w-1/2 bg-[#E8F4FC] p-10 md:p-14 flex flex-col justify-center relative">
             <h3 className="text-3xl md:text-4xl font-semibold text-gray-700 mb-4 leading-tight">
               Natural language
@@ -21,7 +19,6 @@ export function FeaturesSection() {
             </button>
           </div>
 
-          {/* Right - Mockup */}
           <div className="w-full md:w-1/2 bg-[#4A90D9] p-8 flex items-center justify-center relative">
             <div className="bg-white rounded-2xl shadow-2xl p-5 w-full max-w-xs transform rotate-1">
               <div className="flex items-center gap-2 mb-3">
@@ -40,14 +37,12 @@ export function FeaturesSection() {
                 </div>
               </div>
             </div>
-            {/* Shadow underneath */}
+
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-48 h-4 bg-black/20 rounded-full blur-xl" />
           </div>
         </div>
 
-        {/* Visual Builder */}
         <div className="rounded-[40px] overflow-hidden flex flex-col md:flex-row-reverse min-h-[80vh]">
-          {/* Right - Content */}
           <div className="w-full md:w-1/2 bg-[#F3EAFC] p-10 md:p-14 flex flex-col justify-center relative">
             <h3 className="text-3xl md:text-4xl font-semibold text-gray-700 mb-4 leading-tight">
               Visual workflow
@@ -63,7 +58,6 @@ export function FeaturesSection() {
             </button>
           </div>
 
-          {/* Left - Mockup */}
           <div className="w-full md:w-1/2 bg-[#9B6DD7] p-8 flex items-center justify-center relative">
             <div className="bg-white rounded-2xl shadow-2xl p-5 w-full max-w-xs transform -rotate-1">
               <div className="space-y-3">
@@ -90,9 +84,7 @@ export function FeaturesSection() {
           </div>
         </div>
 
-        {/* Smart Conditions */}
         <div className="rounded-[40px] overflow-hidden flex flex-col md:flex-row min-h-[80vh]">
-          {/* Left - Content */}
           <div className="w-full md:w-1/2 bg-[#FEF0EC] p-10 md:p-14 flex flex-col justify-center relative">
             <h3 className="text-3xl md:text-4xl font-semibold text-gray-700 mb-4 leading-tight">
               Smart conditions
@@ -106,7 +98,6 @@ export function FeaturesSection() {
             </button>
           </div>
 
-          {/* Right - Mockup */}
           <div className="w-full md:w-1/2 bg-[#F97066] p-8 flex items-center justify-center relative">
             <div className="bg-white rounded-2xl shadow-2xl p-5 w-full max-w-xs transform rotate-1">
               <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
@@ -131,9 +122,7 @@ export function FeaturesSection() {
           </div>
         </div>
 
-        {/* Notifications */}
         <div className="rounded-[40px] overflow-hidden flex flex-col md:flex-row-reverse min-h-[80vh]">
-          {/* Right - Content */}
           <div className="w-full md:w-1/2 bg-[#E6F7F5] p-10 md:p-14 flex flex-col justify-center relative">
             <h3 className="text-3xl md:text-4xl font-semibold text-gray-700 mb-4 leading-tight">
               Notifications
@@ -149,7 +138,6 @@ export function FeaturesSection() {
             </button>
           </div>
 
-          {/* Left - Mockup */}
           <div className="w-full md:w-1/2 bg-[#2DD4BF] p-8 flex items-center justify-center relative">
             <div className="bg-white rounded-2xl shadow-2xl p-5 w-full max-w-xs transform -rotate-1">
               <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
