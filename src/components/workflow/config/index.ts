@@ -16,3 +16,6 @@ export { AggregateConfig } from "./AggregateConfig";
 export { DatabaseConfig } from "./DatabaseConfig";
 export { VariablePicker } from "./VariablePicker";
 export { ExpressionInput, ExpressionTextarea } from "./ExpressionInput";
+
+// AI Node Configs
+export { SentimentConfig } from "./SentimentConfig";
