@@ -26,8 +26,9 @@ const SUGGESTED_PROMPTS = [
 ];
 
 export function WorkflowChat() {
-  const { isChatOpen, setIsChatOpen, workflow } = useWorkflowStore();
-  const { thread } = useTamboThread();
+  const { isChatOpen, setIsChatOpen, workflow, isInitialMount } =
+    useWorkflowStore();
+  const { thread, switchCurrentThread } = useTamboThread();
   const { value, setValue, submit, isPending } = useTamboThreadInput();
   const {
     startRecording,
@@ -41,6 +42,40 @@ export function WorkflowChat() {
   const [hasTimedOut, setHasTimedOut] = useState(false);
   const [chatWidth, setChatWidth] = useState(320);
   const isResizingRef = useRef(false);
+  const switchAttemptedRef = useRef<string | null>(null);
+
+  // Switch to saved thread when component mounts with a chatThreadId
+  useEffect(() => {
+    const threadIdToSwitch = workflow.chatThreadId;
+
+    if (!workflow.id || !threadIdToSwitch) {
+      return;
+    }
+
+    // Already on the correct thread
+    if (thread?.id === threadIdToSwitch) {
+      switchAttemptedRef.current = threadIdToSwitch;
+      return;
+    }
+
+    // Only attempt once per thread ID
+    if (switchAttemptedRef.current === threadIdToSwitch) {
+      return;
+    }
+    switchAttemptedRef.current = threadIdToSwitch;
+
+    // Perform the switch
+    const doSwitch = async () => {
+      try {
+        await switchCurrentThread(threadIdToSwitch);
+      } catch (err) {
+        console.error("[WorkflowChat] Thread switch failed:", err);
+        switchAttemptedRef.current = null;
+      }
+    };
+
+    doSwitch();
+  }, [workflow.id, workflow.chatThreadId, thread?.id, switchCurrentThread]);
 
   // Update input when voice transcript changes
   useEffect(() => {
@@ -111,8 +146,19 @@ export function WorkflowChat() {
     (threadNotReady || threadSwitchingOrLoading);
 
   // Auto-scroll to bottom when new messages arrive
+  // Use instant scroll on initial load, smooth scroll for new messages
+  const hasScrolledInitialRef = useRef(false);
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (!thread?.messages?.length) return;
+
+    if (!hasScrolledInitialRef.current) {
+      // Initial load - instant scroll (no animation)
+      messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
+      hasScrolledInitialRef.current = true;
+    } else {
+      // New message - smooth scroll
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [thread?.messages]);
 
   // Focus input when chat opens
@@ -165,7 +211,7 @@ export function WorkflowChat() {
 
   return (
     <motion.div
-      initial={{ width: 0, opacity: 0 }}
+      initial={isInitialMount ? false : { width: 0, opacity: 0 }}
       animate={{ width: chatWidth, opacity: 1 }}
       exit={{ width: 0, opacity: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
