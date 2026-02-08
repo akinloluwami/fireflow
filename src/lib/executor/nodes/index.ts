@@ -12,3 +12,6 @@ export { executeFilter } from "./transform-filter";
 export { executeFunction } from "./transform-function";
 export { executeSplit } from "./transform-split";
 export { executeAggregate } from "./transform-aggregate";
+
+// AI node executors
+export { executeSentimentAnalysis } from "./ai-sentiment";
