@@ -210,7 +210,7 @@ function WorkflowLayout() {
             }}
             className="px-2 py-1 text-sm font-medium text-gray-700 bg-transparent border border-transparent 
                        rounded hover:border-gray-200 focus:border-accent focus:outline-none 
-                       transition-colors min-w-48"
+                       transition-colors min-w-64 max-w-96"
             placeholder="Workflow name"
           />
         </div>
