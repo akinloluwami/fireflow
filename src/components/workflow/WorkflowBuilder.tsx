@@ -54,8 +54,10 @@ export function WorkflowBuilder({
     selectedNodeId,
     isPanelOpen,
     isChatOpen,
+    isInitialMount,
     togglePanel,
     toggleChat,
+    setInitialMountComplete,
     undo,
     redo,
     history,
@@ -76,6 +78,13 @@ export function WorkflowBuilder({
     useState<ExecutionResult | null>(null);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const lastExecutionIdRef = useRef<string | null>(null);
+
+  // Mark initial mount as complete after a brief delay (to skip animations)
+  useEffect(() => {
+    if (!isInitialMount) return;
+    const timer = setTimeout(() => setInitialMountComplete(), 100);
+    return () => clearTimeout(timer);
+  }, [isInitialMount, setInitialMountComplete]);
 
   // Multiple trigger support
   const [selectedTriggerId, setSelectedTriggerId] = useState<string | null>(
@@ -611,7 +620,8 @@ export function WorkflowBuilder({
           <div className="flex flex-1 overflow-hidden">
             <div
               className={`
-                shrink-0 transition-all duration-300 ease-in-out overflow-hidden bg-white border-r border-gray-200
+                shrink-0 overflow-hidden bg-white border-r border-gray-200
+                ${isInitialMount ? "" : "transition-all duration-300 ease-in-out"}
                 ${isPanelOpen ? "w-60" : "w-0"}
               `}
             >
