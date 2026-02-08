@@ -504,13 +504,25 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
         }
       }
 
-      // Check Sentiment Analysis
+      // Check Sentiment Analysis - needs connected model picker
       if (node.subType === "sentiment-analysis") {
-        if (!config.credentialId) {
-          errors.push("API credentials are required");
-        }
         if (!config.text) {
           errors.push("Text input is required");
+        }
+        // Check if there's a connected model picker
+        const hasModelConnection = workflow.edges.some(
+          (e: { target: string; targetHandle?: string }) =>
+            e.target === node.id && e.targetHandle === "model",
+        );
+        if (!hasModelConnection) {
+          errors.push("AI Model connection is required");
+        }
+      }
+
+      // Check Model Picker
+      if (node.subType === "model-picker") {
+        if (!config.credentialId) {
+          errors.push("API credentials are required");
         }
       }
 
