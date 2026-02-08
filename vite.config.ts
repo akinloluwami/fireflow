@@ -14,6 +14,10 @@ const config = defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
+  ssr: {
+    // Externalize packages that use browser-only APIs (Worker, etc.) during SSR
+    external: ["@tambo-ai/react", "react-media-recorder", "media-encoder-host", "media-encoder-host-broker"],
+  },
   server: {
     allowedHosts: [".outray.app"],
   },
