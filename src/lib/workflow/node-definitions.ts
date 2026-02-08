@@ -229,12 +229,24 @@ export const nodeDefinitions: NodeDefinition[] = [
     color: "#ec4899",
     defaultConfig: {
       text: "",
-      provider: "openai",
-      model: "gpt-4o-mini",
-      credentialId: "",
       language: "auto",
       includeEmotions: false,
       confidenceThreshold: 0.5,
+    },
+  },
+
+  // Sub/Helper Nodes
+  {
+    type: "sub",
+    subType: "model-picker",
+    label: "AI Model",
+    description: "Configure AI model provider",
+    icon: "sparkles",
+    color: "#6b7280",
+    defaultConfig: {
+      provider: "",
+      model: "",
+      credentialId: "",
     },
   },
 
