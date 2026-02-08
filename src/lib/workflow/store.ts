@@ -7,6 +7,8 @@ import type {
   NodeCategory,
   NodeSubType,
   NodeConfig,
+  NodeExecutionStatus,
+  ExecutionState,
 } from "./types";
 import { getNodeDefinition } from "./node-definitions";
 
@@ -22,6 +24,9 @@ interface WorkflowState {
 
   // Validation errors per node
   nodeErrors: Record<string, string[]>;
+
+  // Execution state
+  execution: ExecutionState;
 
   // History for undo/redo
   history: Workflow[];
@@ -87,6 +92,17 @@ interface WorkflowActions {
   clearNodeErrors: () => void;
   getNodeErrors: (nodeId: string) => string[];
   hasValidationErrors: () => boolean;
+
+  // Execution
+  startExecution: (executionId: string) => void;
+  updateNodeStatus: (
+    nodeId: string,
+    status: NodeExecutionStatus,
+    output?: unknown,
+    error?: string,
+  ) => void;
+  setExecutionComplete: (success: boolean) => void;
+  resetExecution: () => void;
 }
 
 type WorkflowStore = WorkflowState & WorkflowActions;
@@ -102,6 +118,16 @@ const createEmptyWorkflow = (): Workflow => ({
   updatedAt: new Date(),
 });
 
+const createEmptyExecution = (): ExecutionState => ({
+  isRunning: false,
+  executionId: null,
+  nodeStatuses: {},
+  nodeOutputs: {},
+  nodeErrors: {},
+  startedAt: null,
+  completedAt: null,
+});
+
 const initialState: WorkflowState = {
   workflow: createEmptyWorkflow(),
   selectedNodeId: null,
@@ -109,6 +135,7 @@ const initialState: WorkflowState = {
   isPanelOpen: false,
   isChatOpen: false,
   nodeErrors: {},
+  execution: createEmptyExecution(),
   history: [],
   historyIndex: -1,
 };
@@ -168,12 +195,12 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
       },
     };
 
-    set((state) => {
+    set((s) => {
       get().saveToHistory();
       return {
         workflow: {
-          ...state.workflow,
-          nodes: [...state.workflow.nodes, newNode],
+          ...s.workflow,
+          nodes: [...s.workflow.nodes, newNode],
           updatedAt: new Date(),
         },
       };
@@ -506,5 +533,72 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
 
   hasValidationErrors: () => {
     return Object.keys(get().nodeErrors).length > 0;
+  },
+
+  // Execution actions
+  startExecution: (executionId: string) => {
+    const { workflow } = get();
+    // Initialize all nodes as pending
+    const nodeStatuses: Record<string, NodeExecutionStatus> = {};
+    for (const node of workflow.nodes) {
+      nodeStatuses[node.id] = "pending";
+    }
+
+    set({
+      execution: {
+        isRunning: true,
+        executionId,
+        nodeStatuses,
+        nodeOutputs: {},
+        nodeErrors: {},
+        startedAt: new Date(),
+        completedAt: null,
+      },
+    });
+  },
+
+  updateNodeStatus: (nodeId, status, output, error) => {
+    set((state) => ({
+      execution: {
+        ...state.execution,
+        nodeStatuses: {
+          ...state.execution.nodeStatuses,
+          [nodeId]: status,
+        },
+        nodeOutputs:
+          output !== undefined
+            ? { ...state.execution.nodeOutputs, [nodeId]: output }
+            : state.execution.nodeOutputs,
+        nodeErrors:
+          error !== undefined
+            ? { ...state.execution.nodeErrors, [nodeId]: error }
+            : state.execution.nodeErrors,
+      },
+    }));
+  },
+
+  setExecutionComplete: (_success: boolean) => {
+    set((state) => {
+      // Mark any remaining pending nodes as skipped
+      const nodeStatuses = { ...state.execution.nodeStatuses };
+      for (const nodeId of Object.keys(nodeStatuses)) {
+        if (nodeStatuses[nodeId] === "pending") {
+          nodeStatuses[nodeId] = "skipped";
+        }
+      }
+
+      return {
+        execution: {
+          ...state.execution,
+          isRunning: false,
+          nodeStatuses,
+          completedAt: new Date(),
+        },
+      };
+    });
+  },
+
+  resetExecution: () => {
+    set({ execution: createEmptyExecution() });
   },
 }));
