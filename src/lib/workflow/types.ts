@@ -5,6 +5,7 @@ export type NodeCategory =
   | "action"
   | "condition"
   | "transform"
+  | "ai"
   | "others";
 
 export type TriggerSubType =
@@ -30,6 +31,8 @@ export type TransformSubType =
   | "split"
   | "aggregate";
 
+export type AISubType = "sentiment-analysis";
+
 export type OthersSubType = "wait" | "note" | "sticky";
 
 export type NodeSubType =
@@ -37,7 +40,11 @@ export type NodeSubType =
   | ActionSubType
   | ConditionSubType
   | TransformSubType
+  | AISubType
   | OthersSubType;
+
+// AI Provider Types
+export type AIProvider = "openai" | "xai" | "gemini" | "vercel-ai-gateway";
 
 // Node Configuration Types
 
@@ -94,6 +101,24 @@ export interface DatabaseQueryConfig {
   maxRows?: number;
 }
 
+// AI Node Configuration Types
+export interface SentimentAnalysisConfig {
+  /** The text to analyze - supports variable interpolation */
+  text: string;
+  /** AI provider to use for analysis */
+  provider: AIProvider;
+  /** Model to use (provider-specific) */
+  model: string;
+  /** Credential ID for API authentication */
+  credentialId: string;
+  /** Language hint (optional, auto-detect if not specified) */
+  language?: string;
+  /** Include detailed emotion breakdown */
+  includeEmotions?: boolean;
+  /** Confidence threshold (0-1) for sentiment classification */
+  confidenceThreshold?: number;
+}
+
 export type NodeConfig =
   | WebhookConfig
   | ScheduleConfig
@@ -102,6 +127,7 @@ export type NodeConfig =
   | SendSlackConfig
   | ConditionConfig
   | CodeConfig
+  | SentimentAnalysisConfig
   | Record<string, unknown>;
 
 export interface NodePosition {
