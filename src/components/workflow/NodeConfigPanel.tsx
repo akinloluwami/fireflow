@@ -21,6 +21,7 @@ import {
   AggregateConfig,
   DatabaseConfig,
   SentimentConfig,
+  ModelPickerConfig,
 } from "./config";
 
 type SaveStatus = "idle" | "saving" | "saved";
@@ -424,6 +425,14 @@ export function NodeConfigPanel() {
           />
         )}
 
+        {selectedNode.subType === "model-picker" && (
+          <ModelPickerConfig
+            config={localConfig}
+            onChange={handleChange}
+            nodeId={selectedNode.id}
+          />
+        )}
+
         {/* Generic config for other node types */}
         {selectedNode.type !== "trigger" &&
           selectedNode.subType !== "send-slack" &&
@@ -442,6 +451,7 @@ export function NodeConfigPanel() {
           selectedNode.subType !== "aggregate" &&
           selectedNode.subType !== "database-query" &&
           selectedNode.subType !== "sentiment-analysis" &&
+          selectedNode.subType !== "model-picker" &&
           Object.entries(localConfig).map(([key, value]) => {
             // Skip complex objects for now
             if (typeof value === "object" && value !== null) return null;
