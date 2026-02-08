@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from "react";
-import { useTamboThread, useTamboThreadInput } from "@tambo-ai/react";
+import { useTamboThread, useTamboThreadInput, useTamboVoice } from "@tambo-ai/react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Send,
@@ -8,6 +8,8 @@ import {
   X,
   Loader2,
   ArrowRight,
+  Mic,
+  MicOff,
 } from "lucide-react";
 import { useWorkflowStore } from "@/lib/workflow/store";
 import ReactMarkdown from "react-markdown";
@@ -23,11 +25,26 @@ export function WorkflowChat() {
   const { isChatOpen, setIsChatOpen, workflow } = useWorkflowStore();
   const { thread } = useTamboThread();
   const { value, setValue, submit, isPending } = useTamboThreadInput();
+  const {
+    startRecording,
+    stopRecording,
+    isRecording,
+    isTranscribing,
+    transcript,
+  } = useTamboVoice();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [hasTimedOut, setHasTimedOut] = useState(false);
   const [chatWidth, setChatWidth] = useState(320);
   const isResizingRef = useRef(false);
+
+  // Update input when voice transcript changes
+  useEffect(() => {
+    if (transcript) {
+      setValue(transcript);
+      inputRef.current?.focus();
+    }
+  }, [transcript, setValue]);
 
   // Handle resize drag
   const handleResizeStart = useCallback(
@@ -397,28 +414,47 @@ export function WorkflowChat() {
               e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Describe your workflow..."
+            placeholder={isRecording ? "Listening..." : isTranscribing ? "Transcribing..." : "Describe your workflow..."}
             rows={1}
-            disabled={isPending}
-            className="w-full px-3 py-2.5 pr-10 bg-gray-50 border border-gray-200 rounded-lg
+            disabled={isPending || isRecording || isTranscribing}
+            className="w-full px-3 py-2.5 pr-20 bg-gray-50 border border-gray-200 rounded-lg
                        resize-none focus:outline-none focus:ring-1 focus:ring-accent/30 
                        focus:border-accent placeholder:text-gray-400 text-xs
                        disabled:opacity-50 disabled:cursor-not-allowed transition-colors
                        min-h-[40px] max-h-[200px] overflow-y-auto"
           />
-          <button
-            type="submit"
-            disabled={!value.trim() || isPending}
-            className="absolute right-2 bottom-2 p-1.5 bg-accent text-white rounded-md
-                       hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed
-                       transition-colors"
-          >
-            {isPending ? (
-              <Loader2 size={14} className="animate-spin" />
-            ) : (
-              <Send size={14} />
-            )}
-          </button>
+          <div className="absolute right-2 bottom-2 flex items-center gap-1">
+            <button
+              type="button"
+              onClick={isRecording ? stopRecording : startRecording}
+              disabled={isPending || isTranscribing}
+              className={`p-1.5 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed
+                         ${isRecording 
+                           ? "bg-red-500 text-white animate-pulse" 
+                           : "bg-gray-200 text-gray-600 hover:bg-gray-300"}`}
+            >
+              {isTranscribing ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : isRecording ? (
+                <MicOff size={14} />
+              ) : (
+                <Mic size={14} />
+              )}
+            </button>
+            <button
+              type="submit"
+              disabled={!value.trim() || isPending || isRecording || isTranscribing}
+              className="p-1.5 bg-accent text-white rounded-md
+                         hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed
+                         transition-colors"
+            >
+              {isPending ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <Send size={14} />
+              )}
+            </button>
+          </div>
         </div>
         <p className="mt-1.5 text-[10px] text-gray-400 text-center">
           Enter to send • Shift+Enter for new line
