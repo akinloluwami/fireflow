@@ -73,20 +73,29 @@ export function ModelPickerConfig({
     (config.model as string) || (provider ? getDefaultModel(provider) : "");
   const credentialId = config.credentialId as string | undefined;
 
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isProviderOpen, setIsProviderOpen] = useState(false);
+  const [isModelOpen, setIsModelOpen] = useState(false);
+  const providerDropdownRef = useRef<HTMLDivElement>(null);
+  const modelDropdownRef = useRef<HTMLDivElement>(null);
 
   const models = provider ? getModelsForProvider(provider) : [];
   const selectedProvider = PROVIDERS.find((p) => p.value === provider);
+  const selectedModel = models.find((m) => m.value === model);
 
-  // Close dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
+        providerDropdownRef.current &&
+        !providerDropdownRef.current.contains(event.target as Node)
       ) {
-        setIsOpen(false);
+        setIsProviderOpen(false);
+      }
+      if (
+        modelDropdownRef.current &&
+        !modelDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsModelOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -99,7 +108,12 @@ export function ModelPickerConfig({
     onChange("model", getDefaultModel(newProvider));
     // Clear credential since type changed
     onChange("credentialId", "");
-    setIsOpen(false);
+    setIsProviderOpen(false);
+  };
+
+  const handleModelChange = (newModel: string) => {
+    onChange("model", newModel);
+    setIsModelOpen(false);
   };
 
   return (
@@ -109,10 +123,10 @@ export function ModelPickerConfig({
         <label className="block text-xs font-medium text-gray-600 mb-1">
           AI Provider
         </label>
-        <div ref={dropdownRef} className="relative">
+        <div ref={providerDropdownRef} className="relative">
           <button
             type="button"
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={() => setIsProviderOpen(!isProviderOpen)}
             className="w-full px-2.5 py-2 text-xs bg-white border border-gray-200 rounded-md
                        focus:outline-none focus:ring-1 focus:ring-accent/30 focus:border-accent
                        flex items-center justify-between"
@@ -129,11 +143,11 @@ export function ModelPickerConfig({
             )}
             <ChevronDown
               size={14}
-              className={`text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
+              className={`text-gray-400 transition-transform ${isProviderOpen ? "rotate-180" : ""}`}
             />
           </button>
 
-          {isOpen && (
+          {isProviderOpen && (
             <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
               {PROVIDERS.map((p) => (
                 <button
@@ -152,24 +166,47 @@ export function ModelPickerConfig({
         </div>
       </div>
 
-      {/* Model Selection - Only show if provider selected */}
+      {/* Model Selection - Custom Dropdown */}
       {provider && (
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1">
             Model
           </label>
-          <select
-            value={model}
-            onChange={(e) => onChange("model", e.target.value)}
-            className="w-full px-2.5 py-1.5 text-xs bg-white border border-gray-200 rounded-md
-                       focus:outline-none focus:ring-1 focus:ring-accent/30 focus:border-accent"
-          >
-            {models.map((m) => (
-              <option key={m.value} value={m.value}>
-                {m.label}
-              </option>
-            ))}
-          </select>
+          <div ref={modelDropdownRef} className="relative">
+            <button
+              type="button"
+              onClick={() => setIsModelOpen(!isModelOpen)}
+              className="w-full px-2.5 py-2 text-xs bg-white border border-gray-200 rounded-md
+                         focus:outline-none focus:ring-1 focus:ring-accent/30 focus:border-accent
+                         flex items-center justify-between"
+            >
+              {selectedModel ? (
+                <span>{selectedModel.label}</span>
+              ) : (
+                <span className="text-gray-400">Select a model...</span>
+              )}
+              <ChevronDown
+                size={14}
+                className={`text-gray-400 transition-transform ${isModelOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {isModelOpen && (
+              <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                {models.map((m) => (
+                  <button
+                    key={m.value}
+                    type="button"
+                    onClick={() => handleModelChange(m.value)}
+                    className={`w-full px-2.5 py-2 text-xs text-left hover:bg-gray-50 transition-colors
+                               ${model === m.value ? "bg-gray-50 font-medium" : ""}`}
+                  >
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
