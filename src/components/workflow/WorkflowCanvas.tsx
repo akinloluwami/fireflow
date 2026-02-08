@@ -1,4 +1,4 @@
-import { useCallback, useRef, useMemo } from "react";
+import { useCallback, useRef, useMemo, useState } from "react";
 import {
   ReactFlow,
   Background,
@@ -16,6 +16,8 @@ import {
   MarkerType,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import { motion, AnimatePresence } from "motion/react";
+import { Plus, Sparkles, Grid3X3 } from "lucide-react";
 
 import { nodeTypes } from "./nodes";
 import { WorkflowEdge } from "./edges/WorkflowEdge";
@@ -30,6 +32,7 @@ const edgeTypes = {
 
 export function WorkflowCanvas() {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
+  const contextMenuRef = useRef<HTMLDivElement>(null);
   const {
     workflow,
     selectedNodeId,
@@ -42,6 +45,31 @@ export function WorkflowCanvas() {
     setIsPanelOpen,
     setIsChatOpen,
   } = useWorkflowStore();
+
+  // Context menu state
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    flowPosition: { x: number; y: number };
+  } | null>(null);
+
+  // Close context menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        contextMenuRef.current &&
+        !contextMenuRef.current.contains(event.target as HTMLElement)
+      ) {
+        setContextMenu(null);
+      }
+    };
+
+    if (contextMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [contextMenu]);
 
   // Convert workflow nodes to React Flow nodes
   const initialNodes: Node[] = useMemo(
@@ -115,10 +143,16 @@ export function WorkflowCanvas() {
     [updateNodePosition],
   );
 
+  // Handle node drag start - close context menu
+  const onNodeDragStart = useCallback(() => {
+    setContextMenu(null);
+  }, []);
+
   // Handle node selection
   const onNodeClick = useCallback(
     (_event: React.MouseEvent, node: Node) => {
       selectNode(node.id);
+      setContextMenu(null);
     },
     [selectNode],
   );
@@ -127,22 +161,176 @@ export function WorkflowCanvas() {
   const onEdgeClick = useCallback(
     (_event: React.MouseEvent, edge: Edge) => {
       selectEdge(edge.id);
+      setContextMenu(null);
     },
     [selectEdge],
   );
 
-  // Handle pane click (deselect)
+  // Handle pane click (deselect and close context menu)
   const onPaneClick = useCallback(() => {
     clearSelection();
+    setContextMenu(null);
   }, [clearSelection]);
+
+  // Handle move start (pan) - close context menu
+  const onMoveStart = useCallback(() => {
+    setContextMenu(null);
+  }, []);
+
+  const { screenToFlowPosition } = useReactFlow();
+
+  // Handle right-click context menu
+  const onPaneContextMenu = useCallback(
+    (event: MouseEvent | React.MouseEvent) => {
+      event.preventDefault();
+      const flowPosition = screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+      setContextMenu({
+        x: event.clientX,
+        y: event.clientY,
+        flowPosition,
+      });
+    },
+    [screenToFlowPosition],
+  );
+
+  // Tidy up workflow - arrange nodes in layers based on dependencies
+  const tidyUpWorkflow = useCallback(() => {
+    const nodeCount = workflow.nodes.length;
+    if (nodeCount === 0) return;
+
+    const spacing = { x: 250, y: 120 };
+    const startX = 100;
+    const startY = 100;
+
+    // Separate model-picker nodes (sub nodes) - they should be positioned below their connected parent
+    const modelPickerNodes = workflow.nodes.filter(
+      (n) => n.subType === "model-picker",
+    );
+    const regularNodes = workflow.nodes.filter(
+      (n) => n.subType !== "model-picker",
+    );
+
+    // Build adjacency map for regular nodes only
+    const outgoingEdges = new Map<string, string[]>();
+    const incomingEdges = new Map<string, string[]>();
+
+    regularNodes.forEach((node) => {
+      outgoingEdges.set(node.id, []);
+      incomingEdges.set(node.id, []);
+    });
+
+    workflow.edges.forEach((edge) => {
+      // Only count edges between regular nodes
+      if (outgoingEdges.has(edge.source) && incomingEdges.has(edge.target)) {
+        outgoingEdges.get(edge.source)?.push(edge.target);
+        incomingEdges.get(edge.target)?.push(edge.source);
+      }
+    });
+
+    // Find root nodes (nodes with no incoming edges - typically triggers)
+    const rootNodes = regularNodes.filter(
+      (node) => (incomingEdges.get(node.id)?.length || 0) === 0,
+    );
+
+    // Build layers using BFS from root nodes
+    const layers: string[][] = [];
+    const visited = new Set<string>();
+    let currentLayer = rootNodes.map((n) => n.id);
+
+    while (currentLayer.length > 0) {
+      layers.push(currentLayer);
+      currentLayer.forEach((id) => visited.add(id));
+
+      const nextLayer: string[] = [];
+      currentLayer.forEach((nodeId) => {
+        const children = outgoingEdges.get(nodeId) || [];
+        children.forEach((childId) => {
+          if (!visited.has(childId) && !nextLayer.includes(childId)) {
+            // Only add to next layer if all parents are visited
+            const parents = incomingEdges.get(childId) || [];
+            if (parents.every((p) => visited.has(p))) {
+              nextLayer.push(childId);
+            }
+          }
+        });
+      });
+
+      // Handle nodes that couldn't be added due to unvisited parents
+      if (nextLayer.length === 0) {
+        const remaining = regularNodes.filter((n) => !visited.has(n.id));
+        if (remaining.length > 0) {
+          nextLayer.push(remaining[0].id);
+        }
+      }
+
+      currentLayer = nextLayer;
+    }
+
+    // Add any orphan regular nodes (not connected to anything)
+    const orphans = regularNodes.filter((n) => !visited.has(n.id));
+    if (orphans.length > 0) {
+      layers.push(orphans.map((n) => n.id));
+    }
+
+    // Track positioned nodes for model picker placement
+    const nodePositions = new Map<string, { x: number; y: number }>();
+
+    // Position regular nodes based on layers (left to right)
+    const regularNodeCount = regularNodes.length;
+    layers.forEach((layer, layerIndex) => {
+      const layerHeight = layer.length * spacing.y;
+      const layerStartY =
+        startY +
+        (regularNodeCount > layer.length
+          ? ((regularNodeCount * spacing.y) / 2 - layerHeight) / 2
+          : 0);
+
+      layer.forEach((nodeId, nodeIndex) => {
+        // Center nodes vertically in their layer
+        const y = layerStartY + nodeIndex * spacing.y;
+        const x = startX + layerIndex * spacing.x;
+        updateNodePosition(nodeId, { x, y });
+        nodePositions.set(nodeId, { x, y });
+      });
+    });
+
+    // Position model-picker nodes below their connected parent nodes
+    modelPickerNodes.forEach((modelPicker) => {
+      // Find the node this model picker connects to
+      const connectedEdge = workflow.edges.find(
+        (edge) => edge.source === modelPicker.id,
+      );
+
+      if (connectedEdge) {
+        const parentPos = nodePositions.get(connectedEdge.target);
+        if (parentPos) {
+          // Position below the parent node, slightly offset
+          updateNodePosition(modelPicker.id, {
+            x: parentPos.x,
+            y: parentPos.y + 100,
+          });
+          return;
+        }
+      }
+
+      // If no connected parent found, place at the bottom left
+      updateNodePosition(modelPicker.id, {
+        x: startX,
+        y: startY + regularNodeCount * spacing.y + 50,
+      });
+    });
+
+    setContextMenu(null);
+  }, [workflow.nodes, workflow.edges, updateNodePosition]);
 
   // Handle drop from palette
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
   }, []);
-
-  const { screenToFlowPosition } = useReactFlow();
 
   const onDrop = useCallback(
     (event: React.DragEvent) => {
@@ -177,17 +365,20 @@ export function WorkflowCanvas() {
   };
 
   return (
-    <div ref={reactFlowWrapper} className="w-full h-full">
+    <div ref={reactFlowWrapper} className="w-full h-full relative">
       <ReactFlow
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onNodeDragStart={onNodeDragStart}
         onNodeDragStop={onNodeDragStop}
         onNodeClick={onNodeClick}
         onEdgeClick={onEdgeClick}
         onPaneClick={onPaneClick}
+        onPaneContextMenu={onPaneContextMenu}
+        onMoveStart={onMoveStart}
         onDragOver={onDragOver}
         onDrop={onDrop}
         nodeTypes={nodeTypes}
@@ -294,6 +485,51 @@ export function WorkflowCanvas() {
           </Panel>
         )}
       </ReactFlow>
+
+      {/* Context Menu */}
+      <AnimatePresence>
+        {contextMenu && (
+          <motion.div
+            ref={contextMenuRef}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.1 }}
+            className="fixed z-50 bg-white rounded-xl shadow-xl border border-gray-200 py-1.5 min-w-[180px] overflow-hidden"
+            style={{ left: contextMenu.x, top: contextMenu.y }}
+          >
+            <button
+              onClick={() => {
+                setIsPanelOpen(true);
+                setContextMenu(null);
+              }}
+              className="w-full px-3 py-2 text-left text-sm flex items-center gap-2.5 hover:bg-gray-50 transition-colors"
+            >
+              <Plus size={16} className="text-gray-500" />
+              <span>Add Node</span>
+            </button>
+            <button
+              onClick={() => {
+                setIsChatOpen(true);
+                setContextMenu(null);
+              }}
+              className="w-full px-3 py-2 text-left text-sm flex items-center gap-2.5 hover:bg-gray-50 transition-colors"
+            >
+              <Sparkles size={16} className="text-accent" />
+              <span>Build with AI</span>
+            </button>
+            <div className="h-px bg-gray-100 my-1" />
+            <button
+              onClick={tidyUpWorkflow}
+              disabled={workflow.nodes.length === 0}
+              className="w-full px-3 py-2 text-left text-sm flex items-center gap-2.5 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Grid3X3 size={16} className="text-gray-500" />
+              <span>Tidy Up Workflow</span>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
