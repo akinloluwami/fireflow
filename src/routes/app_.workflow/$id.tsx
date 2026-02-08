@@ -1,58 +1,63 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useRef, useCallback } from "react";
+import {
+  createFileRoute,
+  Outlet,
+  Link,
+  useLocation,
+} from "@tanstack/react-router";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useWorkflowStore } from "@/lib/workflow/store";
-import { WorkflowBuilder } from "@/components/workflow/WorkflowBuilder";
-import { Loader2 } from "lucide-react";
+import { Loader2, Check, Cloud } from "lucide-react";
 
 export const Route = createFileRoute("/app_/workflow/$id")({
   head: () => ({
-    meta: [{ title: "Edit Workflow | FireFlow" }],
+    meta: [{ title: "Workflow | FireFlow" }],
   }),
-  component: WorkflowEditorPage,
+  component: WorkflowLayout,
 });
 
-function WorkflowEditorPage() {
+function WorkflowLayout() {
   const { id } = Route.useParams();
-  const navigate = useNavigate();
+  const location = useLocation();
   const { data: session, isPending: isAuthPending } = authClient.useSession();
 
   const { workflow, setWorkflow } = useWorkflowStore();
   const isLoadingRef = useRef(false);
-  const hasLoadedRef = useRef(false);
+  const loadedWorkflowIdRef = useRef<string | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastSavedRef = useRef<string>("");
 
-  useEffect(() => {
-    console.log("[Workflow] Load effect:", {
-      userId: session?.user?.id,
-      isLoading: isLoadingRef.current,
-      hasLoaded: hasLoadedRef.current,
-      isAuthPending,
-    });
+  const [localWorkflowName, setLocalWorkflowName] = useState(workflow.name);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
+    "idle",
+  );
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
-    if (!session?.user?.id || isLoadingRef.current || hasLoadedRef.current)
-      return;
+  // Check if this workflow is already loaded (survives HMR)
+  const isWorkflowLoaded = workflow.id === id && workflow.nodes !== undefined;
+
+  // Determine active tab from URL
+  const isExecutionsTab = location.pathname.endsWith("/executions");
+
+  // Sync local name when workflow changes
+  useEffect(() => {
+    setLocalWorkflowName(workflow.name);
+  }, [workflow.name]);
+
+  // Load workflow
+  useEffect(() => {
+    if (!session?.user?.id || isLoadingRef.current) return;
+    if (isWorkflowLoaded && loadedWorkflowIdRef.current === id) return;
 
     async function loadWorkflow() {
       isLoadingRef.current = true;
-      console.log("[Workflow] Fetching workflow:", id);
       try {
         const res = await fetch(`/api/workflows/${id}`);
-        console.log("[Workflow] Response:", res.status, res.ok);
         if (!res.ok) {
-          const errorData = await res.json().catch(() => ({}));
-          console.error("[Workflow] Load failed:", errorData);
-          navigate({ to: "/app/workflows" });
+          window.location.href = "/app/workflows";
           return;
         }
         const data = await res.json();
-        console.log(
-          "[Workflow] Loaded:",
-          data.name,
-          "chatThreadId:",
-          data.chatThreadId,
-        );
         setWorkflow({
           id: data.id,
           name: data.name,
@@ -69,21 +74,21 @@ function WorkflowEditorPage() {
           edges: data.edges,
           name: data.name,
         });
-        hasLoadedRef.current = true;
+        loadedWorkflowIdRef.current = id;
       } catch (error) {
         console.error("Failed to load workflow:", error);
-        navigate({ to: "/app/workflows" });
+        window.location.href = "/app/workflows";
       } finally {
         isLoadingRef.current = false;
       }
     }
 
     loadWorkflow();
-  }, [id, session?.user?.id, setWorkflow, navigate, isAuthPending]);
+  }, [id, session?.user?.id, setWorkflow, isWorkflowLoaded]);
 
   // Auto-save on changes
   const saveWorkflow = useCallback(async () => {
-    if (!session?.user?.id || !hasLoadedRef.current) return;
+    if (!session?.user?.id || !isWorkflowLoaded) return;
 
     const currentState = JSON.stringify({
       nodes: workflow.nodes,
@@ -92,9 +97,9 @@ function WorkflowEditorPage() {
       chatThreadId: workflow.chatThreadId,
     });
 
-    // Don't save if nothing changed
     if (currentState === lastSavedRef.current) return;
 
+    setSaveStatus("saving");
     try {
       await fetch(`/api/workflows/${workflow.id}`, {
         method: "PUT",
@@ -108,14 +113,17 @@ function WorkflowEditorPage() {
         }),
       });
       lastSavedRef.current = currentState;
+      setSaveStatus("saved");
+      setTimeout(() => setSaveStatus("idle"), 2000);
     } catch (error) {
       console.error("Failed to save workflow:", error);
+      setSaveStatus("idle");
     }
-  }, [workflow, session?.user?.id]);
+  }, [workflow, session?.user?.id, isWorkflowLoaded]);
 
   // Debounced auto-save
   useEffect(() => {
-    if (!hasLoadedRef.current) return;
+    if (!isWorkflowLoaded) return;
 
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
@@ -123,7 +131,7 @@ function WorkflowEditorPage() {
 
     saveTimeoutRef.current = setTimeout(() => {
       saveWorkflow();
-    }, 1000); // Save after 1 second of inactivity
+    }, 1000);
 
     return () => {
       if (saveTimeoutRef.current) {
@@ -137,33 +145,19 @@ function WorkflowEditorPage() {
     workflow.description,
     workflow.chatThreadId,
     saveWorkflow,
+    isWorkflowLoaded,
   ]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      hasLoadedRef.current = false;
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
     };
   }, []);
 
-  // Auth redirect - only redirect if we're sure auth is complete and no user
-  useEffect(() => {
-    // Give the session a moment to settle after OAuth redirect
-    if (!isAuthPending && !session?.user) {
-      const timeout = setTimeout(() => {
-        // Double-check after a short delay
-        if (!session?.user) {
-          navigate({ to: "/" });
-        }
-      }, 500);
-      return () => clearTimeout(timeout);
-    }
-  }, [isAuthPending, session, navigate]);
-
-  if (isAuthPending || !hasLoadedRef.current) {
+  if (isAuthPending || !isWorkflowLoaded) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
         <div className="text-center">
@@ -178,25 +172,104 @@ function WorkflowEditorPage() {
     return null;
   }
 
-  const tamboApiKey = import.meta.env.VITE_TAMBO_API_KEY || "";
+  return (
+    <div className="flex flex-col h-screen bg-gray-50">
+      {/* Header with Tabs */}
+      <header className="flex items-center justify-between px-4 h-14 bg-white border-b border-gray-200 z-10">
+        <div className="flex items-center gap-4">
+          <Link to="/app/workflows" className="flex items-center gap-2">
+            <img src="/logo.png" alt="FireFlow Logo" className="w-5" />
+            <span className="font-semibold text-gray-900">FireFlow</span>
+          </Link>
 
-  if (!tamboApiKey) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
-        <div className="text-center p-8 max-w-md">
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">
-            Tambo API Key Required
-          </h2>
-          <p className="text-gray-600 mb-4">
-            Please add your Tambo API key to the environment variables.
-          </p>
-          <code className="block p-3 bg-gray-100 rounded-lg text-sm text-gray-700">
-            VITE_TAMBO_API_KEY=your_api_key
-          </code>
+          <div className="w-px h-5 bg-gray-200" />
+
+          <input
+            ref={nameInputRef}
+            type="text"
+            value={localWorkflowName}
+            onChange={(e) => setLocalWorkflowName(e.target.value)}
+            onBlur={() => {
+              if (localWorkflowName.trim()) {
+                useWorkflowStore
+                  .getState()
+                  .updateWorkflowMeta(
+                    localWorkflowName.trim(),
+                    workflow.description,
+                  );
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                nameInputRef.current?.blur();
+              } else if (e.key === "Escape") {
+                setLocalWorkflowName(workflow.name);
+                nameInputRef.current?.blur();
+              }
+            }}
+            className="px-2 py-1 text-sm font-medium text-gray-700 bg-transparent border border-transparent 
+                       rounded hover:border-gray-200 focus:border-accent focus:outline-none 
+                       transition-colors min-w-48"
+            placeholder="Workflow name"
+          />
         </div>
-      </div>
-    );
-  }
 
-  return <WorkflowBuilder tamboApiKey={tamboApiKey} workflowId={id} />;
+        {/* Tabs */}
+        <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+          <Link
+            to="/app/workflow/$id"
+            params={{ id }}
+            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+              !isExecutionsTab
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Editor
+          </Link>
+          <Link
+            to="/app/workflow/$id/executions"
+            params={{ id }}
+            search={{ executionId: undefined }}
+            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+              isExecutionsTab
+                ? "bg-white text-gray-900 shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Executions
+          </Link>
+        </div>
+
+        {/* Right side - Save status */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 text-xs text-gray-500">
+            {saveStatus === "saving" && (
+              <>
+                <Loader2 size={12} className="animate-spin" />
+                <span>Saving...</span>
+              </>
+            )}
+            {saveStatus === "saved" && (
+              <>
+                <Check size={12} className="text-green-600" />
+                <span className="text-green-600">Saved</span>
+              </>
+            )}
+            {saveStatus === "idle" && (
+              <>
+                <Cloud size={12} />
+                <span>All changes saved</span>
+              </>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Content - Outlet for child routes */}
+      <div className="flex-1 overflow-hidden">
+        <Outlet />
+      </div>
+    </div>
+  );
 }
