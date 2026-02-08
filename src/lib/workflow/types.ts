@@ -43,6 +43,26 @@ export type NodeSubType =
   | AISubType
   | OthersSubType;
 
+// Node Execution Status
+export type NodeExecutionStatus =
+  | "idle"
+  | "pending"
+  | "running"
+  | "success"
+  | "failed"
+  | "skipped";
+
+// Execution State for real-time UI updates
+export interface ExecutionState {
+  isRunning: boolean;
+  executionId: string | null;
+  nodeStatuses: Record<string, NodeExecutionStatus>;
+  nodeOutputs: Record<string, unknown>;
+  nodeErrors: Record<string, string>;
+  startedAt: Date | null;
+  completedAt: Date | null;
+}
+
 // AI Provider Types
 export type AIProvider = "openai" | "xai" | "gemini" | "vercel-ai-gateway";
 
