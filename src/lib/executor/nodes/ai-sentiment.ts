@@ -5,16 +5,52 @@
 import type {
   WorkflowNode,
   SentimentAnalysisConfig,
+  ModelPickerNodeConfig,
 } from "@/lib/workflow/types";
 import type { ExecutionContext, NodeExecutionResult } from "../engine";
 import { interpolate } from "../interpolate";
 import { analyzeSentiment } from "@/lib/integrations/sentiment";
+
+/**
+ * Find the connected model picker node for an AI node
+ */
+function findConnectedModelPicker(
+  node: WorkflowNode,
+  context: ExecutionContext,
+): WorkflowNode | undefined {
+  const { allNodes, allEdges } = context;
+  if (!allNodes || !allEdges) return undefined;
+
+  // Find edges where this node's "model" handle is the target
+  const modelEdge = allEdges.find(
+    (e) => e.target === node.id && e.targetHandle === "model",
+  );
+
+  if (!modelEdge) return undefined;
+
+  // Find the source node (should be a model-picker)
+  return allNodes.find(
+    (n) => n.id === modelEdge.source && n.subType === "model-picker",
+  );
+}
 
 export async function executeSentimentAnalysis(
   node: WorkflowNode,
   context: ExecutionContext,
 ): Promise<NodeExecutionResult> {
   const config = node.data.config as SentimentAnalysisConfig;
+
+  // Find connected model picker node
+  const modelPickerNode = findConnectedModelPicker(node, context);
+
+  // Get model config from connected model picker
+  const modelConfig = modelPickerNode?.data.config as
+    | ModelPickerNodeConfig
+    | undefined;
+
+  const provider = modelConfig?.provider;
+  const model = modelConfig?.model;
+  const credentialId = modelConfig?.credentialId;
 
   // Validate required fields
   if (!config.text) {
@@ -25,19 +61,20 @@ export async function executeSentimentAnalysis(
     };
   }
 
-  if (!config.provider) {
+  if (!provider) {
     return {
       success: false,
       output: null,
-      error: "AI provider is required",
+      error:
+        "AI provider is required. Connect an AI Model node to the Model input.",
     };
   }
 
-  if (!config.model) {
+  if (!model) {
     return {
       success: false,
       output: null,
-      error: "Model is required",
+      error: "Model is required. Connect an AI Model node to the Model input.",
     };
   }
 
@@ -45,23 +82,23 @@ export async function executeSentimentAnalysis(
   const text = interpolate(config.text, context.interpolation);
 
   // Get credentials if specified
-  const credential = config.credentialId
-    ? context.interpolation.credentials?.[config.credentialId]
+  const credential = credentialId
+    ? context.interpolation.credentials?.[credentialId]
     : null;
 
   if (!credential?.apiKey) {
     return {
       success: false,
       output: null,
-      error: `API key credential is required for ${config.provider}`,
+      error: `API key credential is required for ${provider}. Configure it in the connected AI Model node.`,
     };
   }
 
   try {
     const result = await analyzeSentiment({
       text,
-      provider: config.provider,
-      model: config.model,
+      provider,
+      model,
       apiKey: credential.apiKey as string,
       language: config.language,
       includeEmotions: config.includeEmotions,
