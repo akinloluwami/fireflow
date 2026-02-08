@@ -219,6 +219,25 @@ export const nodeDefinitions: NodeDefinition[] = [
     },
   },
 
+  // AI Nodes
+  {
+    type: "ai",
+    subType: "sentiment-analysis",
+    label: "Sentiment Analysis",
+    description: "Analyze text sentiment",
+    icon: "brain",
+    color: "#ec4899",
+    defaultConfig: {
+      text: "",
+      provider: "openai",
+      model: "gpt-4o-mini",
+      credentialId: "",
+      language: "auto",
+      includeEmotions: false,
+      confidenceThreshold: 0.5,
+    },
+  },
+
   {
     type: "others",
     subType: "wait",
@@ -252,6 +271,7 @@ export function getCategoryColor(category: string): string {
     action: "#3b82f6",
     condition: "#f59e0b",
     transform: "#8b5cf6",
+    ai: "#ec4899",
     others: "#6b7280",
   };
   return colors[category] || "#6b7280";
@@ -263,6 +283,7 @@ export function getCategoryLabel(category: string): string {
     action: "Actions",
     condition: "Logic",
     transform: "Transform",
+    ai: "AI",
     others: "Others",
   };
   return labels[category] || category;
