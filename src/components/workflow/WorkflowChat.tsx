@@ -1,5 +1,6 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { useTamboThread, useTamboThreadInput } from "@tambo-ai/react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Send,
   Sparkles,
@@ -25,6 +26,35 @@ export function WorkflowChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [hasTimedOut, setHasTimedOut] = useState(false);
+  const [chatWidth, setChatWidth] = useState(320);
+  const isResizingRef = useRef(false);
+
+  // Handle resize drag
+  const handleResizeStart = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      isResizingRef.current = true;
+      const startX = e.clientX;
+      const startWidth = chatWidth;
+
+      const handleMouseMove = (e: MouseEvent) => {
+        if (!isResizingRef.current) return;
+        const delta = startX - e.clientX;
+        const newWidth = Math.min(Math.max(startWidth + delta, 280), 600);
+        setChatWidth(newWidth);
+      };
+
+      const handleMouseUp = () => {
+        isResizingRef.current = false;
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+      };
+
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    },
+    [chatWidth],
+  );
 
   // Reset timeout when workflow changes
   useEffect(() => {
@@ -96,18 +126,37 @@ export function WorkflowChat() {
   if (!isChatOpen) {
     // Floating button when closed
     return (
-      <button
+      <motion.button
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0, opacity: 0 }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
         onClick={() => setIsChatOpen(true)}
         className="fixed bottom-6 right-6 p-3.5 bg-accent text-white rounded-full 
                    shadow-lg hover:bg-accent-hover transition-colors z-50"
       >
         <Sparkles size={20} />
-      </button>
+      </motion.button>
     );
   }
 
   return (
-    <div className="flex flex-col w-80 bg-white border-l border-gray-200">
+    <motion.div
+      initial={{ width: 0, opacity: 0 }}
+      animate={{ width: chatWidth, opacity: 1 }}
+      exit={{ width: 0, opacity: 0 }}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      className="flex flex-col bg-white border-l border-gray-200 overflow-hidden relative group"
+      style={{ width: chatWidth }}
+    >
+      {/* Resize handle */}
+      <div
+        className="absolute left-0 top-0 bottom-0 w-1 cursor-ew-resize hover:bg-accent/30 transition-colors z-10"
+        onMouseDown={handleResizeStart}
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
         <div className="flex items-center gap-2.5">
@@ -119,12 +168,14 @@ export function WorkflowChat() {
             <p className="text-xs text-gray-400">Describe your workflow</p>
           </div>
         </div>
-        <button
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
           onClick={() => setIsChatOpen(false)}
-          className="p-1 rounded hover:bg-gray-100 transition-colors"
+          className="p-1.5 rounded hover:bg-gray-100 transition-colors"
         >
-          <X size={16} className="text-gray-400" />
-        </button>
+          <X size={14} className="text-gray-400" />
+        </motion.button>
       </div>
 
       {/* Messages */}
@@ -373,6 +424,6 @@ export function WorkflowChat() {
           Enter to send • Shift+Enter for new line
         </p>
       </form>
-    </div>
+    </motion.div>
   );
 }
