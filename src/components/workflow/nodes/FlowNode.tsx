@@ -362,10 +362,12 @@ function FlowNodeComponent({
             {showErrorTooltip && executionError && (
               <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50 w-48">
                 <div className="bg-white rounded-lg shadow-lg border border-red-200 p-2">
-                  <p className="text-xs font-medium text-red-700 mb-1">
-                    Execution Error:
+                  <p className="text-xs font-medium text-red-700">
+                    Execution failed
                   </p>
-                  <p className="text-[11px] text-gray-600">{executionError}</p>
+                  <p className="text-[11px] text-gray-500 mt-0.5">
+                    See execution details for more info
+                  </p>
                 </div>
               </div>
             )}
