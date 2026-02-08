@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   Loader2,
   Heart,
+  Star,
 } from "lucide-react";
 import { useState } from "react";
 import { DemoWorkflowCanvas } from "@/components/DemoWorkflowCanvas";
@@ -38,11 +39,22 @@ function LandingPage() {
     <div className="min-h-screen">
       <nav className="sticky top-0 z-50 backdrop-blur bg-white/75 border-gray-200">
         <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <img src="/logo.png" alt="FireFlow Logo" className="w-5" />
-            <span className="text-lg font-bold text-gray-900 tracking-tight">
-              FireFlow
-            </span>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2.5">
+              <img src="/logo.png" alt="FireFlow Logo" className="w-5" />
+              <span className="text-lg font-bold text-gray-900 tracking-tight">
+                FireFlow
+              </span>
+            </div>
+            <a
+              href="https://github.com/akinloluwami/fireflow"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-full text-gray-700 transition-colors text-sm font-medium"
+            >
+              <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+              <span>Star on GitHub</span>
+            </a>
           </div>
 
           {isPending ? (
@@ -148,6 +160,15 @@ function LandingPage() {
           <div className="flex items-center gap-2">
             <span className="font-semibold text-gray-600">FireFlow</span>
           </div>
+          <a
+            href="https://github.com/akinloluwami/fireflow"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            <SiGithub className="w-5 h-5" />
+            <span>GitHub</span>
+          </a>
         </div>
       </footer>
     </div>
