@@ -1,4 +1,4 @@
-import { useCallback, useRef, useMemo, useState } from "react";
+import { useCallback, useRef, useMemo, useState, useEffect } from "react";
 import {
   ReactFlow,
   Background,
@@ -11,6 +11,7 @@ import {
   type Connection,
   type Node,
   type Edge,
+  type Viewport,
   BackgroundVariant,
   ConnectionMode,
   MarkerType,
@@ -24,7 +25,10 @@ import { WorkflowEdge } from "./edges/WorkflowEdge";
 import { useWorkflowStore } from "@/lib/workflow/store";
 import { getCategoryColor } from "@/lib/workflow/node-definitions";
 import type { NodeCategory, NodeSubType } from "@/lib/workflow/types";
-import { useEffect } from "react";
+import {
+  getEditorSettings,
+  saveViewportDebounced,
+} from "@/lib/workflow/editor-settings";
 
 const edgeTypes = {
   workflow: WorkflowEdge,
@@ -181,6 +185,34 @@ export function WorkflowCanvas() {
   }, []);
 
   const { screenToFlowPosition } = useReactFlow();
+
+  // Track if initial viewport has been restored
+  const viewportRestoredRef = useRef<string | null>(null);
+
+  // Get saved viewport settings (for initial load - no animation)
+  const savedSettings = useMemo(() => {
+    if (!workflow.id) return null;
+    return getEditorSettings(workflow.id);
+  }, [workflow.id]);
+
+  const hasSavedViewport = !!savedSettings?.viewport;
+
+  // Mark viewport as restored once workflow loads
+  useEffect(() => {
+    if (workflow.id && viewportRestoredRef.current !== workflow.id) {
+      viewportRestoredRef.current = workflow.id;
+    }
+  }, [workflow.id]);
+
+  // Save viewport on move end (debounced)
+  const onMoveEnd = useCallback(
+    (_event: MouseEvent | TouchEvent | null, viewport: Viewport) => {
+      if (workflow.id && viewportRestoredRef.current === workflow.id) {
+        saveViewportDebounced(workflow.id, viewport);
+      }
+    },
+    [workflow.id],
+  );
 
   // Handle right-click context menu
   const onPaneContextMenu = useCallback(
@@ -388,6 +420,7 @@ export function WorkflowCanvas() {
         onPaneClick={onPaneClick}
         onPaneContextMenu={onPaneContextMenu}
         onMoveStart={onMoveStart}
+        onMoveEnd={onMoveEnd}
         onDragOver={onDragOver}
         onDrop={onDrop}
         nodeTypes={nodeTypes}
@@ -397,7 +430,8 @@ export function WorkflowCanvas() {
           type: "workflow",
           animated: true,
         }}
-        fitView
+        defaultViewport={savedSettings?.viewport}
+        fitView={!hasSavedViewport}
         fitViewOptions={{
           padding: 0.2,
         }}
