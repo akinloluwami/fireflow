@@ -27,6 +27,7 @@ export function NodePalette({ onDragStart }: NodePaletteProps) {
     action: true,
     condition: true,
     transform: true,
+    ai: true,
   });
 
   const categories = useMemo(() => {
@@ -36,7 +37,7 @@ export function NodePalette({ onDragStart }: NodePaletteProps) {
         node.description.toLowerCase().includes(search.toLowerCase()),
     );
 
-    return ["trigger", "action", "condition", "transform", "others"].map(
+    return ["trigger", "action", "condition", "transform", "ai", "others"].map(
       (category) => ({
         id: category,
         label: getCategoryLabel(category),
