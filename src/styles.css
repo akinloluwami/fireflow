@@ -29,3 +29,8 @@ code {
   font-family:
     source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
+
+/* Tidy animation for workflow nodes */
+.tidying-nodes .react-flow__node {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
