@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { SiSlack, SiDiscord } from "react-icons/si";
 import type { IconType } from "react-icons";
+import { TallyIcon } from "@/components/icons/tally";
 
 // Map icon names to Lucide components
 const iconMap: Record<string, LucideIcon> = {
@@ -53,10 +54,11 @@ const iconMap: Record<string, LucideIcon> = {
   sparkles: Sparkles,
 };
 
-// Map for react-icons (brand icons)
-const brandIconMap: Record<string, IconType> = {
+// Map for react-icons (brand icons) and custom icons
+const brandIconMap: Record<string, IconType | typeof TallyIcon> = {
   slack: SiSlack,
   discord: SiDiscord,
+  tally: TallyIcon,
 };
 
 interface NodeIconProps {
