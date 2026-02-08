@@ -53,6 +53,9 @@ export function WorkflowCanvas() {
     flowPosition: { x: number; y: number };
   } | null>(null);
 
+  // Animation state for tidy
+  const [isTidying, setIsTidying] = useState(false);
+
   // Close context menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -201,6 +204,9 @@ export function WorkflowCanvas() {
     const nodeCount = workflow.nodes.length;
     if (nodeCount === 0) return;
 
+    // Enable animation
+    setIsTidying(true);
+
     const spacing = { x: 250, y: 120 };
     const startX = 100;
     const startY = 100;
@@ -323,6 +329,9 @@ export function WorkflowCanvas() {
       });
     });
 
+    // Disable animation after transition completes
+    setTimeout(() => setIsTidying(false), 500);
+
     setContextMenu(null);
   }, [workflow.nodes, workflow.edges, updateNodePosition]);
 
@@ -393,7 +402,7 @@ export function WorkflowCanvas() {
           padding: 0.2,
         }}
         proOptions={{ hideAttribution: true }}
-        className="bg-gray-50"
+        className={`bg-gray-50 ${isTidying ? "tidying-nodes" : ""}`}
       >
         <Background
           variant={BackgroundVariant.Dots}
