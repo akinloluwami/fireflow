@@ -20,6 +20,8 @@ import {
   Filter,
   Scissors,
   Layers,
+  Brain,
+  Sparkles,
   LucideIcon,
 } from "lucide-react";
 import { SiSlack, SiDiscord } from "react-icons/si";
@@ -47,6 +49,8 @@ const iconMap: Record<string, LucideIcon> = {
   filter: Filter,
   scissors: Scissors,
   layers: Layers,
+  brain: Brain,
+  sparkles: Sparkles,
 };
 
 // Map for react-icons (brand icons)
