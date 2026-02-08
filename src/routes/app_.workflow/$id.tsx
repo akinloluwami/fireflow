@@ -22,7 +22,7 @@ function WorkflowLayout() {
   const location = useLocation();
   const { data: session, isPending: isAuthPending } = authClient.useSession();
 
-  const { workflow, setWorkflow } = useWorkflowStore();
+  const { workflow, setWorkflow, loadEditorSettings } = useWorkflowStore();
   const isLoadingRef = useRef(false);
   const loadedWorkflowIdRef = useRef<string | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -76,6 +76,12 @@ function WorkflowLayout() {
           name: data.name,
         });
         loadedWorkflowIdRef.current = id;
+
+        // Load editor settings after workflow is set
+        // Use setTimeout to ensure workflow state is updated first
+        setTimeout(() => {
+          loadEditorSettings();
+        }, 0);
       } catch (error) {
         console.error("Failed to load workflow:", error);
         window.location.href = "/app/workflows";
