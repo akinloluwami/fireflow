@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { TamboProvider } from "@tambo-ai/react";
 import { ReactFlowProvider } from "@xyflow/react";
+import { useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { WorkflowCanvas } from "./WorkflowCanvas";
 import { NodePalette } from "./NodePalette";
@@ -40,12 +41,14 @@ interface ExecutionResult {
   status: "success" | "failed";
   executionId: string;
   message?: string;
+  error?: string;
 }
 
 export function WorkflowBuilder({
   tamboApiKey,
   workflowId,
 }: WorkflowBuilderProps) {
+  const navigate = useNavigate();
   const {
     workflow,
     selectedNodeId,
@@ -322,7 +325,8 @@ export function WorkflowBuilder({
               message:
                 data.execution.status === "completed"
                   ? "Workflow executed successfully!"
-                  : data.execution.error || "Workflow execution failed",
+                  : "Execution failed",
+              error: data.execution.error,
             });
             setTimeout(() => setExecutionResult(null), 5000);
           }
@@ -569,26 +573,6 @@ export function WorkflowBuilder({
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Execution status */}
-              {executionResult && (
-                <div
-                  className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg ${
-                    executionResult.status === "success"
-                      ? "bg-green-50 text-green-700"
-                      : "bg-red-50 text-red-700"
-                  }`}
-                >
-                  {executionResult.status === "success" ? (
-                    <CheckCircle size={14} />
-                  ) : (
-                    <XCircle size={14} />
-                  )}
-                  <span className="truncate max-w-40">
-                    {executionResult.message}
-                  </span>
-                </div>
-              )}
-
               {/* Execution panel toggle */}
               <div className="relative group/tooltip">
                 <button
@@ -711,7 +695,7 @@ export function WorkflowBuilder({
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40">
               {executionResult ? (
                 <div
-                  className={`flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-lg shadow-lg ${
+                  className={`flex items-center gap-3 px-5 py-2.5 text-sm font-medium rounded-lg shadow-lg ${
                     executionResult.status === "success"
                       ? "bg-green-500 text-white"
                       : "bg-red-500 text-white"
@@ -722,7 +706,24 @@ export function WorkflowBuilder({
                   ) : (
                     <XCircle size={16} />
                   )}
-                  <span>{executionResult.message}</span>
+                  <span>
+                    {executionResult.status === "success"
+                      ? executionResult.message
+                      : "Execution failed"}
+                  </span>
+                  {executionResult.status === "failed" && workflowId && (
+                    <button
+                      onClick={() => {
+                        setExecutionResult(null);
+                        navigate({
+                          to: `/app/workflow/${workflowId}/executions`,
+                        });
+                      }}
+                      className="px-3 py-1 text-sm font-medium text-red-600 bg-white hover:bg-red-50 rounded-md transition-colors"
+                    >
+                      See Details
+                    </button>
+                  )}
                 </div>
               ) : isWaitingForTrigger ? (
                 <div className="flex items-center gap-2">
