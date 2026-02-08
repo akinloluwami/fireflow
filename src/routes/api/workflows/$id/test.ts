@@ -38,9 +38,11 @@ export const Route = createFileRoute("/api/workflows/$id/test")({
 
         // Parse optional test data from request body
         let testData: Record<string, unknown> = {};
+        let triggerId: string | undefined;
         try {
           const body = await request.json();
           testData = body.testData || {};
+          triggerId = body.triggerId;
         } catch {
           // No body provided, use empty test data
         }
@@ -51,6 +53,7 @@ export const Route = createFileRoute("/api/workflows/$id/test")({
           _test: true,
           _triggeredAt: new Date().toISOString(),
           _triggeredBy: session.user.email || session.user.id,
+          _triggerId: triggerId, // Track which trigger started this execution
         };
 
         // Create execution record
@@ -63,10 +66,12 @@ export const Route = createFileRoute("/api/workflows/$id/test")({
           startedAt: new Date(),
         });
 
-        // Execute workflow (don't await - return quickly)
-        executeWorkflow(id, executionId, triggerData).catch((error) => {
-          console.error(`Test workflow execution failed: ${id}`, error);
-        });
+        // Execute workflow starting from the specified trigger (don't await - return quickly)
+        executeWorkflow(id, executionId, triggerData, triggerId).catch(
+          (error) => {
+            console.error(`Test workflow execution failed: ${id}`, error);
+          },
+        );
 
         return Response.json({
           success: true,
