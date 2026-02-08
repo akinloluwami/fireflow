@@ -35,6 +35,9 @@ export interface ExecutionContext {
   userId: string;
   triggerData: Record<string, unknown>;
   interpolation: InterpolationContext;
+  // For AI nodes to find connected model picker nodes
+  allNodes?: WorkflowNode[];
+  allEdges?: WorkflowEdge[];
 }
 
 export interface NodeExecutionResult {
@@ -180,6 +183,9 @@ export async function executeWorkflow(
         trigger: triggerData,
         credentials: loadedCredentials,
       },
+      // Include nodes and edges for AI nodes to find connected model picker nodes
+      allNodes: nodes,
+      allEdges: edges,
     };
 
     // Find trigger node (starting point)
