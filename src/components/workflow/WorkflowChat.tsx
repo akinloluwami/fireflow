@@ -161,6 +161,16 @@ export function WorkflowChat() {
     }
   }, [thread?.messages]);
 
+  // Scroll to bottom when chat opens
+  useEffect(() => {
+    if (isChatOpen && thread?.messages?.length) {
+      // Small delay to ensure the panel is rendered
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
+      });
+    }
+  }, [isChatOpen, thread?.messages?.length]);
+
   // Focus input when chat opens
   useEffect(() => {
     if (isChatOpen) {
