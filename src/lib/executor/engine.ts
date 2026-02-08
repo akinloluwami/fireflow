@@ -27,6 +27,7 @@ import { executeFilter } from "./nodes/transform-filter";
 import { executeFunction } from "./nodes/transform-function";
 import { executeSplit } from "./nodes/transform-split";
 import { executeAggregate } from "./nodes/transform-aggregate";
+import { executeSentimentAnalysis } from "./nodes/ai-sentiment";
 
 export interface ExecutionContext {
   workflowId: string;
@@ -44,6 +45,8 @@ export interface NodeExecutionResult {
   conditionResult?: boolean;
   // For switch nodes, which case branch to take
   switchResult?: string | null;
+  // For sentiment analysis nodes, which sentiment branch to take
+  sentimentResult?: "positive" | "neutral" | "negative";
   // For loop nodes, the iterations to process
   loopIterations?: Array<{
     item: unknown;
@@ -230,6 +233,11 @@ async function executeNodeChain(
     success: result.success,
   };
 
+  // If node failed, stop execution chain here
+  if (!result.success) {
+    return;
+  }
+
   // Special handling for loop nodes - iterate over items
   if (node.subType === "loop" && result.loopIterations) {
     const config = node.data.config as Record<string, unknown>;
@@ -382,6 +390,11 @@ async function executeNode(
         result = await executeAggregate(node, context);
         break;
 
+      // AI Nodes
+      case "sentiment-analysis":
+        result = await executeSentimentAnalysis(node, context);
+        break;
+
       case "wait":
         result = await executeWait(node, context);
         break;
@@ -441,6 +454,21 @@ function getNextNodes(
     const branchHandle = result.conditionResult ? "true" : "false";
     const filteredEdges = outgoingEdges.filter(
       (e) => e.sourceHandle === branchHandle || e.label === branchHandle,
+    );
+    return filteredEdges
+      .map((e) => allNodes.find((n) => n.id === e.target))
+      .filter((n): n is WorkflowNode => n !== undefined);
+  }
+
+  // For sentiment analysis nodes, filter by the sentiment result
+  if (currentNode.subType === "sentiment-analysis") {
+    // If sentiment analysis failed, don't follow any branches
+    if (!result.success || result.sentimentResult === undefined) {
+      return [];
+    }
+    const sentimentHandle = result.sentimentResult;
+    const filteredEdges = outgoingEdges.filter(
+      (e) => e.sourceHandle === sentimentHandle,
     );
     return filteredEdges
       .map((e) => allNodes.find((n) => n.id === e.target))
