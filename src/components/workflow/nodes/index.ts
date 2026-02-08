@@ -4,6 +4,7 @@ import { ConditionNode } from "./ConditionNode";
 import { TransformNode } from "./TransformNode";
 import { OthersNode } from "./OthersNode";
 import { SentimentNode } from "./SentimentNode";
+import { ModelPickerNode } from "./ModelPickerNode";
 
 // Node type registry for React Flow
 export const nodeTypes = {
@@ -13,6 +14,7 @@ export const nodeTypes = {
   transform: TransformNode,
   others: OthersNode,
   ai: SentimentNode,
+  sub: ModelPickerNode,
 };
 
 export {
@@ -22,4 +24,5 @@ export {
   TransformNode,
   OthersNode,
   SentimentNode,
+  ModelPickerNode,
 };
