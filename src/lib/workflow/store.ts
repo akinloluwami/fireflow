@@ -477,6 +477,16 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
         }
       }
 
+      // Check Sentiment Analysis
+      if (node.subType === "sentiment-analysis") {
+        if (!config.credentialId) {
+          errors.push("API credentials are required");
+        }
+        if (!config.text) {
+          errors.push("Text input is required");
+        }
+      }
+
       if (errors.length > 0) {
         nodeErrors[node.id] = errors;
       }
