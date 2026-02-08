@@ -43,7 +43,14 @@ Do not leave config empty except for trigger nodes.`,
           },
           type: {
             type: "string",
-            enum: ["trigger", "action", "condition", "transform", "others"],
+            enum: [
+              "trigger",
+              "action",
+              "condition",
+              "transform",
+              "ai",
+              "others",
+            ],
             description: "Category of the node",
           },
           subType: {
@@ -66,6 +73,7 @@ Do not leave config empty except for trigger nodes.`,
               "function",
               "filter",
               "wait",
+              "sentiment-analysis",
             ],
             description: "Specific node type",
           },
@@ -214,6 +222,21 @@ function inferConfigFromContext(
       // Default to trigger.items if not specified
       if (!config.items || config.items === "") {
         config.items = "{{ trigger.items }}";
+      }
+      break;
+    }
+
+    case "sentiment-analysis": {
+      // Default text to trigger.message or trigger.text
+      if (!config.text || config.text === "") {
+        config.text = "{{ trigger.message }}";
+      }
+      // Default provider and model
+      if (!config.provider) {
+        config.provider = "openai";
+      }
+      if (!config.model) {
+        config.model = "gpt-4o-mini";
       }
       break;
     }
@@ -405,6 +428,8 @@ export const workflowGeneratorComponent: TamboComponent = {
     send-email: { "to": "{{ trigger.email }}", "subject": "Subject", "body": "Body text" }
     wait: { "duration": 5, "unit": "seconds" }
     loop: { "items": "{{ trigger.items }}", "itemVariable": "item" }
+    sentiment-analysis: { "text": "{{ trigger.message }}", "provider": "openai", "model": "gpt-4o-mini", "credentialId": "" }
+    Note: sentiment-analysis outputs to 3 handles: "positive", "neutral", "negative". Connect edges accordingly.
     
     FULL EXAMPLE for "when form submitted, if amount > 100, send slack":
     {
