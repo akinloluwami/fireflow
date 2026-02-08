@@ -19,10 +19,14 @@ import { Route as ApiCredentialsIndexRouteImport } from './routes/api/credential
 import { Route as AppWorkflowIdRouteImport } from './routes/app_.workflow/$id'
 import { Route as AppWorkflowLayoutRouteImport } from './routes/app/workflow/_layout'
 import { Route as ApiIntegrationsStatusRouteImport } from './routes/api/integrations/status'
+import { Route as ApiExecutionsIdRouteImport } from './routes/api/executions/$id'
 import { Route as ApiCredentialsIdRouteImport } from './routes/api/credentials/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as AppWorkflowIdIndexRouteImport } from './routes/app_.workflow/$id.index'
 import { Route as ApiWorkflowsIdIndexRouteImport } from './routes/api/workflows/$id/index'
+import { Route as AppWorkflowIdExecutionsRouteImport } from './routes/app_.workflow/$id.executions'
 import { Route as ApiWorkflowsIdTestRouteImport } from './routes/api/workflows/$id/test'
+import { Route as ApiWorkflowsIdExecutionsRouteImport } from './routes/api/workflows/$id/executions'
 import { Route as ApiWebhooksTallyWorkflowIdRouteImport } from './routes/api/webhooks/tally.$workflowId'
 import { Route as ApiWebhooksGenericWorkflowIdRouteImport } from './routes/api/webhooks/generic.$workflowId'
 import { Route as ApiIntegrationsSlackDisconnectRouteImport } from './routes/api/integrations/slack.disconnect'
@@ -87,6 +91,11 @@ const ApiIntegrationsStatusRoute = ApiIntegrationsStatusRouteImport.update({
   path: '/api/integrations/status',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiExecutionsIdRoute = ApiExecutionsIdRouteImport.update({
+  id: '/api/executions/$id',
+  path: '/api/executions/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCredentialsIdRoute = ApiCredentialsIdRouteImport.update({
   id: '/api/credentials/$id',
   path: '/api/credentials/$id',
@@ -97,16 +106,32 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppWorkflowIdIndexRoute = AppWorkflowIdIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppWorkflowIdRoute,
+} as any)
 const ApiWorkflowsIdIndexRoute = ApiWorkflowsIdIndexRouteImport.update({
   id: '/api/workflows/$id/',
   path: '/api/workflows/$id/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppWorkflowIdExecutionsRoute = AppWorkflowIdExecutionsRouteImport.update({
+  id: '/executions',
+  path: '/executions',
+  getParentRoute: () => AppWorkflowIdRoute,
 } as any)
 const ApiWorkflowsIdTestRoute = ApiWorkflowsIdTestRouteImport.update({
   id: '/api/workflows/$id/test',
   path: '/api/workflows/$id/test',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWorkflowsIdExecutionsRoute =
+  ApiWorkflowsIdExecutionsRouteImport.update({
+    id: '/api/workflows/$id/executions',
+    path: '/api/workflows/$id/executions',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiWebhooksTallyWorkflowIdRoute =
   ApiWebhooksTallyWorkflowIdRouteImport.update({
     id: '/api/webhooks/tally/$workflowId',
@@ -180,9 +205,9 @@ const ApiCredentialsIdTestRoute = ApiCredentialsIdTestRouteImport.update({
 } as any)
 const ApiWorkflowsIdExecutionsLatestRoute =
   ApiWorkflowsIdExecutionsLatestRouteImport.update({
-    id: '/api/workflows/$id/executions/latest',
-    path: '/api/workflows/$id/executions/latest',
-    getParentRoute: () => rootRouteImport,
+    id: '/latest',
+    path: '/latest',
+    getParentRoute: () => ApiWorkflowsIdExecutionsRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -190,9 +215,10 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/credentials/$id': typeof ApiCredentialsIdRouteWithChildren
+  '/api/executions/$id': typeof ApiExecutionsIdRoute
   '/api/integrations/status': typeof ApiIntegrationsStatusRoute
   '/app/workflow': typeof AppWorkflowLayoutRoute
-  '/app/workflow/$id': typeof AppWorkflowIdRoute
+  '/app/workflow/$id': typeof AppWorkflowIdRouteWithChildren
   '/api/credentials/': typeof ApiCredentialsIndexRoute
   '/api/workflows/': typeof ApiWorkflowsIndexRoute
   '/app/credentials/': typeof AppCredentialsIndexRoute
@@ -210,8 +236,11 @@ export interface FileRoutesByFullPath {
   '/api/integrations/slack/disconnect': typeof ApiIntegrationsSlackDisconnectRoute
   '/api/webhooks/generic/$workflowId': typeof ApiWebhooksGenericWorkflowIdRoute
   '/api/webhooks/tally/$workflowId': typeof ApiWebhooksTallyWorkflowIdRoute
+  '/api/workflows/$id/executions': typeof ApiWorkflowsIdExecutionsRouteWithChildren
   '/api/workflows/$id/test': typeof ApiWorkflowsIdTestRoute
+  '/app/workflow/$id/executions': typeof AppWorkflowIdExecutionsRoute
   '/api/workflows/$id/': typeof ApiWorkflowsIdIndexRoute
+  '/app/workflow/$id/': typeof AppWorkflowIdIndexRoute
   '/api/workflows/$id/executions/latest': typeof ApiWorkflowsIdExecutionsLatestRoute
 }
 export interface FileRoutesByTo {
@@ -219,9 +248,9 @@ export interface FileRoutesByTo {
   '/app': typeof AppRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/credentials/$id': typeof ApiCredentialsIdRouteWithChildren
+  '/api/executions/$id': typeof ApiExecutionsIdRoute
   '/api/integrations/status': typeof ApiIntegrationsStatusRoute
   '/app/workflow': typeof AppWorkflowLayoutRoute
-  '/app/workflow/$id': typeof AppWorkflowIdRoute
   '/api/credentials': typeof ApiCredentialsIndexRoute
   '/api/workflows': typeof ApiWorkflowsIndexRoute
   '/app/credentials': typeof AppCredentialsIndexRoute
@@ -239,8 +268,11 @@ export interface FileRoutesByTo {
   '/api/integrations/slack/disconnect': typeof ApiIntegrationsSlackDisconnectRoute
   '/api/webhooks/generic/$workflowId': typeof ApiWebhooksGenericWorkflowIdRoute
   '/api/webhooks/tally/$workflowId': typeof ApiWebhooksTallyWorkflowIdRoute
+  '/api/workflows/$id/executions': typeof ApiWorkflowsIdExecutionsRouteWithChildren
   '/api/workflows/$id/test': typeof ApiWorkflowsIdTestRoute
+  '/app/workflow/$id/executions': typeof AppWorkflowIdExecutionsRoute
   '/api/workflows/$id': typeof ApiWorkflowsIdIndexRoute
+  '/app/workflow/$id': typeof AppWorkflowIdIndexRoute
   '/api/workflows/$id/executions/latest': typeof ApiWorkflowsIdExecutionsLatestRoute
 }
 export interface FileRoutesById {
@@ -249,9 +281,10 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/credentials/$id': typeof ApiCredentialsIdRouteWithChildren
+  '/api/executions/$id': typeof ApiExecutionsIdRoute
   '/api/integrations/status': typeof ApiIntegrationsStatusRoute
   '/app/workflow/_layout': typeof AppWorkflowLayoutRoute
-  '/app_/workflow/$id': typeof AppWorkflowIdRoute
+  '/app_/workflow/$id': typeof AppWorkflowIdRouteWithChildren
   '/api/credentials/': typeof ApiCredentialsIndexRoute
   '/api/workflows/': typeof ApiWorkflowsIndexRoute
   '/app/credentials/': typeof AppCredentialsIndexRoute
@@ -269,8 +302,11 @@ export interface FileRoutesById {
   '/api/integrations/slack/disconnect': typeof ApiIntegrationsSlackDisconnectRoute
   '/api/webhooks/generic/$workflowId': typeof ApiWebhooksGenericWorkflowIdRoute
   '/api/webhooks/tally/$workflowId': typeof ApiWebhooksTallyWorkflowIdRoute
+  '/api/workflows/$id/executions': typeof ApiWorkflowsIdExecutionsRouteWithChildren
   '/api/workflows/$id/test': typeof ApiWorkflowsIdTestRoute
+  '/app_/workflow/$id/executions': typeof AppWorkflowIdExecutionsRoute
   '/api/workflows/$id/': typeof ApiWorkflowsIdIndexRoute
+  '/app_/workflow/$id/': typeof AppWorkflowIdIndexRoute
   '/api/workflows/$id/executions/latest': typeof ApiWorkflowsIdExecutionsLatestRoute
 }
 export interface FileRouteTypes {
@@ -280,6 +316,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/api/auth/$'
     | '/api/credentials/$id'
+    | '/api/executions/$id'
     | '/api/integrations/status'
     | '/app/workflow'
     | '/app/workflow/$id'
@@ -300,8 +337,11 @@ export interface FileRouteTypes {
     | '/api/integrations/slack/disconnect'
     | '/api/webhooks/generic/$workflowId'
     | '/api/webhooks/tally/$workflowId'
+    | '/api/workflows/$id/executions'
     | '/api/workflows/$id/test'
+    | '/app/workflow/$id/executions'
     | '/api/workflows/$id/'
+    | '/app/workflow/$id/'
     | '/api/workflows/$id/executions/latest'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -309,9 +349,9 @@ export interface FileRouteTypes {
     | '/app'
     | '/api/auth/$'
     | '/api/credentials/$id'
+    | '/api/executions/$id'
     | '/api/integrations/status'
     | '/app/workflow'
-    | '/app/workflow/$id'
     | '/api/credentials'
     | '/api/workflows'
     | '/app/credentials'
@@ -329,8 +369,11 @@ export interface FileRouteTypes {
     | '/api/integrations/slack/disconnect'
     | '/api/webhooks/generic/$workflowId'
     | '/api/webhooks/tally/$workflowId'
+    | '/api/workflows/$id/executions'
     | '/api/workflows/$id/test'
+    | '/app/workflow/$id/executions'
     | '/api/workflows/$id'
+    | '/app/workflow/$id'
     | '/api/workflows/$id/executions/latest'
   id:
     | '__root__'
@@ -338,6 +381,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/api/auth/$'
     | '/api/credentials/$id'
+    | '/api/executions/$id'
     | '/api/integrations/status'
     | '/app/workflow/_layout'
     | '/app_/workflow/$id'
@@ -358,8 +402,11 @@ export interface FileRouteTypes {
     | '/api/integrations/slack/disconnect'
     | '/api/webhooks/generic/$workflowId'
     | '/api/webhooks/tally/$workflowId'
+    | '/api/workflows/$id/executions'
     | '/api/workflows/$id/test'
+    | '/app_/workflow/$id/executions'
     | '/api/workflows/$id/'
+    | '/app_/workflow/$id/'
     | '/api/workflows/$id/executions/latest'
   fileRoutesById: FileRoutesById
 }
@@ -368,8 +415,9 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiCredentialsIdRoute: typeof ApiCredentialsIdRouteWithChildren
+  ApiExecutionsIdRoute: typeof ApiExecutionsIdRoute
   ApiIntegrationsStatusRoute: typeof ApiIntegrationsStatusRoute
-  AppWorkflowIdRoute: typeof AppWorkflowIdRoute
+  AppWorkflowIdRoute: typeof AppWorkflowIdRouteWithChildren
   ApiCredentialsIndexRoute: typeof ApiCredentialsIndexRoute
   ApiWorkflowsIndexRoute: typeof ApiWorkflowsIndexRoute
   ApiIntegrationsDiscordCallbackRoute: typeof ApiIntegrationsDiscordCallbackRoute
@@ -383,9 +431,9 @@ export interface RootRouteChildren {
   ApiIntegrationsSlackDisconnectRoute: typeof ApiIntegrationsSlackDisconnectRoute
   ApiWebhooksGenericWorkflowIdRoute: typeof ApiWebhooksGenericWorkflowIdRoute
   ApiWebhooksTallyWorkflowIdRoute: typeof ApiWebhooksTallyWorkflowIdRoute
+  ApiWorkflowsIdExecutionsRoute: typeof ApiWorkflowsIdExecutionsRouteWithChildren
   ApiWorkflowsIdTestRoute: typeof ApiWorkflowsIdTestRoute
   ApiWorkflowsIdIndexRoute: typeof ApiWorkflowsIdIndexRoute
-  ApiWorkflowsIdExecutionsLatestRoute: typeof ApiWorkflowsIdExecutionsLatestRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -460,6 +508,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiIntegrationsStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/executions/$id': {
+      id: '/api/executions/$id'
+      path: '/api/executions/$id'
+      fullPath: '/api/executions/$id'
+      preLoaderRoute: typeof ApiExecutionsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/credentials/$id': {
       id: '/api/credentials/$id'
       path: '/api/credentials/$id'
@@ -474,6 +529,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app_/workflow/$id/': {
+      id: '/app_/workflow/$id/'
+      path: '/'
+      fullPath: '/app/workflow/$id/'
+      preLoaderRoute: typeof AppWorkflowIdIndexRouteImport
+      parentRoute: typeof AppWorkflowIdRoute
+    }
     '/api/workflows/$id/': {
       id: '/api/workflows/$id/'
       path: '/api/workflows/$id'
@@ -481,11 +543,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWorkflowsIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app_/workflow/$id/executions': {
+      id: '/app_/workflow/$id/executions'
+      path: '/executions'
+      fullPath: '/app/workflow/$id/executions'
+      preLoaderRoute: typeof AppWorkflowIdExecutionsRouteImport
+      parentRoute: typeof AppWorkflowIdRoute
+    }
     '/api/workflows/$id/test': {
       id: '/api/workflows/$id/test'
       path: '/api/workflows/$id/test'
       fullPath: '/api/workflows/$id/test'
       preLoaderRoute: typeof ApiWorkflowsIdTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/workflows/$id/executions': {
+      id: '/api/workflows/$id/executions'
+      path: '/api/workflows/$id/executions'
+      fullPath: '/api/workflows/$id/executions'
+      preLoaderRoute: typeof ApiWorkflowsIdExecutionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/webhooks/tally/$workflowId': {
@@ -574,10 +650,10 @@ declare module '@tanstack/react-router' {
     }
     '/api/workflows/$id/executions/latest': {
       id: '/api/workflows/$id/executions/latest'
-      path: '/api/workflows/$id/executions/latest'
+      path: '/latest'
       fullPath: '/api/workflows/$id/executions/latest'
       preLoaderRoute: typeof ApiWorkflowsIdExecutionsLatestRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ApiWorkflowsIdExecutionsRoute
     }
   }
 }
@@ -609,13 +685,42 @@ const ApiCredentialsIdRouteChildren: ApiCredentialsIdRouteChildren = {
 const ApiCredentialsIdRouteWithChildren =
   ApiCredentialsIdRoute._addFileChildren(ApiCredentialsIdRouteChildren)
 
+interface AppWorkflowIdRouteChildren {
+  AppWorkflowIdExecutionsRoute: typeof AppWorkflowIdExecutionsRoute
+  AppWorkflowIdIndexRoute: typeof AppWorkflowIdIndexRoute
+}
+
+const AppWorkflowIdRouteChildren: AppWorkflowIdRouteChildren = {
+  AppWorkflowIdExecutionsRoute: AppWorkflowIdExecutionsRoute,
+  AppWorkflowIdIndexRoute: AppWorkflowIdIndexRoute,
+}
+
+const AppWorkflowIdRouteWithChildren = AppWorkflowIdRoute._addFileChildren(
+  AppWorkflowIdRouteChildren,
+)
+
+interface ApiWorkflowsIdExecutionsRouteChildren {
+  ApiWorkflowsIdExecutionsLatestRoute: typeof ApiWorkflowsIdExecutionsLatestRoute
+}
+
+const ApiWorkflowsIdExecutionsRouteChildren: ApiWorkflowsIdExecutionsRouteChildren =
+  {
+    ApiWorkflowsIdExecutionsLatestRoute: ApiWorkflowsIdExecutionsLatestRoute,
+  }
+
+const ApiWorkflowsIdExecutionsRouteWithChildren =
+  ApiWorkflowsIdExecutionsRoute._addFileChildren(
+    ApiWorkflowsIdExecutionsRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiCredentialsIdRoute: ApiCredentialsIdRouteWithChildren,
+  ApiExecutionsIdRoute: ApiExecutionsIdRoute,
   ApiIntegrationsStatusRoute: ApiIntegrationsStatusRoute,
-  AppWorkflowIdRoute: AppWorkflowIdRoute,
+  AppWorkflowIdRoute: AppWorkflowIdRouteWithChildren,
   ApiCredentialsIndexRoute: ApiCredentialsIndexRoute,
   ApiWorkflowsIndexRoute: ApiWorkflowsIndexRoute,
   ApiIntegrationsDiscordCallbackRoute: ApiIntegrationsDiscordCallbackRoute,
@@ -629,9 +734,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiIntegrationsSlackDisconnectRoute: ApiIntegrationsSlackDisconnectRoute,
   ApiWebhooksGenericWorkflowIdRoute: ApiWebhooksGenericWorkflowIdRoute,
   ApiWebhooksTallyWorkflowIdRoute: ApiWebhooksTallyWorkflowIdRoute,
+  ApiWorkflowsIdExecutionsRoute: ApiWorkflowsIdExecutionsRouteWithChildren,
   ApiWorkflowsIdTestRoute: ApiWorkflowsIdTestRoute,
   ApiWorkflowsIdIndexRoute: ApiWorkflowsIdIndexRoute,
-  ApiWorkflowsIdExecutionsLatestRoute: ApiWorkflowsIdExecutionsLatestRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
