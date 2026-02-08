@@ -1,41 +1,11 @@
 import { useState } from "react";
-import { ChevronDown, ChevronUp, Brain } from "lucide-react";
+import { ChevronDown, ChevronUp, Brain, Link2 } from "lucide-react";
 import { ExpressionInput } from "./ExpressionInput";
-import { CredentialSelector } from "@/components/credentials";
-import type { AIProvider } from "@/lib/workflow/types";
-import type { CredentialType } from "@/lib/credentials/types";
-import {
-  getModelsForProvider,
-  getDefaultModel,
-} from "@/lib/integrations/sentiment";
 
 interface SentimentConfigProps {
   config: Record<string, unknown>;
   onChange: (key: string, value: unknown) => void;
   nodeId: string;
-}
-
-const PROVIDERS: { value: AIProvider; label: string }[] = [
-  { value: "openai", label: "OpenAI" },
-  { value: "xai", label: "xAI (Grok)" },
-  { value: "gemini", label: "Google Gemini" },
-  { value: "vercel-ai-gateway", label: "Vercel AI Gateway" },
-];
-
-// Map AIProvider to CredentialType
-function getCredentialType(provider: AIProvider): CredentialType {
-  switch (provider) {
-    case "openai":
-      return "openai";
-    case "xai":
-      return "xai";
-    case "gemini":
-      return "gemini";
-    case "vercel-ai-gateway":
-      return "vercel_ai_gateway";
-    default:
-      return "custom";
-  }
 }
 
 export function SentimentConfig({
@@ -45,26 +15,27 @@ export function SentimentConfig({
 }: SentimentConfigProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const provider = (config.provider as AIProvider) || "openai";
-  const model = (config.model as string) || getDefaultModel(provider);
-  const credentialId = config.credentialId as string | undefined;
   const text = (config.text as string) || "";
   const language = (config.language as string) || "auto";
   const includeEmotions = (config.includeEmotions as boolean) || false;
   const confidenceThreshold = (config.confidenceThreshold as number) || 0.5;
 
-  const models = getModelsForProvider(provider);
-
-  const handleProviderChange = (newProvider: AIProvider) => {
-    onChange("provider", newProvider);
-    // Reset model to default for new provider
-    onChange("model", getDefaultModel(newProvider));
-    // Clear credential since type changed
-    onChange("credentialId", "");
-  };
-
   return (
     <div className="space-y-4">
+      {/* Model Connection Info */}
+      <div className="bg-gray-50 border border-gray-200 rounded-md p-2.5">
+        <div className="flex items-start gap-2">
+          <Link2 className="w-4 h-4 text-gray-500 mt-0.5 shrink-0" />
+          <div className="text-xs text-gray-600">
+            <p className="font-medium mb-1">AI Model Required</p>
+            <p className="text-gray-500">
+              Connect an <strong>AI Model</strong> node to the Model input below
+              this node to configure the AI provider and credentials.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Text Input */}
       <div>
         <label className="block text-xs font-medium text-gray-600 mb-1">
@@ -81,54 +52,6 @@ export function SentimentConfig({
           The text to analyze for sentiment
         </p>
       </div>
-
-      {/* Provider Selection */}
-      <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">
-          AI Provider
-        </label>
-        <select
-          value={provider}
-          onChange={(e) => handleProviderChange(e.target.value as AIProvider)}
-          className="w-full px-2.5 py-1.5 text-xs bg-white border border-gray-200 rounded-md
-                     focus:outline-none focus:ring-1 focus:ring-accent/30 focus:border-accent"
-        >
-          {PROVIDERS.map((p) => (
-            <option key={p.value} value={p.value}>
-              {p.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Model Selection */}
-      <div>
-        <label className="block text-xs font-medium text-gray-600 mb-1">
-          Model
-        </label>
-        <select
-          value={model}
-          onChange={(e) => onChange("model", e.target.value)}
-          className="w-full px-2.5 py-1.5 text-xs bg-white border border-gray-200 rounded-md
-                     focus:outline-none focus:ring-1 focus:ring-accent/30 focus:border-accent"
-        >
-          {models.map((m) => (
-            <option key={m.value} value={m.value}>
-              {m.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Credential Selector */}
-      <CredentialSelector
-        type={getCredentialType(provider)}
-        value={credentialId}
-        onChange={(id) => onChange("credentialId", id || "")}
-        label="API Credential"
-        placeholder="Select credential..."
-        required
-      />
 
       {/* Advanced Options Toggle */}
       <button
