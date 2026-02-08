@@ -1,12 +1,6 @@
-import {
-  Database,
-  Key,
-  Lock,
-  Mail,
-  Webhook,
-  Settings,
-  Brain,
-} from "lucide-react";
+import { Key, Lock, Webhook, Settings } from "lucide-react";
+import { SiOpenai, SiGooglegemini, SiVercel, SiPostgresql } from "react-icons/si";
+import { XAIIcon } from "@/components/icons/xai";
 import type { CredentialType } from "@/lib/credentials/types";
 
 interface CredentialTypeIconProps {
@@ -18,9 +12,13 @@ export function CredentialTypeIcon({
   type,
   className = "w-5 h-5",
 }: CredentialTypeIconProps) {
+  // Extract size from className for react-icons
+  const sizeMatch = className.match(/w-(\d+)/);
+  const size = sizeMatch ? parseInt(sizeMatch[1]) * 4 : 20;
+
   switch (type) {
     case "postgres":
-      return <Database className={className} />;
+      return <SiPostgresql className={className} />;
     case "http_bearer":
     case "http_api_key":
       return <Key className={className} />;
@@ -29,10 +27,13 @@ export function CredentialTypeIcon({
     case "webhook":
       return <Webhook className={className} />;
     case "openai":
+      return <SiOpenai className={className} />;
     case "xai":
+      return <XAIIcon size={size} className={className} />;
     case "gemini":
+      return <SiGooglegemini className={className} />;
     case "vercel_ai_gateway":
-      return <Brain className={className} />;
+      return <SiVercel className={className} />;
     case "custom":
     default:
       return <Settings className={className} />;
@@ -43,7 +44,7 @@ export function CredentialTypeIcon({
 export function getCredentialTypeColor(type: CredentialType): string {
   switch (type) {
     case "postgres":
-      return "text-blue-600 bg-blue-100";
+      return "text-[#336791] bg-blue-50";
     case "http_bearer":
     case "http_api_key":
       return "text-amber-600 bg-amber-100";
@@ -52,11 +53,11 @@ export function getCredentialTypeColor(type: CredentialType): string {
     case "webhook":
       return "text-pink-600 bg-pink-100";
     case "openai":
-      return "text-emerald-600 bg-emerald-100";
+      return "text-[#10a37f] bg-emerald-50";
     case "xai":
-      return "text-slate-700 bg-slate-100";
+      return "text-black bg-gray-100";
     case "gemini":
-      return "text-blue-500 bg-blue-100";
+      return "text-[#4285f4] bg-blue-50";
     case "vercel_ai_gateway":
       return "text-black bg-gray-100";
     case "custom":
