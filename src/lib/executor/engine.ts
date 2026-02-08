@@ -203,7 +203,26 @@ export async function executeWorkflow(
     }
 
     // Execute starting from trigger
-    await executeNodeChain(triggerNode, nodes, edges, context);
+    const chainResult = await executeNodeChain(
+      triggerNode,
+      nodes,
+      edges,
+      context,
+    );
+
+    // Check if any node failed during execution
+    if (!chainResult.success) {
+      await db
+        .update(workflowExecutions)
+        .set({
+          status: "failed",
+          completedAt: new Date(),
+          error: chainResult.error || "A node failed during execution",
+          result: { duration: Date.now() - startTime },
+        })
+        .where(eq(workflowExecutions.id, executionId));
+      return;
+    }
 
     // Mark execution as completed
     await db
@@ -232,12 +251,18 @@ export async function executeWorkflow(
   }
 }
 
+interface ChainResult {
+  success: boolean;
+  error?: string;
+  failedNodeId?: string;
+}
+
 async function executeNodeChain(
   node: WorkflowNode,
   allNodes: WorkflowNode[],
   allEdges: WorkflowEdge[],
   context: ExecutionContext,
-): Promise<void> {
+): Promise<ChainResult> {
   // Execute the current node
   const result = await executeNode(node, context);
 
@@ -248,9 +273,13 @@ async function executeNodeChain(
     success: result.success,
   };
 
-  // If node failed, stop execution chain here
+  // If node failed, stop execution chain here and return failure
   if (!result.success) {
-    return;
+    return {
+      success: false,
+      error: result.error || `Node ${node.id} failed`,
+      failedNodeId: node.id,
+    };
   }
 
   // Special handling for loop nodes - iterate over items
@@ -284,7 +313,15 @@ async function executeNodeChain(
 
       // Execute all body nodes for this iteration
       for (const bodyNode of bodyNodes) {
-        await executeNodeChain(bodyNode, allNodes, allEdges, context);
+        const bodyResult = await executeNodeChain(
+          bodyNode,
+          allNodes,
+          allEdges,
+          context,
+        );
+        if (!bodyResult.success) {
+          return bodyResult;
+        }
       }
     }
 
@@ -302,10 +339,18 @@ async function executeNodeChain(
       .filter((n): n is WorkflowNode => n !== undefined);
 
     for (const doneNode of doneNodes) {
-      await executeNodeChain(doneNode, allNodes, allEdges, context);
+      const doneResult = await executeNodeChain(
+        doneNode,
+        allNodes,
+        allEdges,
+        context,
+      );
+      if (!doneResult.success) {
+        return doneResult;
+      }
     }
 
-    return; // Don't use getNextNodes for loops
+    return { success: true }; // Don't use getNextNodes for loops
   }
 
   // Find next nodes to execute
@@ -313,8 +358,18 @@ async function executeNodeChain(
 
   // Execute next nodes in sequence (could be parallel for some node types)
   for (const nextNode of nextNodes) {
-    await executeNodeChain(nextNode, allNodes, allEdges, context);
+    const nextResult = await executeNodeChain(
+      nextNode,
+      allNodes,
+      allEdges,
+      context,
+    );
+    if (!nextResult.success) {
+      return nextResult;
+    }
   }
+
+  return { success: true };
 }
 
 async function executeNode(
