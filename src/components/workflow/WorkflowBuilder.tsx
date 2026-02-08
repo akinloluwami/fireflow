@@ -145,6 +145,12 @@ export function WorkflowBuilder({
           redo();
         }
       }
+
+      // E: Execute workflow
+      if (e.key === "e" || e.key === "E") {
+        e.preventDefault();
+        handleExecute();
+      }
     };
 
     document.addEventListener("keydown", handleKeyDown);
