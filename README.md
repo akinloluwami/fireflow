@@ -1,6 +1,8 @@
 # FireFlow
 
-AI-poet workflow builder and execution engine.
+AI-powered workflow builder and execution engine.
+
+![Demo](public/demo.gif)
 
 ## Tech Stack
 
