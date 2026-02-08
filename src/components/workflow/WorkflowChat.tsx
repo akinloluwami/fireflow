@@ -1,5 +1,9 @@
 import { useRef, useEffect, useState, useCallback } from "react";
-import { useTamboThread, useTamboThreadInput, useTamboVoice } from "@tambo-ai/react";
+import {
+  useTamboThread,
+  useTamboThreadInput,
+  useTamboVoice,
+} from "@tambo-ai/react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Send,
@@ -414,7 +418,13 @@ export function WorkflowChat() {
               e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
             }}
             onKeyDown={handleKeyDown}
-            placeholder={isRecording ? "Listening..." : isTranscribing ? "Transcribing..." : "Describe your workflow..."}
+            placeholder={
+              isRecording
+                ? "Listening..."
+                : isTranscribing
+                  ? "Transcribing..."
+                  : "Describe your workflow..."
+            }
             rows={1}
             disabled={isPending || isRecording || isTranscribing}
             className="w-full px-3 py-2.5 pr-20 bg-gray-50 border border-gray-200 rounded-lg
@@ -429,9 +439,11 @@ export function WorkflowChat() {
               onClick={isRecording ? stopRecording : startRecording}
               disabled={isPending || isTranscribing}
               className={`p-1.5 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed
-                         ${isRecording 
-                           ? "bg-red-500 text-white animate-pulse" 
-                           : "bg-gray-200 text-gray-600 hover:bg-gray-300"}`}
+                         ${
+                           isRecording
+                             ? "bg-red-500 text-white animate-pulse"
+                             : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                         }`}
             >
               {isTranscribing ? (
                 <Loader2 size={14} className="animate-spin" />
@@ -443,7 +455,9 @@ export function WorkflowChat() {
             </button>
             <button
               type="submit"
-              disabled={!value.trim() || isPending || isRecording || isTranscribing}
+              disabled={
+                !value.trim() || isPending || isRecording || isTranscribing
+              }
               className="p-1.5 bg-accent text-white rounded-md
                          hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed
                          transition-colors"
