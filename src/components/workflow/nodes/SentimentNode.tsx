@@ -15,6 +15,8 @@ function SentimentNodeComponent({ id, data, selected }: SentimentNodeProps) {
     { id: "negative", label: "Negative", color: "#ef4444" },
   ];
 
+  const inputHandles = [{ id: "model", label: "Model", required: true }];
+
   return (
     <FlowNode
       id={id}
@@ -25,6 +27,8 @@ function SentimentNodeComponent({ id, data, selected }: SentimentNodeProps) {
       hasInputHandle={true}
       hasOutputHandle={false}
       outputHandles={outputHandles}
+      inputHandles={inputHandles}
+      showLabelInside={true}
     />
   );
 }
