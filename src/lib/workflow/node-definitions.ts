@@ -39,9 +39,9 @@ export const nodeDefinitions: NodeDefinition[] = [
   {
     type: "trigger",
     subType: "form-submission",
-    label: "Form Submitted",
-    description: "Trigger on form submission",
-    icon: "file-text",
+    label: "Tally Submission",
+    description: "Trigger on Tally form submission",
+    icon: "tally",
     color: "#10b981",
     defaultConfig: {
       formId: "",
