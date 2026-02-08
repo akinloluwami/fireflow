@@ -6,6 +6,7 @@ export type NodeCategory =
   | "condition"
   | "transform"
   | "ai"
+  | "sub"
   | "others";
 
 export type TriggerSubType =
@@ -33,6 +34,8 @@ export type TransformSubType =
 
 export type AISubType = "sentiment-analysis";
 
+export type SubSubType = "model-picker";
+
 export type OthersSubType = "wait" | "note" | "sticky";
 
 export type NodeSubType =
@@ -41,6 +44,7 @@ export type NodeSubType =
   | ConditionSubType
   | TransformSubType
   | AISubType
+  | SubSubType
   | OthersSubType;
 
 // Node Execution Status
@@ -125,18 +129,22 @@ export interface DatabaseQueryConfig {
 export interface SentimentAnalysisConfig {
   /** The text to analyze - supports variable interpolation */
   text: string;
-  /** AI provider to use for analysis */
-  provider: AIProvider;
-  /** Model to use (provider-specific) */
-  model: string;
-  /** Credential ID for API authentication */
-  credentialId: string;
   /** Language hint (optional, auto-detect if not specified) */
   language?: string;
   /** Include detailed emotion breakdown */
   includeEmotions?: boolean;
   /** Confidence threshold (0-1) for sentiment classification */
   confidenceThreshold?: number;
+}
+
+// Model Picker Configuration (sub-node for AI nodes)
+export interface ModelPickerNodeConfig {
+  /** AI provider to use */
+  provider: AIProvider;
+  /** Model to use (provider-specific) */
+  model: string;
+  /** Credential ID for API authentication */
+  credentialId: string;
 }
 
 export type NodeConfig =
@@ -148,6 +156,7 @@ export type NodeConfig =
   | ConditionConfig
   | CodeConfig
   | SentimentAnalysisConfig
+  | ModelPickerNodeConfig
   | Record<string, unknown>;
 
 export interface NodePosition {
