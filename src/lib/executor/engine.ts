@@ -139,6 +139,7 @@ export async function executeWorkflow(
   workflowId: string,
   executionId: string,
   triggerData: Record<string, unknown>,
+  triggerId?: string,
 ): Promise<void> {
   const startTime = Date.now();
 
@@ -182,9 +183,17 @@ export async function executeWorkflow(
     };
 
     // Find trigger node (starting point)
-    const triggerNode = nodes.find((n) => n.type === "trigger");
+    // If triggerId is provided, use that specific trigger, otherwise fall back to first trigger
+    let triggerNode = triggerId
+      ? nodes.find((n) => n.id === triggerId && n.type === "trigger")
+      : nodes.find((n) => n.type === "trigger");
+
     if (!triggerNode) {
-      throw new Error("No trigger node found");
+      throw new Error(
+        triggerId
+          ? `Trigger node not found: ${triggerId}`
+          : "No trigger node found",
+      );
     }
 
     // Execute starting from trigger
