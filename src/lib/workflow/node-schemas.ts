@@ -391,6 +391,55 @@ export const nodeOutputSchemas: Record<string, NodeOutputSchema> = {
       },
     },
   },
+
+  // AI Node Schemas
+  "sentiment-analysis": {
+    type: "object",
+    description: "Sentiment analysis results",
+    properties: {
+      sentiment: {
+        type: "string",
+        description: "Dominant sentiment label",
+        example: "positive",
+      },
+      confidence: {
+        type: "number",
+        description: "Confidence score (0-1)",
+        example: 0.87,
+      },
+      scores: {
+        type: "object",
+        description: "Individual sentiment scores",
+        properties: {
+          positive: { type: "number", example: 0.87 },
+          negative: { type: "number", example: 0.05 },
+          neutral: { type: "number", example: 0.08 },
+        },
+      },
+      emotions: {
+        type: "object",
+        description: "Detailed emotion breakdown (if enabled)",
+        properties: {
+          joy: { type: "number", example: 0.72 },
+          anger: { type: "number", example: 0.02 },
+          sadness: { type: "number", example: 0.03 },
+          fear: { type: "number", example: 0.01 },
+          surprise: { type: "number", example: 0.15 },
+          disgust: { type: "number", example: 0.01 },
+        },
+      },
+      analyzedText: {
+        type: "string",
+        description: "The text that was analyzed",
+        example: "I love this product!",
+      },
+      language: {
+        type: "string",
+        description: "Detected or specified language",
+        example: "en",
+      },
+    },
+  },
 };
 
 interface Variable {
