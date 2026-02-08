@@ -1,5 +1,5 @@
 import { memo, useState } from "react";
-import { Handle, Position } from "@xyflow/react";
+import { Handle, Position, useReactFlow } from "@xyflow/react";
 import { NodeIcon } from "../icons";
 import { useWorkflowStore } from "@/lib/workflow/store";
 import {
@@ -11,6 +11,7 @@ import {
   Clock,
   XCircle,
   SkipForward,
+  Plus,
 } from "lucide-react";
 import type {
   NodeData,
@@ -27,6 +28,8 @@ interface FlowNodeProps {
   hasInputHandle?: boolean;
   hasOutputHandle?: boolean;
   outputHandles?: { id: string; label?: string; color?: string }[];
+  inputHandles?: { id: string; label: string; required?: boolean }[];
+  showLabelInside?: boolean;
 }
 
 function FlowNodeComponent({
@@ -38,11 +41,24 @@ function FlowNodeComponent({
   hasInputHandle = true,
   hasOutputHandle = true,
   outputHandles,
+  inputHandles,
+  showLabelInside = false,
 }: FlowNodeProps) {
-  const { removeNode, duplicateNode, selectNode, nodeErrors, execution } =
-    useWorkflowStore();
+  const {
+    removeNode,
+    duplicateNode,
+    selectNode,
+    nodeErrors,
+    execution,
+    workflow,
+    addNode,
+    addEdge,
+    removeEdge,
+  } = useWorkflowStore();
   const [showActions, setShowActions] = useState(false);
   const [showErrorTooltip, setShowErrorTooltip] = useState(false);
+  const [showModelPicker, setShowModelPicker] = useState(false);
+  const reactFlow = useReactFlow();
 
   const errors = nodeErrors[id] || [];
   const hasErrors = errors.length > 0;
@@ -112,6 +128,56 @@ function FlowNodeComponent({
     duplicateNode(id);
   };
 
+  // Check if a model-picker is already connected to a specific handle
+  const isHandleConnected = (handleId: string) => {
+    return workflow.edges.some(
+      (edge) => edge.target === id && edge.targetHandle === handleId,
+    );
+  };
+
+  // Find the connected model-picker node for a handle
+  const getConnectedModelPicker = (handleId: string) => {
+    const edge = workflow.edges.find(
+      (e) => e.target === id && e.targetHandle === handleId,
+    );
+    if (!edge) return null;
+    return workflow.nodes.find(
+      (n) => n.id === edge.source && n.subType === "model-picker",
+    );
+  };
+
+  // Create a model-picker node and connect it
+  const handleCreateModelPicker = (e: React.MouseEvent, handleId: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    // Get current node position from React Flow
+    const currentNode = reactFlow.getNode(id);
+    if (!currentNode) return;
+
+    // Position the model picker below the parent node
+    const modelPickerPosition = {
+      x: currentNode.position.x,
+      y: currentNode.position.y + 180,
+    };
+
+    // Add the model-picker node
+    const newNodeId = addNode("sub", "model-picker", modelPickerPosition);
+
+    // Connect the model-picker to this node
+    if (newNodeId) {
+      // addEdge takes (source, target, sourceHandle, targetHandle)
+      addEdge(newNodeId, id, "model", handleId);
+
+      // Use setTimeout to ensure the node is created before selecting it
+      setTimeout(() => {
+        selectNode(newNodeId);
+      }, 0);
+    }
+
+    setShowModelPicker(false);
+  };
+
   // Calculate vertical positions for multiple output handles
   const getHandlePosition = (index: number, total: number) => {
     if (total === 1) return "50%";
@@ -124,7 +190,14 @@ function FlowNodeComponent({
       className="relative flex flex-col items-center pt-5"
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
-      onClick={() => selectNode(id)}
+      onClick={(e) => {
+        // Don't select this node if click was on a nodrag element (like the + button)
+        const target = e.target as HTMLElement;
+        if (target.closest(".nodrag")) {
+          return;
+        }
+        selectNode(id);
+      }}
     >
       {/* Actions - Shown on hover/select */}
       <div
@@ -153,34 +226,55 @@ function FlowNodeComponent({
       {/* Main Node Body */}
       <div
         className={`
-          relative w-[72px] h-[72px] 
-          flex items-center justify-center
+          relative ${showLabelInside ? "min-w-[140px] px-3 py-4" : "w-[72px] h-[72px]"} 
+          flex items-center ${showLabelInside ? "gap-3" : "justify-center"}
           transition-all duration-150 cursor-pointer
-          bg-white shadow-sm
+          bg-white
           ${isTrigger ? "rounded-l-full rounded-r-2xl" : "rounded-2xl"}
-          ${selected ? "ring-2 ring-offset-2 ring-offset-gray-50 shadow-md" : "hover:shadow-md"}
+          ${selected ? "ring-2 ring-offset-2 ring-offset-gray-50" : ""}
           ${!selected && !isTrigger && getStatusRingClass()}
           ${getStatusAnimationClass()}
         `}
         style={{
-          borderWidth:
-            isTrigger && getStatusBorderColor() && !selected ? "3px" : "2px",
+          borderWidth: selected
+            ? "2px"
+            : isTrigger && getStatusBorderColor()
+              ? "3px"
+              : "2px",
           borderStyle: "solid",
           borderColor: selected
             ? color
             : isTrigger && getStatusBorderColor() && !selected
               ? getStatusBorderColor()!
-              : "#e5e7eb",
+              : "#d1d5db",
           ["--tw-ring-color" as string]: selected ? color : undefined,
         }}
       >
         {/* Icon */}
         <div
-          className={`flex items-center justify-center w-10 h-10 ${isTrigger ? "rounded-l-full rounded-r-xl" : "rounded-xl"}`}
-          style={{ backgroundColor: `${color}15` }}
+          className={`flex items-center justify-center ${showLabelInside ? "w-8 h-8" : "w-10 h-10"} ${isTrigger ? "rounded-l-full rounded-r-xl" : "rounded-xl"}`}
+          style={{ backgroundColor: `${color}25` }}
         >
-          <NodeIcon name={data.icon || "code"} size={24} style={{ color }} />
+          <NodeIcon
+            name={data.icon || "code"}
+            size={showLabelInside ? 20 : 24}
+            style={{ color }}
+          />
         </div>
+
+        {/* Label inside node */}
+        {showLabelInside && (
+          <div className="flex flex-col">
+            <span className="text-xs font-medium text-gray-700 leading-tight">
+              {data.label.split(" ")[0]}
+            </span>
+            {data.label.split(" ").length > 1 && (
+              <span className="text-xs font-medium text-gray-700 leading-tight">
+                {data.label.split(" ").slice(1).join(" ")}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Input Handle */}
         {hasInputHandle && (
@@ -325,12 +419,86 @@ function FlowNodeComponent({
         )}
       </div>
 
-      {/* Label below node */}
-      <div className="mt-2 text-center max-w-[120px]">
-        <p className="text-xs font-medium text-gray-700 truncate">
-          {data.label}
-        </p>
-      </div>
+      {/* Bottom Input Handles (for sub-node connections like Model) */}
+      {inputHandles && inputHandles.length > 0 && (
+        <div className="flex flex-col items-center mt-1">
+          {inputHandles.map((handle) => {
+            const connected = isHandleConnected(handle.id);
+            const connectedNode = getConnectedModelPicker(handle.id);
+
+            return (
+              <div
+                key={handle.id}
+                className="flex flex-col items-center relative"
+              >
+                {/* Handle positioned on the diamond (for receiving connections) */}
+                <Handle
+                  type="target"
+                  position={Position.Bottom}
+                  id={handle.id}
+                  className="!w-4 !h-4 !bg-transparent !border-0"
+                  style={{
+                    position: "absolute",
+                    top: "0px",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                  }}
+                />
+
+                {/* Diamond connector at top */}
+                <div
+                  className="w-2.5 h-2.5 rotate-45 bg-gray-300 border border-gray-400"
+                  style={{ marginBottom: "-5px" }}
+                />
+
+                {/* Dashed line */}
+                <div
+                  className="w-px h-4"
+                  style={{
+                    borderRight: "1px dashed #d1d5db",
+                  }}
+                />
+
+                {/* Label */}
+                <span className="text-[10px] text-gray-500 mb-1">
+                  {handle.label}
+                  {handle.required && <span className="text-red-500">*</span>}
+                </span>
+
+                {/* Plus button when not connected */}
+                {!connected && (
+                  <div
+                    className="nodrag nopan"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      handleCreateModelPicker(e, handle.id);
+                    }}
+                  >
+                    <div
+                      className="w-6 h-6 rounded-full bg-gray-600 hover:bg-gray-700 
+                                 flex items-center justify-center transition-colors
+                                 shadow-sm border-2 border-gray-700 cursor-pointer"
+                      title="Add AI Model"
+                    >
+                      <Plus size={14} className="text-white" />
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Label below node - only when not showing inside */}
+      {!showLabelInside && (
+        <div className="mt-2 text-center max-w-[120px]">
+          <p className="text-xs font-medium text-gray-700 truncate">
+            {data.label}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
