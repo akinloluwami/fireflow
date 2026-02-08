@@ -11,6 +11,93 @@ import type {
   CredentialListItem,
 } from "@/lib/credentials/types";
 
+// Verify AI API keys before saving
+async function verifyAIApiKey(
+  type: CredentialType,
+  apiKey: string,
+): Promise<{ valid: boolean; error?: string }> {
+  try {
+    switch (type) {
+      case "openai": {
+        const res = await fetch("https://api.openai.com/v1/models", {
+          headers: { Authorization: `Bearer ${apiKey}` },
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          return {
+            valid: false,
+            error: data.error?.message || `OpenAI API error: ${res.status}`,
+          };
+        }
+        return { valid: true };
+      }
+
+      case "xai": {
+        const res = await fetch("https://api.x.ai/v1/models", {
+          headers: { Authorization: `Bearer ${apiKey}` },
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          return {
+            valid: false,
+            error: data.error?.message || `xAI API error: ${res.status}`,
+          };
+        }
+        return { valid: true };
+      }
+
+      case "gemini": {
+        // Test actual content generation to catch quota issues
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: "Say hi" }] }],
+              generationConfig: { maxOutputTokens: 5 },
+            }),
+          },
+        );
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          return {
+            valid: false,
+            error: data.error?.message || `Gemini API error: ${res.status}`,
+          };
+        }
+        return { valid: true };
+      }
+
+      case "vercel_ai_gateway": {
+        // Vercel AI Gateway - test with a simple models list
+        const res = await fetch("https://ai-gateway.vercel.sh/v1/models", {
+          headers: { Authorization: `Bearer ${apiKey}` },
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          return {
+            valid: false,
+            error:
+              data.error?.message || `Vercel AI Gateway error: ${res.status}`,
+          };
+        }
+        return { valid: true };
+      }
+
+      default:
+        // Non-AI credentials don't need verification
+        return { valid: true };
+    }
+  } catch (error) {
+    return {
+      valid: false,
+      error:
+        error instanceof Error ? error.message : "Failed to verify API key",
+    };
+  }
+}
+
 export const Route = createFileRoute("/api/credentials/")({
   server: {
     handlers: {
@@ -66,9 +153,12 @@ export const Route = createFileRoute("/api/credentials/")({
           "http_bearer",
           "http_api_key",
           "http_basic",
-          "smtp",
           "webhook",
           "custom",
+          "openai",
+          "xai",
+          "gemini",
+          "vercel_ai_gateway",
         ];
         if (!validTypes.includes(type)) {
           return Response.json(
@@ -77,6 +167,25 @@ export const Route = createFileRoute("/api/credentials/")({
             },
             { status: 400 },
           );
+        }
+
+        // Verify AI API keys before saving
+        if (["openai", "xai", "gemini", "vercel_ai_gateway"].includes(type)) {
+          const apiKey = (data as { apiKey?: string }).apiKey;
+          if (!apiKey) {
+            return Response.json(
+              { error: "API key is required" },
+              { status: 400 },
+            );
+          }
+
+          const verification = await verifyAIApiKey(type, apiKey);
+          if (!verification.valid) {
+            return Response.json(
+              { error: `Invalid API key: ${verification.error}` },
+              { status: 400 },
+            );
+          }
         }
 
         // Encrypt the credential data
