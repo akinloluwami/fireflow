@@ -440,6 +440,29 @@ export const nodeOutputSchemas: Record<string, NodeOutputSchema> = {
       },
     },
   },
+
+  // Sub/Helper Node Schemas
+  "model-picker": {
+    type: "object",
+    description: "AI model configuration",
+    properties: {
+      provider: {
+        type: "string",
+        description: "AI provider name",
+        example: "openai",
+      },
+      model: {
+        type: "string",
+        description: "Model identifier",
+        example: "gpt-4o-mini",
+      },
+      credentialId: {
+        type: "string",
+        description: "Credential ID for API access",
+        example: "abc123",
+      },
+    },
+  },
 };
 
 interface Variable {
