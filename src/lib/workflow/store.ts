@@ -11,6 +11,11 @@ import type {
   ExecutionState,
 } from "./types";
 import { getNodeDefinition } from "./node-definitions";
+import {
+  getEditorSettings,
+  saveEditorSettings,
+  type EditorSettings,
+} from "./editor-settings";
 
 interface WorkflowState {
   // Current workflow
@@ -21,6 +26,7 @@ interface WorkflowState {
   // UI state
   isPanelOpen: boolean;
   isChatOpen: boolean;
+  isInitialMount: boolean; // Track initial mount to skip animations
 
   // Validation errors per node
   nodeErrors: Record<string, string[]>;
@@ -76,6 +82,12 @@ interface WorkflowActions {
   toggleChat: () => void;
   setIsPanelOpen: (isOpen: boolean) => void;
   setIsChatOpen: (isOpen: boolean) => void;
+  setInitialMountComplete: () => void;
+
+  // Editor settings persistence
+  loadEditorSettings: () => void;
+  saveCurrentEditorSettings: () => void;
+  getEditorSettingsForSave: () => Partial<EditorSettings>;
 
   // History
   undo: () => void;
@@ -134,6 +146,7 @@ const initialState: WorkflowState = {
   selectedEdgeId: null,
   isPanelOpen: false,
   isChatOpen: false,
+  isInitialMount: true,
   nodeErrors: {},
   execution: createEmptyExecution(),
   history: [],
@@ -356,30 +369,107 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
 
   selectNode: (nodeId) => {
     set({ selectedNodeId: nodeId, selectedEdgeId: null });
+    // Auto-save selection to editor settings
+    const { workflow } = get();
+    if (workflow.id) {
+      saveEditorSettings(workflow.id, { selectedNodeId: nodeId });
+    }
   },
 
   selectEdge: (edgeId) => {
     set({ selectedEdgeId: edgeId, selectedNodeId: null });
+    // Clear selected node in editor settings when selecting edge
+    const { workflow } = get();
+    if (workflow.id) {
+      saveEditorSettings(workflow.id, { selectedNodeId: null });
+    }
   },
 
   clearSelection: () => {
     set({ selectedNodeId: null, selectedEdgeId: null });
+    const { workflow } = get();
+    if (workflow.id) {
+      saveEditorSettings(workflow.id, { selectedNodeId: null });
+    }
   },
 
   togglePanel: () => {
-    set((state) => ({ isPanelOpen: !state.isPanelOpen }));
+    set((state) => {
+      const newValue = !state.isPanelOpen;
+      if (state.workflow.id) {
+        saveEditorSettings(state.workflow.id, { isPanelOpen: newValue });
+      }
+      return { isPanelOpen: newValue };
+    });
   },
 
   toggleChat: () => {
-    set((state) => ({ isChatOpen: !state.isChatOpen }));
+    set((state) => {
+      const newValue = !state.isChatOpen;
+      if (state.workflow.id) {
+        saveEditorSettings(state.workflow.id, { isChatOpen: newValue });
+      }
+      return { isChatOpen: newValue };
+    });
   },
 
   setIsPanelOpen: (isOpen) => {
     set({ isPanelOpen: isOpen });
+    const { workflow } = get();
+    if (workflow.id) {
+      saveEditorSettings(workflow.id, { isPanelOpen: isOpen });
+    }
   },
 
   setIsChatOpen: (isOpen) => {
     set({ isChatOpen: isOpen });
+    const { workflow } = get();
+    if (workflow.id) {
+      saveEditorSettings(workflow.id, { isChatOpen: isOpen });
+    }
+  },
+
+  setInitialMountComplete: () => {
+    set({ isInitialMount: false });
+  },
+
+  // Editor settings persistence
+  loadEditorSettings: () => {
+    const { workflow } = get();
+    if (!workflow.id) return;
+
+    const settings = getEditorSettings(workflow.id);
+
+    // Validate that selectedNodeId still exists in the workflow
+    const nodeExists = settings.selectedNodeId
+      ? workflow.nodes.some((n) => n.id === settings.selectedNodeId)
+      : false;
+
+    set({
+      isPanelOpen: settings.isPanelOpen,
+      isChatOpen: settings.isChatOpen,
+      selectedNodeId: nodeExists ? settings.selectedNodeId : null,
+    });
+  },
+
+  saveCurrentEditorSettings: () => {
+    const state = get();
+    if (!state.workflow.id) return;
+
+    saveEditorSettings(state.workflow.id, {
+      isPanelOpen: state.isPanelOpen,
+      isChatOpen: state.isChatOpen,
+      selectedNodeId: state.selectedNodeId,
+    });
+  },
+
+  getEditorSettingsForSave: () => {
+    const state = get();
+    return {
+      isPanelOpen: state.isPanelOpen,
+      isChatOpen: state.isChatOpen,
+      selectedNodeId: state.selectedNodeId,
+    };
   },
 
   saveToHistory: () => {
