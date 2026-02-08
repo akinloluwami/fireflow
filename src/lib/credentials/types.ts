@@ -12,6 +12,10 @@ export type CredentialType =
   | "http_api_key"
   | "http_basic"
   | "webhook"
+  | "openai"
+  | "xai"
+  | "gemini"
+  | "vercel_ai_gateway"
   | "custom";
 
 // Individual credential data structures (what gets encrypted)
@@ -46,6 +50,24 @@ export interface WebhookCredentialData {
   headerName?: string;
 }
 
+// AI Provider Credential Data
+export interface OpenAICredentialData {
+  apiKey: string;
+}
+
+export interface XAICredentialData {
+  apiKey: string;
+}
+
+export interface GeminiCredentialData {
+  apiKey: string;
+}
+
+export interface VercelAIGatewayCredentialData {
+  apiKey: string;
+  gatewayUrl?: string;
+}
+
 export interface CustomCredentialData {
   [key: string]: string;
 }
@@ -57,6 +79,10 @@ export type CredentialData =
   | HttpApiKeyCredentialData
   | HttpBasicCredentialData
   | WebhookCredentialData
+  | OpenAICredentialData
+  | XAICredentialData
+  | GeminiCredentialData
+  | VercelAIGatewayCredentialData
   | CustomCredentialData;
 
 // Type mapping for type-safe access
@@ -66,6 +92,10 @@ export interface CredentialDataMap {
   http_api_key: HttpApiKeyCredentialData;
   http_basic: HttpBasicCredentialData;
   webhook: WebhookCredentialData;
+  openai: OpenAICredentialData;
+  xai: XAICredentialData;
+  gemini: GeminiCredentialData;
+  vercel_ai_gateway: VercelAIGatewayCredentialData;
   custom: CustomCredentialData;
 }
 
@@ -265,6 +295,72 @@ export const CREDENTIAL_TYPE_META: Record<CredentialType, CredentialTypeMeta> =
           type: "text",
           required: false,
           placeholder: "X-Webhook-Signature",
+        },
+      ],
+    },
+    openai: {
+      type: "openai",
+      label: "OpenAI",
+      description: "OpenAI API key for GPT models",
+      icon: "Brain",
+      fields: [
+        {
+          name: "apiKey",
+          label: "API Key",
+          type: "password",
+          required: true,
+          placeholder: "sk-...",
+        },
+      ],
+    },
+    xai: {
+      type: "xai",
+      label: "xAI (Grok)",
+      description: "xAI API key for Grok models",
+      icon: "Brain",
+      fields: [
+        {
+          name: "apiKey",
+          label: "API Key",
+          type: "password",
+          required: true,
+          placeholder: "xai-...",
+        },
+      ],
+    },
+    gemini: {
+      type: "gemini",
+      label: "Google Gemini",
+      description: "Google Gemini API key",
+      icon: "Brain",
+      fields: [
+        {
+          name: "apiKey",
+          label: "API Key",
+          type: "password",
+          required: true,
+          placeholder: "AIza...",
+        },
+      ],
+    },
+    vercel_ai_gateway: {
+      type: "vercel_ai_gateway",
+      label: "Vercel AI Gateway",
+      description: "Vercel AI Gateway API key",
+      icon: "Brain",
+      fields: [
+        {
+          name: "apiKey",
+          label: "API Key",
+          type: "password",
+          required: true,
+        },
+        {
+          name: "gatewayUrl",
+          label: "Gateway URL (optional)",
+          type: "text",
+          required: false,
+          placeholder: "https://gateway.ai.vercel.com",
         },
       ],
     },
