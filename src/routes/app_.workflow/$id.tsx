@@ -5,9 +5,10 @@ import {
   useLocation,
 } from "@tanstack/react-router";
 import { useEffect, useRef, useCallback, useState } from "react";
+import { motion } from "motion/react";
 import { authClient } from "@/lib/auth-client";
 import { useWorkflowStore } from "@/lib/workflow/store";
-import { Loader2, Check, Cloud } from "lucide-react";
+import { Loader2, Check, Cloud, PenLine, History } from "lucide-react";
 
 export const Route = createFileRoute("/app_/workflow/$id")({
   head: () => ({
@@ -175,7 +176,7 @@ function WorkflowLayout() {
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       {/* Header with Tabs */}
-      <header className="flex items-center justify-between px-4 h-14 bg-white border-b border-gray-200 z-10">
+      <header className="grid grid-cols-3 items-center px-4 h-14 bg-white border-b border-gray-200 z-10">
         <div className="flex items-center gap-4">
           <Link to="/app/workflows" className="flex items-center gap-2">
             <img src="/logo.png" alt="FireFlow Logo" className="w-5" />
@@ -214,55 +215,77 @@ function WorkflowLayout() {
           />
         </div>
 
-        {/* Tabs */}
-        <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
-          <Link
-            to="/app/workflow/$id"
-            params={{ id }}
-            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
-              !isExecutionsTab
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            Editor
-          </Link>
-          <Link
-            to="/app/workflow/$id/executions"
-            params={{ id }}
-            search={{ executionId: undefined }}
-            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
-              isExecutionsTab
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            Executions
-          </Link>
+        {/* Tabs - centered */}
+        <div className="flex items-center justify-center">
+          <div className="relative flex items-center bg-accent/10 p-1 rounded-full ring-1 ring-accent/30">
+            <Link
+              to="/app/workflow/$id"
+              params={{ id }}
+              className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium rounded-full transition-colors"
+            >
+              {!isExecutionsTab && (
+                <motion.div
+                  layoutId="tab-indicator"
+                  className="absolute inset-0 bg-accent rounded-full"
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                />
+              )}
+              <PenLine
+                size={14}
+                className={`relative z-10 ${!isExecutionsTab ? "text-white" : "text-gray-500"}`}
+              />
+              <span
+                className={`relative z-10 ${!isExecutionsTab ? "text-white" : "text-gray-500 hover:text-gray-700"}`}
+              >
+                Editor
+              </span>
+            </Link>
+            <Link
+              to="/app/workflow/$id/executions"
+              params={{ id }}
+              search={{ executionId: undefined }}
+              className="relative z-10 flex items-center gap-1.5 px-4 py-1.5 text-sm font-medium rounded-full transition-colors"
+            >
+              {isExecutionsTab && (
+                <motion.div
+                  layoutId="tab-indicator"
+                  className="absolute inset-0 bg-accent rounded-full"
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                />
+              )}
+              <History
+                size={14}
+                className={`relative z-10 ${isExecutionsTab ? "text-white" : "text-gray-500"}`}
+              />
+              <span
+                className={`relative z-10 ${isExecutionsTab ? "text-white" : "text-gray-500 hover:text-gray-700"}`}
+              >
+                Executions
+              </span>
+            </Link>
+          </div>
         </div>
 
         {/* Right side - Save status */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 text-xs text-gray-500">
-            {saveStatus === "saving" && (
-              <>
-                <Loader2 size={12} className="animate-spin" />
-                <span>Saving...</span>
-              </>
-            )}
-            {saveStatus === "saved" && (
-              <>
-                <Check size={12} className="text-green-600" />
-                <span className="text-green-600">Saved</span>
-              </>
-            )}
-            {saveStatus === "idle" && (
-              <>
-                <Cloud size={12} />
-                <span>All changes saved</span>
-              </>
-            )}
-          </div>
+        <div className="flex items-center justify-end gap-1.5 text-xs text-gray-500">
+          {saveStatus === "saving" && (
+            <>
+              <Loader2 size={12} className="animate-spin" />
+              <span>Saving...</span>
+            </>
+          )}
+          {saveStatus === "saved" && (
+            <>
+              <Check size={12} className="text-green-600" />
+              <span className="text-green-600">Saved</span>
+            </>
+          )}
+          {saveStatus === "idle" && (
+            <>
+              <Cloud size={12} />
+              <span>All changes saved</span>
+            </>
+          )}
         </div>
       </header>
 
