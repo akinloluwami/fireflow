@@ -18,7 +18,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { motion, AnimatePresence } from "motion/react";
-import { Plus, Sparkles, Grid3X3 } from "lucide-react";
+import { Plus, Sparkles, Grid3X3, X, Keyboard } from "lucide-react";
 
 import { nodeTypes } from "./nodes";
 import { WorkflowEdge } from "./edges/WorkflowEdge";
@@ -48,6 +48,7 @@ export function WorkflowCanvas() {
     clearSelection,
     setIsPanelOpen,
     setIsChatOpen,
+    saveToHistory,
   } = useWorkflowStore();
 
   // Context menu state
@@ -59,6 +60,9 @@ export function WorkflowCanvas() {
 
   // Animation state for tidy
   const [isTidying, setIsTidying] = useState(false);
+
+  // Keyboard shortcuts help modal
+  const [showShortcuts, setShowShortcuts] = useState(false);
 
   // Close context menu when clicking outside
   useEffect(() => {
@@ -150,10 +154,11 @@ export function WorkflowCanvas() {
     [updateNodePosition],
   );
 
-  // Handle node drag start - close context menu
+  // Handle node drag start - save history for undo and close context menu
   const onNodeDragStart = useCallback(() => {
+    saveToHistory();
     setContextMenu(null);
-  }, []);
+  }, [saveToHistory]);
 
   // Handle node selection
   const onNodeClick = useCallback(
@@ -367,6 +372,54 @@ export function WorkflowCanvas() {
     setContextMenu(null);
   }, [workflow.nodes, workflow.edges, updateNodePosition]);
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check if user is typing in an input/textarea
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      // Tab: Open node picker
+      if (e.key === "Tab") {
+        e.preventDefault();
+        setIsPanelOpen(true);
+      }
+
+      // C: Open chat
+      if (e.key === "c" || e.key === "C") {
+        e.preventDefault();
+        setIsChatOpen(true);
+      }
+
+      // T: Tidy up workflow
+      if (e.key === "t" || e.key === "T") {
+        e.preventDefault();
+        tidyUpWorkflow();
+      }
+
+      // ?: Show keyboard shortcuts
+      if (e.key === "?") {
+        e.preventDefault();
+        setShowShortcuts(true);
+      }
+
+      // Escape: Close shortcuts modal
+      if (e.key === "Escape" && showShortcuts) {
+        e.preventDefault();
+        setShowShortcuts(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [setIsPanelOpen, setIsChatOpen, tidyUpWorkflow, showShortcuts]);
+
   // Handle drop from palette
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
@@ -549,7 +602,8 @@ export function WorkflowCanvas() {
               className="w-full px-3 py-2 text-left text-sm flex items-center gap-2.5 hover:bg-gray-50 transition-colors"
             >
               <Plus size={16} className="text-gray-500" />
-              <span>Add Node</span>
+              <span className="flex-1">Add Node</span>
+              <span className="text-xs text-gray-400">Tab</span>
             </button>
             <button
               onClick={() => {
@@ -559,7 +613,8 @@ export function WorkflowCanvas() {
               className="w-full px-3 py-2 text-left text-sm flex items-center gap-2.5 hover:bg-gray-50 transition-colors"
             >
               <Sparkles size={16} className="text-accent" />
-              <span>Build with AI</span>
+              <span className="flex-1">Build with AI</span>
+              <span className="text-xs text-gray-400">C</span>
             </button>
             <div className="h-px bg-gray-100 my-1" />
             <button
@@ -568,8 +623,130 @@ export function WorkflowCanvas() {
               className="w-full px-3 py-2 text-left text-sm flex items-center gap-2.5 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Grid3X3 size={16} className="text-gray-500" />
-              <span>Tidy Up Workflow</span>
+              <span className="flex-1">Tidy Up Workflow</span>
+              <span className="text-xs text-gray-400">T</span>
             </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Keyboard shortcuts modal */}
+      <AnimatePresence>
+        {showShortcuts && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+            onClick={() => setShowShortcuts(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className="bg-white rounded-xl shadow-2xl border border-gray-200 w-[400px] max-h-[80vh] overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+                <div className="flex items-center gap-2.5">
+                  <Keyboard size={20} className="text-gray-500" />
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Keyboard Shortcuts
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setShowShortcuts(false)}
+                  className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <X size={18} className="text-gray-500" />
+                </button>
+              </div>
+              <div className="p-5 space-y-4">
+                <div>
+                  <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">
+                    Navigation
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-700">Open node picker</span>
+                      <kbd className="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-600">
+                        Tab
+                      </kbd>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-700">Open AI chat</span>
+                      <kbd className="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-600">
+                        C
+                      </kbd>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">
+                    Editing
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-700">Undo</span>
+                      <kbd className="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-600">
+                        ⌘Z
+                      </kbd>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-700">Redo</span>
+                      <kbd className="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-600">
+                        ⌘Y
+                      </kbd>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-700">Tidy up workflow</span>
+                      <kbd className="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-600">
+                        T
+                      </kbd>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">
+                    Execution
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-700">Execute workflow</span>
+                      <kbd className="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-600">
+                        E
+                      </kbd>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">
+                    Help
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-700">
+                        Show keyboard shortcuts
+                      </span>
+                      <kbd className="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-600">
+                        ?
+                      </kbd>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="px-5 py-3 bg-gray-50 border-t border-gray-100">
+                <p className="text-xs text-gray-500 text-center">
+                  Press{" "}
+                  <kbd className="px-1.5 py-0.5 bg-white rounded border border-gray-200 font-mono">
+                    Esc
+                  </kbd>{" "}
+                  to close
+                </p>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
