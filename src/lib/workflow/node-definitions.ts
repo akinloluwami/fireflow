@@ -113,18 +113,8 @@ export const nodeDefinitions: NodeDefinition[] = [
       query: "",
     },
   },
-  {
-    type: "action",
-    subType: "code",
-    label: "Run Code",
-    description: "Execute custom code",
-    icon: "code",
-    color: "#3b82f6",
-    defaultConfig: {
-      language: "javascript",
-      code: "// Your code here\nreturn data;",
-    },
-  },
+  // NOTE: Code execution node removed for security reasons
+  // See SECURITY_AUDIT.md for details
 
   {
     type: "condition",
@@ -174,17 +164,8 @@ export const nodeDefinitions: NodeDefinition[] = [
       variables: {},
     },
   },
-  {
-    type: "transform",
-    subType: "function",
-    label: "Transform",
-    description: "Transform data with code",
-    icon: "cpu",
-    color: "#8b5cf6",
-    defaultConfig: {
-      expression: "",
-    },
-  },
+  // NOTE: Function/Transform node removed for security reasons (code execution)
+  // See SECURITY_AUDIT.md for details
   {
     type: "transform",
     subType: "filter",
