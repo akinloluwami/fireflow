@@ -25,6 +25,7 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AppWorkflowIdIndexRouteImport } from './routes/app_.workflow/$id.index'
 import { Route as ApiWorkflowsIdIndexRouteImport } from './routes/api/workflows/$id/index'
 import { Route as AppWorkflowIdExecutionsRouteImport } from './routes/app_.workflow/$id.executions'
+import { Route as ApiWorkflowsIdWebhookSecretRouteImport } from './routes/api/workflows/$id.webhook-secret'
 import { Route as ApiWorkflowsIdTestRouteImport } from './routes/api/workflows/$id/test'
 import { Route as ApiWorkflowsIdExecutionsRouteImport } from './routes/api/workflows/$id/executions'
 import { Route as ApiWebhooksTallyWorkflowIdRouteImport } from './routes/api/webhooks/tally.$workflowId'
@@ -121,6 +122,12 @@ const AppWorkflowIdExecutionsRoute = AppWorkflowIdExecutionsRouteImport.update({
   path: '/executions',
   getParentRoute: () => AppWorkflowIdRoute,
 } as any)
+const ApiWorkflowsIdWebhookSecretRoute =
+  ApiWorkflowsIdWebhookSecretRouteImport.update({
+    id: '/api/workflows/$id/webhook-secret',
+    path: '/api/workflows/$id/webhook-secret',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiWorkflowsIdTestRoute = ApiWorkflowsIdTestRouteImport.update({
   id: '/api/workflows/$id/test',
   path: '/api/workflows/$id/test',
@@ -238,6 +245,7 @@ export interface FileRoutesByFullPath {
   '/api/webhooks/tally/$workflowId': typeof ApiWebhooksTallyWorkflowIdRoute
   '/api/workflows/$id/executions': typeof ApiWorkflowsIdExecutionsRouteWithChildren
   '/api/workflows/$id/test': typeof ApiWorkflowsIdTestRoute
+  '/api/workflows/$id/webhook-secret': typeof ApiWorkflowsIdWebhookSecretRoute
   '/app/workflow/$id/executions': typeof AppWorkflowIdExecutionsRoute
   '/api/workflows/$id/': typeof ApiWorkflowsIdIndexRoute
   '/app/workflow/$id/': typeof AppWorkflowIdIndexRoute
@@ -270,6 +278,7 @@ export interface FileRoutesByTo {
   '/api/webhooks/tally/$workflowId': typeof ApiWebhooksTallyWorkflowIdRoute
   '/api/workflows/$id/executions': typeof ApiWorkflowsIdExecutionsRouteWithChildren
   '/api/workflows/$id/test': typeof ApiWorkflowsIdTestRoute
+  '/api/workflows/$id/webhook-secret': typeof ApiWorkflowsIdWebhookSecretRoute
   '/app/workflow/$id/executions': typeof AppWorkflowIdExecutionsRoute
   '/api/workflows/$id': typeof ApiWorkflowsIdIndexRoute
   '/app/workflow/$id': typeof AppWorkflowIdIndexRoute
@@ -304,6 +313,7 @@ export interface FileRoutesById {
   '/api/webhooks/tally/$workflowId': typeof ApiWebhooksTallyWorkflowIdRoute
   '/api/workflows/$id/executions': typeof ApiWorkflowsIdExecutionsRouteWithChildren
   '/api/workflows/$id/test': typeof ApiWorkflowsIdTestRoute
+  '/api/workflows/$id/webhook-secret': typeof ApiWorkflowsIdWebhookSecretRoute
   '/app_/workflow/$id/executions': typeof AppWorkflowIdExecutionsRoute
   '/api/workflows/$id/': typeof ApiWorkflowsIdIndexRoute
   '/app_/workflow/$id/': typeof AppWorkflowIdIndexRoute
@@ -339,6 +349,7 @@ export interface FileRouteTypes {
     | '/api/webhooks/tally/$workflowId'
     | '/api/workflows/$id/executions'
     | '/api/workflows/$id/test'
+    | '/api/workflows/$id/webhook-secret'
     | '/app/workflow/$id/executions'
     | '/api/workflows/$id/'
     | '/app/workflow/$id/'
@@ -371,6 +382,7 @@ export interface FileRouteTypes {
     | '/api/webhooks/tally/$workflowId'
     | '/api/workflows/$id/executions'
     | '/api/workflows/$id/test'
+    | '/api/workflows/$id/webhook-secret'
     | '/app/workflow/$id/executions'
     | '/api/workflows/$id'
     | '/app/workflow/$id'
@@ -404,6 +416,7 @@ export interface FileRouteTypes {
     | '/api/webhooks/tally/$workflowId'
     | '/api/workflows/$id/executions'
     | '/api/workflows/$id/test'
+    | '/api/workflows/$id/webhook-secret'
     | '/app_/workflow/$id/executions'
     | '/api/workflows/$id/'
     | '/app_/workflow/$id/'
@@ -433,6 +446,7 @@ export interface RootRouteChildren {
   ApiWebhooksTallyWorkflowIdRoute: typeof ApiWebhooksTallyWorkflowIdRoute
   ApiWorkflowsIdExecutionsRoute: typeof ApiWorkflowsIdExecutionsRouteWithChildren
   ApiWorkflowsIdTestRoute: typeof ApiWorkflowsIdTestRoute
+  ApiWorkflowsIdWebhookSecretRoute: typeof ApiWorkflowsIdWebhookSecretRoute
   ApiWorkflowsIdIndexRoute: typeof ApiWorkflowsIdIndexRoute
 }
 
@@ -549,6 +563,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/workflow/$id/executions'
       preLoaderRoute: typeof AppWorkflowIdExecutionsRouteImport
       parentRoute: typeof AppWorkflowIdRoute
+    }
+    '/api/workflows/$id/webhook-secret': {
+      id: '/api/workflows/$id/webhook-secret'
+      path: '/api/workflows/$id/webhook-secret'
+      fullPath: '/api/workflows/$id/webhook-secret'
+      preLoaderRoute: typeof ApiWorkflowsIdWebhookSecretRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/workflows/$id/test': {
       id: '/api/workflows/$id/test'
@@ -736,6 +757,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiWebhooksTallyWorkflowIdRoute: ApiWebhooksTallyWorkflowIdRoute,
   ApiWorkflowsIdExecutionsRoute: ApiWorkflowsIdExecutionsRouteWithChildren,
   ApiWorkflowsIdTestRoute: ApiWorkflowsIdTestRoute,
+  ApiWorkflowsIdWebhookSecretRoute: ApiWorkflowsIdWebhookSecretRoute,
   ApiWorkflowsIdIndexRoute: ApiWorkflowsIdIndexRoute,
 }
 export const routeTree = rootRouteImport
