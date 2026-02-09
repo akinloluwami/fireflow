@@ -14,9 +14,7 @@ import {
   HttpRequestConfig,
   EmailConfig,
   SetVariableConfig,
-  CodeConfig,
   FilterConfig,
-  FunctionConfig,
   SplitConfig,
   AggregateConfig,
   DatabaseConfig,
@@ -369,13 +367,7 @@ export function NodeConfigPanel() {
           />
         )}
 
-        {selectedNode.subType === "code" && (
-          <CodeConfig
-            config={localConfig}
-            onChange={handleChange}
-            nodeId={selectedNode.id}
-          />
-        )}
+        {/* Code config removed for security - see SECURITY_AUDIT.md */}
 
         {selectedNode.subType === "filter" && (
           <FilterConfig
@@ -385,13 +377,7 @@ export function NodeConfigPanel() {
           />
         )}
 
-        {selectedNode.subType === "function" && (
-          <FunctionConfig
-            config={localConfig}
-            onChange={handleChange}
-            nodeId={selectedNode.id}
-          />
-        )}
+        {/* FunctionConfig removed for security - see SECURITY_AUDIT.md */}
 
         {selectedNode.subType === "split" && (
           <SplitConfig
