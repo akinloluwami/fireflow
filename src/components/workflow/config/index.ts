@@ -8,9 +8,9 @@ export { LoopConfig } from "./LoopConfig";
 export { HttpRequestConfig } from "./HttpRequestConfig";
 export { EmailConfig } from "./EmailConfig";
 export { SetVariableConfig } from "./SetVariableConfig";
-export { CodeConfig } from "./CodeConfig";
+// CodeConfig removed for security - see SECURITY_AUDIT.md
 export { FilterConfig } from "./FilterConfig";
-export { FunctionConfig } from "./FunctionConfig";
+// FunctionConfig removed for security - see SECURITY_AUDIT.md
 export { SplitConfig } from "./SplitConfig";
 export { AggregateConfig } from "./AggregateConfig";
 export { DatabaseConfig } from "./DatabaseConfig";
