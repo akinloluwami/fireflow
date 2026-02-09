@@ -111,10 +111,7 @@ export interface ConditionConfig {
   value: string;
 }
 
-export interface CodeConfig {
-  language: "javascript" | "python";
-  code: string;
-}
+// CodeConfig removed for security - see SECURITY_AUDIT.md
 
 export interface DatabaseQueryConfig {
   databaseType: "postgresql";
@@ -154,7 +151,6 @@ export type NodeConfig =
   | SendEmailConfig
   | SendSlackConfig
   | ConditionConfig
-  | CodeConfig
   | SentimentAnalysisConfig
   | ModelPickerNodeConfig
   | Record<string, unknown>;
