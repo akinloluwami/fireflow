@@ -31,7 +31,7 @@ function LandingPage() {
     setIsSigningIn(true);
     await authClient.signIn.social({
       provider: "github",
-      callbackURL: "/workflows",
+      callbackURL: "/app/workflows",
     });
   };
 
