@@ -1,0 +1,1 @@
+ALTER TABLE "workflows" ADD COLUMN "webhook_auth_method" text DEFAULT 'bearer';
