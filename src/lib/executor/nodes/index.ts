@@ -7,9 +7,9 @@ export { executeEmail } from "./action-email";
 export { executeDatabase } from "./action-database";
 export { executeSetVariable } from "./transform-variable";
 export { executeWait } from "./others-wait";
-export { executeCode } from "./action-code";
+// executeCode removed for security - see SECURITY_AUDIT.md
 export { executeFilter } from "./transform-filter";
-export { executeFunction } from "./transform-function";
+// executeFunction removed for security - see SECURITY_AUDIT.md
 export { executeSplit } from "./transform-split";
 export { executeAggregate } from "./transform-aggregate";
 
