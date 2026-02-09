@@ -53,6 +53,7 @@ function DemoNodeComponent({ data, selected }: NodeProps<Node<DemoNodeData>>) {
           {icon}
         </div>
 
+        {/* Horizontal handles (for desktop) */}
         {!isTrigger && (
           <Handle
             type="target"
@@ -68,6 +69,28 @@ function DemoNodeComponent({ data, selected }: NodeProps<Node<DemoNodeData>>) {
           position={Position.Right}
           id="output"
           className="w-3! h-3! border-2! border-white! -right-1.5!"
+          style={{
+            backgroundColor: color,
+            boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
+          }}
+        />
+
+        {/* Vertical handles (for mobile) */}
+        {!isTrigger && (
+          <Handle
+            type="target"
+            position={Position.Top}
+            id="input-top"
+            className="w-3! h-3! bg-gray-300! border-2! border-white! -top-1.5!"
+            style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.1)" }}
+          />
+        )}
+
+        <Handle
+          type="source"
+          position={Position.Bottom}
+          id="output-bottom"
+          className="w-3! h-3! border-2! border-white! -bottom-1.5!"
           style={{
             backgroundColor: color,
             boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
@@ -117,6 +140,7 @@ function DemoConditionNodeComponent({
           {icon}
         </div>
 
+        {/* Horizontal input handle (for desktop) */}
         <Handle
           type="target"
           position={Position.Left}
@@ -125,6 +149,16 @@ function DemoConditionNodeComponent({
           style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.1)" }}
         />
 
+        {/* Vertical input handle (for mobile) */}
+        <Handle
+          type="target"
+          position={Position.Top}
+          id="input-top"
+          className="w-3! h-3! bg-gray-300! border-2! border-white! -top-1.5!"
+          style={{ boxShadow: "0 1px 2px rgba(0,0,0,0.1)" }}
+        />
+
+        {/* Horizontal output handles (for desktop) */}
         <div
           className="absolute right-0 translate-x-full flex items-center"
           style={{ top: "30%" }}
@@ -162,6 +196,18 @@ function DemoConditionNodeComponent({
             No
           </span>
         </div>
+
+        {/* Vertical output handle (for mobile) */}
+        <Handle
+          type="source"
+          position={Position.Bottom}
+          id="true-bottom"
+          className="w-3! h-3! border-2! border-white! -bottom-1.5!"
+          style={{
+            backgroundColor: "#10b981",
+            boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
+          }}
+        />
 
         <div
           className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full 
@@ -346,11 +392,119 @@ const sampleEdges: Edge[] = [
   },
 ];
 
+// Mobile edges using vertical handles
+const mobileEdges: Edge[] = [
+  {
+    id: "me1-2",
+    source: "1",
+    target: "2",
+    sourceHandle: "output-bottom",
+    targetHandle: "input-top",
+    type: "demo",
+    animated: true,
+    markerEnd: { type: MarkerType.ArrowClosed, width: 15, height: 15 },
+  },
+  {
+    id: "me2-3",
+    source: "2",
+    target: "3",
+    sourceHandle: "true-bottom",
+    targetHandle: "input-top",
+    type: "demo",
+    animated: true,
+    markerEnd: { type: MarkerType.ArrowClosed, width: 15, height: 15 },
+  },
+  {
+    id: "me3-4",
+    source: "3",
+    target: "4",
+    sourceHandle: "output-bottom",
+    targetHandle: "input-top",
+    type: "demo",
+    animated: true,
+    markerEnd: { type: MarkerType.ArrowClosed, width: 15, height: 15 },
+  },
+  {
+    id: "me3-5",
+    source: "3",
+    target: "5",
+    sourceHandle: "output-bottom",
+    targetHandle: "input-top",
+    type: "demo",
+    animated: true,
+    markerEnd: { type: MarkerType.ArrowClosed, width: 15, height: 15 },
+  },
+];
+
 const BOUNDS = { minX: -20, minY: 0, maxX: 680, maxY: 260 };
+const MOBILE_BOUNDS = { minX: -20, minY: 0, maxX: 200, maxY: 520 };
+
+// Mobile vertical layout nodes
+const mobileNodes: Node<DemoNodeData>[] = [
+  {
+    id: "1",
+    type: "demo",
+    position: { x: 60, y: 0 },
+    data: {
+      label: "Webhook",
+      description: "Trigger via HTTP request",
+      icon: <Webhook size={24} style={{ color: "#10b981" }} />,
+      color: "#10b981",
+      isTrigger: true,
+    },
+  },
+  {
+    id: "2",
+    type: "demoCondition",
+    position: { x: 60, y: 120 },
+    data: {
+      label: "If / Else",
+      description: "Check priority",
+      icon: <GitBranch size={24} style={{ color: "#f59e0b" }} />,
+      color: "#f59e0b",
+    },
+  },
+  {
+    id: "3",
+    type: "demo",
+    position: { x: 60, y: 240 },
+    data: {
+      label: "Wait",
+      description: "Delay 5 seconds",
+      icon: <Timer size={24} style={{ color: "#6b7280" }} />,
+      color: "#6b7280",
+    },
+  },
+  {
+    id: "4",
+    type: "demo",
+    position: { x: 0, y: 360 },
+    data: {
+      label: "Send Email",
+      description: "Notify the team",
+      icon: <Send size={24} style={{ color: "#3b82f6" }} />,
+      color: "#3b82f6",
+    },
+  },
+  {
+    id: "5",
+    type: "demo",
+    position: { x: 120, y: 360 },
+    data: {
+      label: "Slack",
+      description: "Post to #general",
+      icon: <SiSlack size={22} style={{ color: "#4A154B" }} />,
+      color: "#4A154B",
+    },
+  },
+];
 
 export function DemoWorkflowCanvas() {
   const [nodes, setNodes, onNodesChange] = useNodesState(sampleNodes);
+  const [mobileNodesState, setMobileNodes, onMobileNodesChange] =
+    useNodesState(mobileNodes);
   const [edges, , onEdgesChange] = useEdgesState(sampleEdges);
+  const [mobileEdgesState, , onMobileEdgesChange] = useEdgesState(mobileEdges);
 
   const onNodeDrag = useCallback(
     (_event: React.MouseEvent, node: Node) => {
@@ -398,9 +552,89 @@ export function DemoWorkflowCanvas() {
     [setNodes],
   );
 
+  const onMobileNodeDrag = useCallback(
+    (_event: React.MouseEvent, node: Node) => {
+      const clampedX = Math.max(
+        MOBILE_BOUNDS.minX,
+        Math.min(MOBILE_BOUNDS.maxX, node.position.x),
+      );
+      const clampedY = Math.max(
+        MOBILE_BOUNDS.minY,
+        Math.min(MOBILE_BOUNDS.maxY, node.position.y),
+      );
+
+      if (clampedX !== node.position.x || clampedY !== node.position.y) {
+        setMobileNodes((nds) =>
+          nds.map((n) =>
+            n.id === node.id
+              ? { ...n, position: { x: clampedX, y: clampedY } }
+              : n,
+          ),
+        );
+      }
+    },
+    [setMobileNodes],
+  );
+
+  const onMobileNodeDragStop = useCallback(
+    (_event: React.MouseEvent, node: Node) => {
+      const clampedX = Math.max(
+        MOBILE_BOUNDS.minX,
+        Math.min(MOBILE_BOUNDS.maxX, node.position.x),
+      );
+      const clampedY = Math.max(
+        MOBILE_BOUNDS.minY,
+        Math.min(MOBILE_BOUNDS.maxY, node.position.y),
+      );
+
+      setMobileNodes((nds) =>
+        nds.map((n) =>
+          n.id === node.id
+            ? { ...n, position: { x: clampedX, y: clampedY } }
+            : n,
+        ),
+      );
+    },
+    [setMobileNodes],
+  );
+
   return (
     <section className="px-6 pb-20 pt-8">
-      <div className="max-w-5xl mx-auto">
+      {/* Mobile version - React Flow with vertical layout */}
+      <div className="md:hidden max-w-sm mx-auto">
+        <div
+          className="rounded-2xl overflow-hidden relative"
+          style={{ height: 520 }}
+        >
+          <ReactFlow
+            nodes={mobileNodesState}
+            edges={mobileEdgesState}
+            onNodesChange={onMobileNodesChange}
+            onEdgesChange={onMobileEdgesChange}
+            onNodeDrag={onMobileNodeDrag}
+            onNodeDragStop={onMobileNodeDragStop}
+            nodeTypes={demoNodeTypes}
+            edgeTypes={demoEdgeTypes}
+            fitView
+            fitViewOptions={{ padding: 0.1, minZoom: 0.9, maxZoom: 0.9 }}
+            proOptions={{ hideAttribution: true }}
+            nodesDraggable
+            autoPanOnNodeDrag={false}
+            nodesConnectable={false}
+            elementsSelectable={false}
+            panOnDrag={false}
+            zoomOnScroll={false}
+            zoomOnPinch={false}
+            zoomOnDoubleClick={false}
+            preventScrolling={false}
+            minZoom={0.9}
+            maxZoom={0.9}
+          ></ReactFlow>
+        </div>
+      </div>
+
+      {/* Desktop version - React Flow canvas */}
+      <div className="hidden md:block max-w-5xl mx-auto">
         <div
           className="rounded-2xl overflow-hidden relative"
           style={{ height: 560 }}
