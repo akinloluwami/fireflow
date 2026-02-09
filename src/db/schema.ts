@@ -25,6 +25,9 @@ export const workflows = pgTable("workflows", {
   edges: jsonb("edges").notNull().default([]),
   status: text("status").notNull().default("draft"), // 'draft' | 'active' | 'paused' | 'error'
   chatThreadId: text("chat_thread_id"), // Tambo thread ID for AI chat history
+  webhookSecret: text("webhook_secret"), // Secret for webhook authentication
+  webhookAuthEnabled: boolean("webhook_auth_enabled").default(false), // Whether to require auth
+  webhookAuthMethod: text("webhook_auth_method").default("bearer"), // 'bearer' | 'hmac'
   userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
