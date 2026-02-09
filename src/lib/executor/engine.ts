@@ -22,9 +22,9 @@ import { executeEmail } from "./nodes/action-email";
 import { executeDatabase } from "./nodes/action-database";
 import { executeSetVariable } from "./nodes/transform-variable";
 import { executeWait } from "./nodes/others-wait";
-import { executeCode } from "./nodes/action-code";
+// executeCode removed for security - see SECURITY_AUDIT.md
 import { executeFilter } from "./nodes/transform-filter";
-import { executeFunction } from "./nodes/transform-function";
+// executeFunction removed for security - see SECURITY_AUDIT.md
 import { executeSplit } from "./nodes/transform-split";
 import { executeAggregate } from "./nodes/transform-aggregate";
 import { executeSentimentAnalysis } from "./nodes/ai-sentiment";
@@ -432,7 +432,12 @@ async function executeNode(
         break;
 
       case "code":
-        result = await executeCode(node, context);
+        // Code execution disabled for security - see SECURITY_AUDIT.md
+        result = {
+          success: false,
+          output: null,
+          error: "Code execution is disabled for security reasons",
+        };
         break;
 
       case "database-query":
@@ -445,7 +450,12 @@ async function executeNode(
         break;
 
       case "function":
-        result = await executeFunction(node, context);
+        // Function execution disabled for security - see SECURITY_AUDIT.md
+        result = {
+          success: false,
+          output: null,
+          error: "Function execution is disabled for security reasons",
+        };
         break;
 
       case "filter":
