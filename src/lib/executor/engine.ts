@@ -11,6 +11,7 @@ import { v4 as uuid } from "uuid";
 import type { WorkflowNode, WorkflowEdge } from "@/lib/workflow/types";
 import { InterpolationContext, createEmptyContext } from "./interpolate";
 import { decrypt } from "@/lib/credentials/encryption";
+import { maskExecutionData } from "./data-masking";
 
 import { executeIfElse } from "./nodes/condition-if";
 import { executeSwitch } from "./nodes/condition-switch";
@@ -379,13 +380,16 @@ async function executeNode(
   const nodeExecutionId = uuid();
   const startTime = Date.now();
 
-  // Record node execution start
+  // Record node execution start - mask sensitive data before storing
   await db.insert(workflowNodeExecutions).values({
     id: nodeExecutionId,
     executionId: context.executionId,
     nodeId: node.id,
     status: "running",
-    input: { config: node.data.config, context: context.interpolation },
+    input: maskExecutionData({
+      config: node.data.config,
+      context: context.interpolation,
+    }),
     startedAt: new Date(),
   });
 
@@ -487,12 +491,12 @@ async function executeNode(
         };
     }
 
-    // Update node execution record
+    // Update node execution record - mask sensitive data in output
     await db
       .update(workflowNodeExecutions)
       .set({
         status: result.success ? "completed" : "failed",
-        output: result.output,
+        output: maskExecutionData(result.output),
         error: result.error,
         completedAt: new Date(),
         duration: String(Date.now() - startTime),
