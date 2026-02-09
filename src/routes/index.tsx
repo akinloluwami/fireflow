@@ -38,11 +38,11 @@ function LandingPage() {
   return (
     <div className="min-h-screen">
       <nav className="sticky top-0 z-50 backdrop-blur bg-white/75 border-gray-200">
-        <div className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2.5">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 md:py-5 flex items-center justify-between">
+          <div className="flex items-center gap-3 md:gap-6">
+            <div className="flex items-center gap-2">
               <img src="/logo.png" alt="FireFlow Logo" className="w-5" />
-              <span className="text-lg font-bold text-gray-900 tracking-tight">
+              <span className="text-base md:text-lg font-bold text-gray-900 tracking-tight">
                 FireFlow
               </span>
             </div>
@@ -50,7 +50,7 @@ function LandingPage() {
               href="https://github.com/akinloluwami/fireflow"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-full text-gray-700 transition-colors text-sm font-medium"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-full text-gray-700 transition-colors text-sm font-medium"
             >
               <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
               <span>Star on GitHub</span>
@@ -60,10 +60,10 @@ function LandingPage() {
           {isPending ? (
             <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
           ) : session?.user ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 md:gap-3">
               <Link
                 to="/app/workflows"
-                className="px-5 py-2.5 bg-accent text-white text-sm font-semibold rounded-2xl hover:bg-accent-hover transition-colors"
+                className="px-3 md:px-5 py-2 md:py-2.5 bg-accent text-white text-xs md:text-sm font-semibold rounded-xl md:rounded-2xl hover:bg-accent-hover transition-colors"
               >
                 Open App
               </Link>
@@ -73,7 +73,7 @@ function LandingPage() {
             <button
               onClick={handleGitHubSignIn}
               disabled={isSigningIn}
-              className="flex items-center gap-2 px-5 py-2.5 bg-accent text-white text-sm font-semibold rounded-full hover:bg-accent-hover transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 md:px-5 py-2 md:py-2.5 bg-accent text-white text-xs md:text-sm font-semibold rounded-full hover:bg-accent-hover transition-colors disabled:opacity-50"
             >
               {isSigningIn ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -86,8 +86,19 @@ function LandingPage() {
         </div>
       </nav>
 
-      <div className="pt-32 pb-8 px-6">
+      <div className="pt-20 md:pt-32 pb-8 px-6">
         <div className="max-w-4xl mx-auto text-center">
+          {/* Mobile GitHub Star pill */}
+          <a
+            href="https://github.com/akinloluwami/fireflow"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="sm:hidden inline-flex items-center gap-1.5 px-4 py-2 mb-6 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-full text-gray-700 transition-colors text-sm font-medium"
+          >
+            <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+            <span>Star on GitHub</span>
+          </a>
+
           <h1 className="text-5xl md:text-[4rem] font-semibold text-gray-700 leading-[1.05] tracking-tight mb-6">
             The{" "}
             <span className="bg-linear-to-r from-accent via-purple-500 to-pink-500 bg-clip-text text-transparent animate-pulse">
