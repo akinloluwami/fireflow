@@ -3,8 +3,8 @@ import { Sparkles, GitBranch, Send, Webhook } from "lucide-react";
 export function FeaturesSection() {
   return (
     <section className="py-20 px-6">
-      <div className="max-w-5xl mx-auto space-y-10">
-        <div className="rounded-[40px] overflow-hidden flex flex-col md:flex-row min-h-[80vh]">
+      <div className="max-w-5xl mx-auto space-y-4 md:space-y-10">
+        <div className="rounded-[40px] overflow-hidden flex flex-col md:flex-row md:min-h-[80vh]">
           <div className="w-full md:w-1/2 bg-[#E8F4FC] p-10 md:p-14 flex flex-col justify-center relative">
             <h3 className="text-3xl md:text-4xl font-semibold text-gray-700 mb-4 leading-tight">
               Natural language
@@ -19,7 +19,7 @@ export function FeaturesSection() {
             </button>
           </div>
 
-          <div className="w-full md:w-1/2 bg-[#4A90D9] p-8 flex items-center justify-center relative">
+          <div className="w-full md:w-1/2 bg-[#4A90D9] p-8 pb-12 flex items-center justify-center relative rounded-b-[40px] md:rounded-b-none">
             <div className="bg-white rounded-2xl shadow-2xl p-5 w-full max-w-xs transform rotate-1">
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles className="w-4 h-4 text-accent" />
@@ -37,12 +37,10 @@ export function FeaturesSection() {
                 </div>
               </div>
             </div>
-
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-48 h-4 bg-black/20 rounded-full blur-xl" />
           </div>
         </div>
 
-        <div className="rounded-[40px] overflow-hidden flex flex-col md:flex-row-reverse min-h-[80vh]">
+        <div className="rounded-[40px] overflow-hidden flex flex-col md:flex-row-reverse md:min-h-[80vh]">
           <div className="w-full md:w-1/2 bg-[#F3EAFC] p-10 md:p-14 flex flex-col justify-center relative">
             <h3 className="text-3xl md:text-4xl font-semibold text-gray-700 mb-4 leading-tight">
               Visual workflow
@@ -58,7 +56,7 @@ export function FeaturesSection() {
             </button>
           </div>
 
-          <div className="w-full md:w-1/2 bg-[#9B6DD7] p-8 flex items-center justify-center relative">
+          <div className="w-full md:w-1/2 bg-[#9B6DD7] p-8 pb-12 flex items-center justify-center relative rounded-b-[40px] md:rounded-b-none">
             <div className="bg-white rounded-2xl shadow-2xl p-5 w-full max-w-xs transform -rotate-1">
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
@@ -80,11 +78,10 @@ export function FeaturesSection() {
                 </div>
               </div>
             </div>
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-48 h-4 bg-black/20 rounded-full blur-xl" />
           </div>
         </div>
 
-        <div className="rounded-[40px] overflow-hidden flex flex-col md:flex-row min-h-[80vh]">
+        <div className="rounded-[40px] overflow-hidden flex flex-col md:flex-row md:min-h-[80vh]">
           <div className="w-full md:w-1/2 bg-[#FEF0EC] p-10 md:p-14 flex flex-col justify-center relative">
             <h3 className="text-3xl md:text-4xl font-semibold text-gray-700 mb-4 leading-tight">
               Smart conditions
@@ -98,7 +95,7 @@ export function FeaturesSection() {
             </button>
           </div>
 
-          <div className="w-full md:w-1/2 bg-[#F97066] p-8 flex items-center justify-center relative">
+          <div className="w-full md:w-1/2 bg-[#F97066] p-8 pb-12 flex items-center justify-center relative rounded-b-[40px] md:rounded-b-none">
             <div className="bg-white rounded-2xl shadow-2xl p-5 w-full max-w-xs transform rotate-1">
               <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
                 If / Else
@@ -118,11 +115,10 @@ export function FeaturesSection() {
                 </div>
               </div>
             </div>
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-48 h-4 bg-black/20 rounded-full blur-xl" />
           </div>
         </div>
 
-        <div className="rounded-[40px] overflow-hidden flex flex-col md:flex-row-reverse min-h-[80vh]">
+        <div className="rounded-[40px] overflow-hidden flex flex-col md:flex-row-reverse md:min-h-[80vh]">
           <div className="w-full md:w-1/2 bg-[#E6F7F5] p-10 md:p-14 flex flex-col justify-center relative">
             <h3 className="text-3xl md:text-4xl font-semibold text-gray-700 mb-4 leading-tight">
               Notifications
@@ -138,7 +134,7 @@ export function FeaturesSection() {
             </button>
           </div>
 
-          <div className="w-full md:w-1/2 bg-[#2DD4BF] p-8 flex items-center justify-center relative">
+          <div className="w-full md:w-1/2 bg-[#2DD4BF] p-8 pb-12 flex items-center justify-center relative rounded-b-[40px] md:rounded-b-none">
             <div className="bg-white rounded-2xl shadow-2xl p-5 w-full max-w-xs transform -rotate-1">
               <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
                 Send to
@@ -168,7 +164,6 @@ export function FeaturesSection() {
                 </div>
               </div>
             </div>
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-48 h-4 bg-black/20 rounded-full blur-xl" />
           </div>
         </div>
       </div>
