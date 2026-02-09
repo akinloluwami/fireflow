@@ -5,6 +5,12 @@
 
 import type { WorkflowNode } from "@/lib/workflow/types";
 import type { ExecutionContext, NodeExecutionResult } from "../engine";
+import {
+  validateCode,
+  createSandbox,
+  truncateOutput,
+  executeWithTimeout,
+} from "../sandbox";
 
 interface FunctionConfig {
   expression: string;
@@ -25,50 +31,49 @@ export async function executeFunction(
     };
   }
 
-  try {
-    // Build execution context
-    const sandbox = {
-      trigger: context.interpolation.trigger,
-      nodes: {} as Record<string, unknown>,
-      variables: context.interpolation.variables,
-      loop: context.interpolation.loop,
-      // Utilities
-      JSON,
-      Math,
-      Date,
-      Array,
-      Object,
-      String,
-      Number,
-      Boolean,
-      parseInt,
-      parseFloat,
-      isNaN,
-      isFinite,
+  // SECURITY: Validate expression for dangerous patterns
+  const validation = validateCode(expression);
+  if (!validation.valid) {
+    return {
+      success: false,
+      output: null,
+      error: `Security error: ${validation.error}`,
     };
+  }
 
-    // Flatten node outputs
+  try {
+    // Build node outputs for easier access
+    const nodeOutputs: Record<string, unknown> = {};
     for (const [nodeId, nodeData] of Object.entries(
       context.interpolation.nodes,
     )) {
-      sandbox.nodes[nodeId] = nodeData.output;
+      nodeOutputs[nodeId] = nodeData.output;
     }
 
+    // Create secure sandbox
+    const sandbox = createSandbox({
+      trigger: context.interpolation.trigger,
+      nodes: nodeOutputs,
+      variables: context.interpolation.variables,
+      loop: context.interpolation.loop,
+    });
+
     // Evaluate the expression
-    // For simple expressions like "trigger.items.map(i => i.name)"
     const AsyncFunction = Object.getPrototypeOf(
       async function () {},
     ).constructor;
 
     const fn = new AsyncFunction(
       "sandbox",
-      `with (sandbox) { return ${expression}; }`,
+      `"use strict"; with (sandbox) { return ${expression}; }`,
     );
-    const result = await fn(sandbox);
+
+    // Execute with timeout protection
+    const result = await executeWithTimeout(async () => await fn(sandbox));
 
     return {
       success: true,
-      output: result,
+      output: truncateOutput(result),
     };
   } catch (error) {
     const errorMessage =
