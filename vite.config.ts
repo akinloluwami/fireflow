@@ -15,11 +15,11 @@ const config = defineConfig({
     },
   },
   ssr: {
-    // Externalize packages that use browser-only APIs (Worker, etc.) during SSR
-    external: ["@tambo-ai/react", "react-media-recorder", "media-encoder-host", "media-encoder-host-broker"],
+    // Force @tambo-ai/react to use CJS during SSR to avoid ESM resolution issues
+    noExternal: ["@tambo-ai/react"],
   },
   server: {
-    allowedHosts: [".outray.app"],
+    allowedHosts: [".outray.app", ".local"],
   },
   plugins: [
     devtools(),
