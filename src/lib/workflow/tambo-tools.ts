@@ -127,10 +127,10 @@ export const addNodeTool: TamboTool = {
     return { success: true, nodeId };
   },
   inputSchema: z.object({
-    type: z.enum(["trigger", "action", "condition", "transform"]),
+    type: z.enum(["trigger", "action", "condition", "transform", "ai", "sub", "others"]),
     subType: z
       .string()
-      .describe('The specific node subType like "webhook", "http-request"'),
+      .describe('The specific node subType like "webhook", "http-request", "sentiment-analysis", "summarization", "model-picker"'),
     position: z.object({
       x: z.number().describe("X position on canvas"),
       y: z.number().describe("Y position on canvas"),
