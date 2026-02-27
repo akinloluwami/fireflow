@@ -609,6 +609,20 @@ export const useWorkflowStore = create<WorkflowStore>((set, get) => ({
         }
       }
 
+      // Check Summarization - needs connected model picker
+      if (node.subType === "summarization") {
+        if (!config.text) {
+          errors.push("Text input is required");
+        }
+        const hasModelConnection = workflow.edges.some(
+          (e: { target: string; targetHandle?: string }) =>
+            e.target === node.id && e.targetHandle === "model",
+        );
+        if (!hasModelConnection) {
+          errors.push("AI Model connection is required");
+        }
+      }
+
       // Check Model Picker
       if (node.subType === "model-picker") {
         if (!config.credentialId) {
