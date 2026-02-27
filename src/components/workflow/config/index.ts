@@ -19,6 +19,7 @@ export { ExpressionInput, ExpressionTextarea } from "./ExpressionInput";
 
 // AI Node Configs
 export { SentimentConfig } from "./SentimentConfig";
+export { SummarizationConfig } from "./SummarizationConfig";
 
 // Sub/Helper Node Configs
 export { ModelPickerConfig } from "./ModelPickerConfig";
