@@ -10,3 +10,4 @@ export { executeFilter } from "./transform-filter";
 export { executeSplit } from "./transform-split";
 export { executeAggregate } from "./transform-aggregate";
 export { executeSentimentAnalysis } from "./ai-sentiment";
+export { executeSummarization } from "./ai-summarization";
