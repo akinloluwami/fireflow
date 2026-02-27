@@ -32,7 +32,7 @@ export type TransformSubType =
   | "split"
   | "aggregate";
 
-export type AISubType = "sentiment-analysis";
+export type AISubType = "sentiment-analysis" | "summarization";
 
 export type SubSubType = "model-picker";
 
@@ -134,6 +134,17 @@ export interface SentimentAnalysisConfig {
   confidenceThreshold?: number;
 }
 
+export interface SummarizationConfig {
+  /** The text to summarize - supports variable interpolation */
+  text: string;
+  /** Summary style */
+  style?: "concise" | "detailed" | "bullet-points";
+  /** Approximate max words for the summary */
+  maxLength?: number;
+  /** Language hint (optional, auto-detect if not specified) */
+  language?: string;
+}
+
 // Model Picker Configuration (sub-node for AI nodes)
 export interface ModelPickerNodeConfig {
   /** AI provider to use */
@@ -152,6 +163,7 @@ export type NodeConfig =
   | SendSlackConfig
   | ConditionConfig
   | SentimentAnalysisConfig
+  | SummarizationConfig
   | ModelPickerNodeConfig
   | Record<string, unknown>;
 
