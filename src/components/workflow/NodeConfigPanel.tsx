@@ -19,6 +19,7 @@ import {
   AggregateConfig,
   DatabaseConfig,
   SentimentConfig,
+  SummarizationConfig,
   ModelPickerConfig,
 } from "./config";
 
@@ -411,6 +412,14 @@ export function NodeConfigPanel() {
           />
         )}
 
+        {selectedNode.subType === "summarization" && (
+          <SummarizationConfig
+            config={localConfig}
+            onChange={handleChange}
+            nodeId={selectedNode.id}
+          />
+        )}
+
         {selectedNode.subType === "model-picker" && (
           <ModelPickerConfig
             config={localConfig}
@@ -437,6 +446,7 @@ export function NodeConfigPanel() {
           selectedNode.subType !== "aggregate" &&
           selectedNode.subType !== "database-query" &&
           selectedNode.subType !== "sentiment-analysis" &&
+          selectedNode.subType !== "summarization" &&
           selectedNode.subType !== "model-picker" &&
           Object.entries(localConfig).map(([key, value]) => {
             // Skip complex objects for now
