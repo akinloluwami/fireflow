@@ -215,6 +215,20 @@ export const nodeDefinitions: NodeDefinition[] = [
       confidenceThreshold: 0.5,
     },
   },
+  {
+    type: "ai",
+    subType: "summarization",
+    label: "Summarization",
+    description: "Summarize text with AI",
+    icon: "file-text",
+    color: "#ec4899",
+    defaultConfig: {
+      text: "",
+      style: "concise",
+      maxLength: 0,
+      language: "auto",
+    },
+  },
 
   // Sub/Helper Nodes
   {
