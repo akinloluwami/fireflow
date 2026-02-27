@@ -441,6 +441,38 @@ export const nodeOutputSchemas: Record<string, NodeOutputSchema> = {
     },
   },
 
+  summarization: {
+    type: "object",
+    description: "Text summarization results",
+    properties: {
+      summary: {
+        type: "string",
+        description: "The summarized text",
+        example: "This is a concise summary of the original text.",
+      },
+      wordCount: {
+        type: "number",
+        description: "Word count of the summary",
+        example: 42,
+      },
+      originalWordCount: {
+        type: "number",
+        description: "Word count of the original text",
+        example: 350,
+      },
+      originalText: {
+        type: "string",
+        description: "The original text that was summarized",
+        example: "The full original text...",
+      },
+      language: {
+        type: "string",
+        description: "Detected or specified language",
+        example: "en",
+      },
+    },
+  },
+
   // Sub/Helper Node Schemas
   "model-picker": {
     type: "object",
