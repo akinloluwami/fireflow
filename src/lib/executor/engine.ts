@@ -29,6 +29,7 @@ import { executeFilter } from "./nodes/transform-filter";
 import { executeSplit } from "./nodes/transform-split";
 import { executeAggregate } from "./nodes/transform-aggregate";
 import { executeSentimentAnalysis } from "./nodes/ai-sentiment";
+import { executeSummarization } from "./nodes/ai-summarization";
 
 export interface ExecutionContext {
   workflowId: string;
@@ -477,6 +478,10 @@ async function executeNode(
       // AI Nodes
       case "sentiment-analysis":
         result = await executeSentimentAnalysis(node, context);
+        break;
+
+      case "summarization":
+        result = await executeSummarization(node, context);
         break;
 
       case "wait":
