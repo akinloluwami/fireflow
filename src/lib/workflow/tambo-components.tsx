@@ -49,6 +49,7 @@ Do not leave config empty except for trigger nodes.`,
               "condition",
               "transform",
               "ai",
+              "sub",
               "others",
             ],
             description: "Category of the node",
@@ -74,6 +75,7 @@ Do not leave config empty except for trigger nodes.`,
               "filter",
               "wait",
               "sentiment-analysis",
+              "summarization",
             ],
             description: "Specific node type",
           },
@@ -237,6 +239,16 @@ function inferConfigFromContext(
       }
       if (!config.model) {
         config.model = "gpt-4o-mini";
+      }
+      break;
+    }
+
+    case "summarization": {
+      if (!config.text || config.text === "") {
+        config.text = "{{ trigger.text }}";
+      }
+      if (!config.style) {
+        config.style = "concise";
       }
       break;
     }
@@ -430,6 +442,8 @@ export const workflowGeneratorComponent: TamboComponent = {
     loop: { "items": "{{ trigger.items }}", "itemVariable": "item" }
     sentiment-analysis: { "text": "{{ trigger.message }}", "provider": "openai", "model": "gpt-4o-mini", "credentialId": "" }
     Note: sentiment-analysis outputs to 3 handles: "positive", "neutral", "negative". Connect edges accordingly.
+    summarization: { "text": "{{ trigger.text }}", "style": "concise", "maxLength": 0, "language": "auto" }
+    Note: summarization requires a connected AI Model (model-picker) node. It outputs a single handle with summary, wordCount, originalWordCount.
     
     FULL EXAMPLE for "when form submitted, if amount > 100, send slack":
     {
