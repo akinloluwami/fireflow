@@ -194,6 +194,25 @@ function inferConfigFromContext(
       if (!config.message || config.message === "") {
         config.message = description || `Notification: {{ trigger }}`;
       }
+      if (!config.guildId || config.guildId === "") {
+        config.guildId = "your-server-id";
+      }
+      if (!config.channelId || config.channelId === "") {
+        config.channelId = "your-channel-id";
+      }
+      break;
+    }
+
+    case "database-query": {
+      if (!config.query || config.query === "") {
+        config.query = `SELECT * FROM users WHERE status = 'active';`;
+      }
+      if (!config.databaseType) {
+        config.databaseType = "postgresql";
+      }
+      if (!config.connectionString || config.connectionString === "") {
+        config.connectionString = "{{ env.DATABASE_URL }}";
+      }
       break;
     }
 
@@ -233,12 +252,22 @@ function inferConfigFromContext(
       if (!config.text || config.text === "") {
         config.text = "{{ trigger.message }}";
       }
+      if (!config.language) {
+        config.language = "auto";
+      }
+      break;
+    }
+
+    case "model-picker": {
       // Default provider and model
       if (!config.provider) {
         config.provider = "openai";
       }
       if (!config.model) {
         config.model = "gpt-4o-mini";
+      }
+      if (!config.credentialId || config.credentialId === "") {
+        config.credentialId = "your-credential-id";
       }
       break;
     }
@@ -287,7 +316,7 @@ function WorkflowGenerator({
   edges,
 }: WorkflowGeneratorProps) {
   const { updateWorkflowMeta, applyWorkflowChanges } = useWorkflowStore();
-  const lastAppliedCount = useRef(0);
+  const lastAppliedData = useRef<string>("");
   const message = useTamboCurrentMessage();
 
   useEffect(() => {
@@ -306,15 +335,15 @@ function WorkflowGenerator({
     // Ensure edges is a valid array (can be empty)
     const safeEdges = Array.isArray(edges) ? edges : [];
 
-    // Only re-apply if node count increased (streaming more nodes in)
-    // This ensures we always have the latest complete state during streaming
-    const totalCount = nodes.length + safeEdges.length;
-    if (totalCount <= lastAppliedCount.current) return;
-    lastAppliedCount.current = totalCount;
+    // Only re-apply if the data has actually changed
+    // This ensures we get all properties (like source/target) as they stream in
+    const dataString = JSON.stringify({ nodes, edges: safeEdges });
+    if (dataString === lastAppliedData.current) return;
+    lastAppliedData.current = dataString;
 
     console.log(
-      "🔧 WorkflowGenerator - Raw AI Data:",
-      JSON.stringify({ nodes, edges: safeEdges }, null, 2),
+      "🔧 WorkflowGenerator - Raw AI Data Lengths:",
+      nodes.length, "nodes,", safeEdges.length, "edges"
     );
 
     // Convert to workflow format with proper defaults
@@ -428,7 +457,7 @@ export const workflowGeneratorComponent: TamboComponent = {
     1. Start with a trigger node (webhook, form-submission, schedule, manual)
     2. Position nodes left-to-right: x=100, x=400, x=700, etc.
     3. For branches, offset y by 150px
-    4. ALWAYS populate config with actual values - never leave it empty except triggers!
+    4. ALWAYS populate config with actual values - never leave it empty except triggers! Make up realistic values contextually if exact values aren't provided.
     5. Connect edges using correct sourceHandle for conditions
     
     CONFIG TEMPLATES (copy and fill in):
@@ -437,17 +466,24 @@ export const workflowGeneratorComponent: TamboComponent = {
     Operators: equals, not-equals, contains, greater, less, greater-or-equal, less-or-equal
     
     send-slack: { "channel": "#channel-name", "message": "Your message with {{ trigger.field }}" }
-    send-email: { "to": "{{ trigger.email }}", "subject": "Subject", "body": "Body text" }
+    send-discord: { "guildId": "your-server-id", "channelId": "your-channel-id", "message": "Notification: {{ trigger.field }}" }
+    send-email: { "to": "user@example.com", "subject": "Subject for email", "body": "Body text with {{ trigger.data }}" }
+    database-query: { "databaseType": "postgresql", "connectionString": "postgres://user:pass@host/db", "query": "SELECT * FROM users WHERE status = 'active'" }
     wait: { "duration": 5, "unit": "seconds" }
-    loop: { "items": "{{ trigger.items }}", "itemVariable": "item" }
-    sentiment-analysis: { "text": "{{ trigger.message }}", "provider": "openai", "model": "gpt-4o-mini", "credentialId": "" }
-    Note: sentiment-analysis outputs to 3 handles: "positive", "neutral", "negative". Connect edges accordingly.
-    summarization: { "text": "{{ trigger.text }}", "style": "concise", "maxLength": 0, "language": "auto" }
-    Note: summarization requires a connected AI Model (model-picker) node. It outputs a single handle with summary, wordCount, originalWordCount.
+    loop: { "items": "{{ trigger.items }}" }
+    
+    AI NODES (sentiment-analysis, summarization):
+    If using sentiment-analysis or summarization, you MUST ALSO create a 'model-picker' node (which takes the credential and model) and connect it to the AI node.
+    - sentiment-analysis: { "text": "{{ trigger.message }}", "language": "auto", "includeEmotions": false }
+    - summarization: { "text": "{{ trigger.text }}", "style": "concise", "language": "auto" }
+    - model-picker: { "provider": "openai", "model": "gpt-4o", "credentialId": "your-openai-key" }
+    
+    Connect the model-picker to the AI node with targetHandle="model".
+    Example edge for model: { "id": "edge-model", "source": "node-model-picker", "target": "node-ai", "targetHandle": "model" }
     
     FULL EXAMPLE for "when form submitted, if amount > 100, send slack":
     {
-      "name": "High Value Form Alert",
+      "name": "High Value Alert",
       "description": "Notify team when high-value form is submitted",
       "nodes": [
         {
