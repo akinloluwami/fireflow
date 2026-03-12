@@ -84,7 +84,7 @@ export const getAvailableNodesTool: TamboTool = {
 export const addNodeTool: TamboTool = {
   name: "addNode",
   description:
-    "Add a new node to the workflow. Specify the node type, subType, position, and optionally connect it to an existing node.",
+    "Add a new node to the workflow. Specify the node type, subType, position, and optionally connect it to an existing node. Always check the 'availableIntegrations' context helper first to get real credential IDs, Discord servers/channels, and Slack channels for configuring nodes.",
   tool: ({
     type,
     subType,
