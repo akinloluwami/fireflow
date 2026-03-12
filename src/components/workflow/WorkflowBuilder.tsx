@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { TamboProvider } from "@tambo-ai/react";
 import { ReactFlowProvider } from "@xyflow/react";
 import { useNavigate } from "@tanstack/react-router";
@@ -13,6 +13,11 @@ import { useWorkflowStore } from "@/lib/workflow/store";
 import { workflowComponents } from "@/lib/workflow/tambo-components";
 import { workflowTools } from "@/lib/workflow/tambo-tools";
 import { nodeDefinitions } from "@/lib/workflow/node-definitions";
+import {
+  usePrefetchedContext,
+  getCachedContext,
+  formatContextForAI,
+} from "@/lib/workflow/use-prefetched-context";
 import {
   Play,
   ChevronLeft,
@@ -78,6 +83,10 @@ export function WorkflowBuilder({
     useState<ExecutionResult | null>(null);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const lastExecutionIdRef = useRef<string | null>(null);
+
+  // Trigger prefetching of integrations & credentials on mount.
+  // The data is stored in a global cache read by contextHelpers via getCachedContext().
+  usePrefetchedContext();
 
   // Mark initial mount as complete after a brief delay (to skip animations)
   useEffect(() => {
@@ -508,27 +517,41 @@ export function WorkflowBuilder({
     }
   };
 
-  // Context helper for Tambo - provides current workflow state
-  const contextHelpers = {
-    currentWorkflow: () => ({
-      name: workflow.name,
-      nodeCount: workflow.nodes.length,
-      edgeCount: workflow.edges.length,
-      nodes: workflow.nodes.map((n) => ({
-        id: n.id,
-        type: n.type,
-        subType: n.subType,
-        label: n.data.label,
-      })),
+  // Context helper for Tambo - provides current workflow state + prefetched integrations
+  // IMPORTANT: memoized with stable references to prevent Tambo from re-triggering the AI
+  // when the store updates (which would cause an infinite generation loop).
+  // Functions use getState()/getCachedContext() to always return fresh data.
+  const contextHelpers = useMemo(
+    () => ({
+      currentWorkflow: () => {
+        const { workflow: w } = useWorkflowStore.getState();
+        return {
+          name: w.name,
+          nodeCount: w.nodes.length,
+          edgeCount: w.edges.length,
+          nodes: w.nodes.map((n) => ({
+            id: n.id,
+            type: n.type,
+            subType: n.subType,
+            label: n.data.label,
+          })),
+        };
+      },
+      availableNodes: () =>
+        nodeDefinitions.map((def) => ({
+          type: def.type,
+          subType: def.subType,
+          label: def.label,
+          description: def.description,
+        })),
+      availableIntegrations: () => {
+        const ctx = getCachedContext();
+        if (!ctx) return "Integrations are still loading...";
+        return formatContextForAI(ctx);
+      },
     }),
-    availableNodes: () =>
-      nodeDefinitions.map((def) => ({
-        type: def.type,
-        subType: def.subType,
-        label: def.label,
-        description: def.description,
-      })),
-  };
+    [], // Empty deps — functions read fresh data via getState()/getCachedContext()
+  );
 
   return (
     <TamboProvider
