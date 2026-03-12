@@ -2,7 +2,7 @@ import type { TamboComponent } from "@tambo-ai/react";
 import { useTamboCurrentMessage } from "@tambo-ai/react";
 import { useWorkflowStore } from "./store";
 import { v4 as uuid } from "uuid";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import type {
   WorkflowNode,
   WorkflowEdge,
@@ -10,6 +10,7 @@ import type {
   NodeSubType,
 } from "./types";
 import { getNodeDefinition } from "./node-definitions";
+import { enrichConfigWithRealData, getCachedContext } from "./use-prefetched-context";
 import type { JSONSchema7 } from "json-schema";
 
 const GeneratedWorkflowJSONSchema: JSONSchema7 = {
@@ -190,28 +191,53 @@ function inferConfigFromContext(
     }
 
     case "send-discord": {
+      const ctx = getCachedContext();
       // Generate a default message
       if (!config.message || config.message === "") {
         config.message = description || `Notification: {{ trigger }}`;
       }
       if (!config.guildId || config.guildId === "") {
-        config.guildId = "your-server-id";
+        // Use the first connected Discord guild, or placeholder
+        if (ctx?.discord.connected && ctx.discord.guilds.length > 0) {
+          config.guildId = ctx.discord.guilds[0].id;
+        } else {
+          config.guildId = "your-server-id";
+        }
       }
       if (!config.channelId || config.channelId === "") {
-        config.channelId = "your-channel-id";
+        // Use the first text channel from the guild, or placeholder
+        const guildId = config.guildId as string;
+        if (ctx?.discord.channels[guildId]?.length) {
+          config.channelId = ctx.discord.channels[guildId][0].id;
+        } else {
+          config.channelId = "your-channel-id";
+        }
       }
       break;
     }
 
     case "database-query": {
+      const ctx = getCachedContext();
       if (!config.query || config.query === "") {
-        config.query = `SELECT * FROM users WHERE status = 'active';`;
+        // Try to infer a SQL query from the label/description
+        config.query = inferSqlQuery(label, description);
       }
       if (!config.databaseType) {
         config.databaseType = "postgresql";
       }
-      if (!config.connectionString || config.connectionString === "") {
-        config.connectionString = "{{ env.DATABASE_URL }}";
+      // Prefer credentialId over connectionString
+      if (ctx?.dbCredentials.length) {
+        if (!config.credentialId || config.credentialId === "") {
+          config.credentialId = ctx.dbCredentials[0].id;
+        }
+        // Clear placeholder connectionStrings when using credential
+        if (config.connectionString === "{{ env.DATABASE_URL }}" || config.connectionString === "") {
+          config.connectionString = "";
+        }
+      } else {
+        if (!config.connectionString || config.connectionString === "") {
+          config.connectionString = "{{ env.DATABASE_URL }}";
+        }
       }
       break;
     }
@@ -259,6 +285,7 @@ function inferConfigFromContext(
     }
 
     case "model-picker": {
+      const ctx = getCachedContext();
       // Default provider and model
       if (!config.provider) {
         config.provider = "openai";
@@ -267,7 +294,15 @@ function inferConfigFromContext(
         config.model = "gpt-4o-mini";
       }
       if (!config.credentialId || config.credentialId === "") {
-        config.credentialId = "your-credential-id";
+        // Use first AI credential from cache
+        if (ctx?.aiCredentials.length) {
+          const preferred = ctx.aiCredentials.find(
+            (c) => c.type === (config.provider as string),
+          );
+          config.credentialId = preferred?.id || ctx.aiCredentials[0].id;
+        } else {
+          config.credentialId = "your-credential-id";
+        }
       }
       break;
     }
@@ -284,6 +319,93 @@ function inferConfigFromContext(
   }
 
   return config;
+}
+
+/**
+ * Infer a SQL query from the node label and description.
+ * Parses patterns like "insert into waitlist", "save name and email to orders table", etc.
+ */
+function inferSqlQuery(label: string, description: string): string {
+  const text = `${label} ${description}`.toLowerCase();
+
+  // Common data fields mentioned in the text → used as columns
+  const commonFields = [
+    "name", "email", "phone", "phone_number", "address", "message",
+    "company", "title", "amount", "status", "feedback", "comment",
+    "username", "password", "url", "description", "notes", "subject",
+  ];
+
+  // Extract fields that appear in the text
+  const mentionedFields = commonFields.filter((f) =>
+    text.includes(f.replace("_", " ")) || text.includes(f),
+  );
+
+  // Default to name + email if nothing specific is found
+  const fields = mentionedFields.length > 0 ? mentionedFields : ["name", "email"];
+
+  // Try to extract the table name
+  // Patterns: "to the waitlist table", "into waitlist", "insert waitlist row", "save to orders"
+  let tableName = "data";
+
+  const tablePatterns = [
+    /(?:into|to|in)\s+(?:the\s+)?(\w+?)(?:\s+table|\s+row|\s+entry|\s+record)?(?:\s|$|,)/i,
+    /(?:insert|save|write|add|store|log)\s+(?:to\s+|into\s+)?(?:the\s+)?(\w+?)(?:\s+table|\s+row|\s+entry|\s+record)?(?:\s|$|,)/i,
+    /(\w+)\s+(?:table|row|entry|record|submission|signup)/i,
+  ];
+
+  for (const pattern of tablePatterns) {
+    const match = text.match(pattern);
+    if (match?.[1]) {
+      const candidate = match[1];
+      // Skip common verbs/prepositions that aren't table names
+      const skipWords = [
+        "the", "a", "an", "to", "into", "from", "and", "or", "with",
+        "new", "insert", "save", "write", "add", "store", "log",
+        "select", "update", "delete", "query", "run", "execute",
+        "name", "email", "data",
+      ];
+      if (!skipWords.includes(candidate)) {
+        tableName = candidate;
+        break;
+      }
+    }
+  }
+
+  // Determine query type from text
+  const isInsert = /insert|save|write|add|store|log|submit|create|record/.test(text);
+  const isSelect = /select|find|lookup|look up|search|get|fetch|read|query/.test(text);
+  const isUpdate = /update|modify|change|set|edit/.test(text);
+  const isDelete = /delete|remove|drop|clear/.test(text);
+
+  if (isInsert && !isSelect && !isUpdate && !isDelete) {
+    const columns = fields.join(", ");
+    const values = fields.map((f) => `'{{ trigger.${f} }}'`).join(", ");
+    return `INSERT INTO ${tableName} (${columns}) VALUES (${values})`;
+  }
+
+  if (isSelect) {
+    if (fields.includes("email")) {
+      return `SELECT * FROM ${tableName} WHERE email = '{{ trigger.email }}'`;
+    }
+    return `SELECT * FROM ${tableName}`;
+  }
+
+  if (isUpdate) {
+    const setClauses = fields
+      .filter((f) => f !== "email")
+      .map((f) => `${f} = '{{ trigger.${f} }}'`)
+      .join(", ");
+    return `UPDATE ${tableName} SET ${setClauses || "status = 'active'"} WHERE email = '{{ trigger.email }}'`;
+  }
+
+  if (isDelete) {
+    return `DELETE FROM ${tableName} WHERE email = '{{ trigger.email }}'`;
+  }
+
+  // Default to INSERT
+  const columns = fields.join(", ");
+  const values = fields.map((f) => `'{{ trigger.${f} }}'`).join(", ");
+  return `INSERT INTO ${tableName} (${columns}) VALUES (${values})`;
 }
 
 interface WorkflowGeneratorProps {
@@ -309,14 +431,20 @@ interface WorkflowGeneratorProps {
   }>;
 }
 
+// Module-level caches – survive component remounts so we never
+// re-apply the same workflow data after streaming has settled.
+const _appliedDataPerMessage = new Map<string, string>();
+
 function WorkflowGenerator({
   name,
   description,
   nodes,
   edges,
 }: WorkflowGeneratorProps) {
-  const { updateWorkflowMeta, applyWorkflowChanges } = useWorkflowStore();
-  const lastAppliedData = useRef<string>("");
+  // Use selectors so this component does NOT re-render on unrelated store changes
+  // (e.g. validateNodes, updateNodeStatus, etc.)
+  const updateWorkflowMeta = useWorkflowStore((s) => s.updateWorkflowMeta);
+  const applyWorkflowChanges = useWorkflowStore((s) => s.applyWorkflowChanges);
   const message = useTamboCurrentMessage();
 
   useEffect(() => {
@@ -324,7 +452,6 @@ function WorkflowGenerator({
     if (message?.createdAt) {
       const messageAge = Date.now() - new Date(message.createdAt).getTime();
       if (messageAge > 10000) {
-        // Message is older than 10 seconds, it's from history - don't apply
         return;
       }
     }
@@ -335,16 +462,26 @@ function WorkflowGenerator({
     // Ensure edges is a valid array (can be empty)
     const safeEdges = Array.isArray(edges) ? edges : [];
 
-    // Only re-apply if the data has actually changed
-    // This ensures we get all properties (like source/target) as they stream in
+    // Module-level dedup keyed by message ID – survives remounts so toggling
+    // the chat panel or Tambo re-creating the rendered component won't
+    // cause a second application of the same data.
+    const messageId = message?.id || "__streaming__";
     const dataString = JSON.stringify({ nodes, edges: safeEdges });
-    if (dataString === lastAppliedData.current) return;
-    lastAppliedData.current = dataString;
+    if (_appliedDataPerMessage.get(messageId) === dataString) return;
+    _appliedDataPerMessage.set(messageId, dataString);
 
-    console.log(
-      "🔧 WorkflowGenerator - Raw AI Data Lengths:",
-      nodes.length, "nodes,", safeEdges.length, "edges"
-    );
+    // Guard against multiple AI messages generating the same workflow:
+    // If the store already has nodes with the same IDs, skip re-applying.
+    const currentStore = useWorkflowStore.getState();
+    const existingNodeIds = new Set(currentStore.workflow.nodes.map((n) => n.id));
+    const incomingNodeIds = nodes.map((n) => n.id).filter(Boolean);
+    if (
+      incomingNodeIds.length > 0 &&
+      incomingNodeIds.every((id) => existingNodeIds.has(id)) &&
+      existingNodeIds.size === incomingNodeIds.length
+    ) {
+      return;
+    }
 
     // Convert to workflow format with proper defaults
     const workflowNodes: WorkflowNode[] = nodes.map((node) => {
@@ -367,10 +504,15 @@ function WorkflowGenerator({
 
       const mergedConfig = { ...defaultConfig, ...inferredConfig };
 
+      // Enrich with real data from prefetched integrations/credentials
+      // This replaces any remaining placeholders with actual IDs
+      const finalConfig = enrichConfigWithRealData(node.subType, mergedConfig);
+
       console.log(`Node ${node.subType} config:`, {
         aiConfig,
         inferredConfig,
         mergedConfig,
+        finalConfig,
       });
 
       return {
@@ -381,7 +523,7 @@ function WorkflowGenerator({
         data: {
           label: node.data?.label || definition?.label || node.subType,
           description: node.data?.description || definition?.description,
-          config: mergedConfig,
+          config: finalConfig,
           icon: definition?.icon,
         },
       };
@@ -453,70 +595,112 @@ export const workflowGeneratorComponent: TamboComponent = {
   description: `
     Generates a complete workflow on the canvas. Use when user describes what they want to automate.
     
-    RULES:
-    1. Start with a trigger node (webhook, form-submission, schedule, manual)
-    2. Position nodes left-to-right: x=100, x=400, x=700, etc.
-    3. For branches, offset y by 150px
-    4. ALWAYS populate config with actual values - never leave it empty except triggers! Make up realistic values contextually if exact values aren't provided.
-    5. Connect edges using correct sourceHandle for conditions
+    CRITICAL RULES:
+    1. NEVER ask the user for details - ALWAYS infer everything from their description!
+       - If user says "write name and email to waitlist table" → table is "waitlist", columns are "name" and "email"
+       - If user says "notify team on Discord in #submissions" → find the #submissions channel from context
+       - If user says "send email to the user" → use {{ trigger.email }} as the recipient
+       - ALWAYS make reasonable assumptions. The user expects the workflow to be complete and ready.
+    2. Start with a trigger node (webhook, form-submission, schedule, manual)
+    3. Position nodes left-to-right: x=100, x=400, x=700, etc. For branches, offset y by 150px.
+    4. ALWAYS populate EVERY config field with actual values — never leave config empty (except triggers)!
+    5. Connect edges using correct sourceHandle for conditions.
+    6. Use the "availableIntegrations" context to get REAL credential IDs, Discord server/channel IDs, and Slack channels.
     
-    CONFIG TEMPLATES (copy and fill in):
+    INFERRING TRIGGER FIELDS:
+    Tally form submissions send data as {{ trigger.FIELDNAME }}. Infer field names from the user's description:
+    - "name and email" → {{ trigger.name }}, {{ trigger.email }}
+    - "name, email, and phone number" → {{ trigger.name }}, {{ trigger.email }}, {{ trigger.phone }}
+    - "feedback message" → {{ trigger.message }} or {{ trigger.feedback }}
+    - "order amount" → {{ trigger.amount }}
+    Use lowercase snake_case for multi-word fields: "phone number" → {{ trigger.phone_number }}
+    
+    DATABASE QUERIES — ALWAYS write the full SQL:
+    When user mentions writing/inserting/saving to a database table, ALWAYS generate the complete SQL query.
+    
+    INSERT: "write name and email to waitlist table"
+    → query: "INSERT INTO waitlist (name, email) VALUES ('{{ trigger.name }}', '{{ trigger.email }}')"
+    
+    INSERT with timestamp: "save submission to orders table"
+    → query: "INSERT INTO orders (name, email, created_at) VALUES ('{{ trigger.name }}', '{{ trigger.email }}', NOW())"
+    
+    SELECT: "look up user by email"
+    → query: "SELECT * FROM users WHERE email = '{{ trigger.email }}'"
+    
+    UPDATE: "update user status to active"
+    → query: "UPDATE users SET status = 'active' WHERE email = '{{ trigger.email }}'"
+    
+    DISCORD MESSAGES — Write the full message:
+    Always include relevant trigger data in the Discord message. Example:
+    "notify team about new waitlist submission"
+    → message: "📋 New waitlist submission!\\nName: {{ trigger.name }}\\nEmail: {{ trigger.email }}"
+    
+    SLACK MESSAGES — Same approach:
+    → message: "New signup: {{ trigger.name }} ({{ trigger.email }})"
+    
+    CONFIG TEMPLATES (populate ALL fields):
     
     if-else: { "field": "{{ trigger.FIELDNAME }}", "operator": "greater", "value": "100" }
-    Operators: equals, not-equals, contains, greater, less, greater-or-equal, less-or-equal
-    
-    send-slack: { "channel": "#channel-name", "message": "Your message with {{ trigger.field }}" }
-    send-discord: { "guildId": "your-server-id", "channelId": "your-channel-id", "message": "Notification: {{ trigger.field }}" }
-    send-email: { "to": "user@example.com", "subject": "Subject for email", "body": "Body text with {{ trigger.data }}" }
-    database-query: { "databaseType": "postgresql", "connectionString": "postgres://user:pass@host/db", "query": "SELECT * FROM users WHERE status = 'active'" }
+    send-slack: { "channel": "#channel-name", "message": "Full message with {{ trigger.field }}" }
+    send-discord: { "guildId": "real-id", "channelId": "real-id", "message": "Full message with {{ trigger.field }}" }
+    send-email: { "to": "{{ trigger.email }}", "subject": "Subject", "body": "Full body with {{ trigger.data }}" }
+    database-query: { "databaseType": "postgresql", "credentialId": "real-id", "query": "INSERT INTO table (col) VALUES ('{{ trigger.field }}')" }
     wait: { "duration": 5, "unit": "seconds" }
     loop: { "items": "{{ trigger.items }}" }
     
     AI NODES (sentiment-analysis, summarization):
-    If using sentiment-analysis or summarization, you MUST ALSO create a 'model-picker' node (which takes the credential and model) and connect it to the AI node.
+    You MUST create a 'model-picker' node connected to the AI node with targetHandle="model".
     - sentiment-analysis: { "text": "{{ trigger.message }}", "language": "auto", "includeEmotions": false }
     - summarization: { "text": "{{ trigger.text }}", "style": "concise", "language": "auto" }
-    - model-picker: { "provider": "openai", "model": "gpt-4o", "credentialId": "your-openai-key" }
+    - model-picker: { "provider": "openai", "model": "gpt-4o", "credentialId": "real-id" }
+    Edge: { "id": "edge-model", "source": "node-model-picker", "target": "node-ai", "targetHandle": "model" }
     
-    Connect the model-picker to the AI node with targetHandle="model".
-    Example edge for model: { "id": "edge-model", "source": "node-model-picker", "target": "node-ai", "targetHandle": "model" }
-    
-    FULL EXAMPLE for "when form submitted, if amount > 100, send slack":
+    FULL EXAMPLE — "when waitlist form submitted, save name and email to waitlist table, then notify team on Discord in #submissions":
     {
-      "name": "High Value Alert",
-      "description": "Notify team when high-value form is submitted",
+      "name": "Waitlist Submission → DB + Discord",
+      "description": "Save waitlist form submissions to database and notify team on Discord",
       "nodes": [
         {
           "id": "node-1",
           "type": "trigger",
           "subType": "form-submission",
           "position": { "x": 100, "y": 200 },
-          "data": { "label": "Form Submitted", "config": {} }
+          "data": { "label": "Waitlist Form", "config": {} }
         },
         {
           "id": "node-2",
-          "type": "condition",
-          "subType": "if-else",
+          "type": "action",
+          "subType": "database-query",
           "position": { "x": 400, "y": 200 },
           "data": {
-            "label": "Amount > 100?",
-            "config": { "field": "{{ trigger.amount }}", "operator": "greater", "value": "100" }
+            "label": "Insert waitlist row",
+            "description": "Save name and email to waitlist table",
+            "config": {
+              "databaseType": "postgresql",
+              "credentialId": "use-real-credential-id-from-context",
+              "query": "INSERT INTO waitlist (name, email) VALUES ('{{ trigger.name }}', '{{ trigger.email }}')"
+            }
           }
         },
         {
           "id": "node-3",
           "type": "action",
-          "subType": "send-slack",
-          "position": { "x": 700, "y": 150 },
+          "subType": "send-discord",
+          "position": { "x": 700, "y": 200 },
           "data": {
-            "label": "Notify Team",
-            "config": { "channel": "#alerts", "message": "High value: {{ trigger.amount }}" }
+            "label": "Notify #submissions",
+            "description": "Notify team about new waitlist signup",
+            "config": {
+              "guildId": "use-real-guild-id-from-context",
+              "channelId": "use-real-channel-id-from-context",
+              "message": "📋 New waitlist submission!\\nName: {{ trigger.name }}\\nEmail: {{ trigger.email }}"
+            }
           }
         }
       ],
       "edges": [
         { "id": "edge-1", "source": "node-1", "target": "node-2" },
-        { "id": "edge-2", "source": "node-2", "target": "node-3", "sourceHandle": "true" }
+        { "id": "edge-2", "source": "node-2", "target": "node-3" }
       ]
     }
   `,
