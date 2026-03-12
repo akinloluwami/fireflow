@@ -470,19 +470,6 @@ function WorkflowGenerator({
     if (_appliedDataPerMessage.get(messageId) === dataString) return;
     _appliedDataPerMessage.set(messageId, dataString);
 
-    // Guard against multiple AI messages generating the same workflow:
-    // If the store already has nodes with the same IDs, skip re-applying.
-    const currentStore = useWorkflowStore.getState();
-    const existingNodeIds = new Set(currentStore.workflow.nodes.map((n) => n.id));
-    const incomingNodeIds = nodes.map((n) => n.id).filter(Boolean);
-    if (
-      incomingNodeIds.length > 0 &&
-      incomingNodeIds.every((id) => existingNodeIds.has(id)) &&
-      existingNodeIds.size === incomingNodeIds.length
-    ) {
-      return;
-    }
-
     // Convert to workflow format with proper defaults
     const workflowNodes: WorkflowNode[] = nodes.map((node) => {
       const definition = getNodeDefinition(
